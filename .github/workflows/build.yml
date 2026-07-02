@@ -142,6 +142,28 @@ jobs:
                   vite-config-path: ./packages/core/test/vitest.config.ts
                   file-coverage-mode: changes
 
+            - name: Extract unit coverage percentage
+              # Only run on push to main so the badge reflects the merged
+              # state.
+              if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.node-version == 24 }}
+              id: coverage
+              run: |
+                  pct=$(node -e "console.log(require('./packages/core/coverage/node/coverage-summary.json').total.lines.pct)")
+                  echo "pct=$pct" >> "$GITHUB_OUTPUT"
+
+            - name: Update coverage badge gist
+              if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.node-version == 24 }}
+              uses: Schneegans/dynamic-badges-action@0e50b8bad39e7e1afd3e4e9c2b7dd145fad07501 # v1.8.0
+              with:
+                  auth: ${{ secrets.GIST_SECRET }}
+                  gistID: ${{ vars.COVERAGE_GIST_ID }}
+                  filename: hiero-enterprise-js-coverage.json
+                  label: coverage
+                  message: ${{ steps.coverage.outputs.pct }}%
+                  valColorRange: ${{ steps.coverage.outputs.pct }}
+                  minColorRange: 50
+                  maxColorRange: 95
+
             - name: Run examples
               env:
                   HIERO_NETWORK: hiero-solo-action

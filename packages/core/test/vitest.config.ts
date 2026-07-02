@@ -17,6 +17,14 @@ export default defineConfig({
             reportsDirectory: "./coverage/node",
             include: ["src/**/*.ts"],
             exclude: ["src/**/index.ts", "src/**/*.d.ts", "src/types/**"],
+            // Fail the unit-test run if any metric drops below 95%.
+            // The unit config is the canonical coverage surface
+            thresholds: {
+                lines: 95,
+                statements: 95,
+                functions: 95,
+                branches: 95,
+            },
         },
     },
 });
