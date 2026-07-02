@@ -9,16 +9,16 @@ export default defineConfig({
         setupFiles: ["test/utils/setup-env.ts"],
         coverage: {
             provider: "v8",
-            reporter: ["lcov", "text-summary"],
+            // `json-summary` is required by the vitest-coverage-report
+            // GitHub Action; `json` powers its per-file table. `lcov` is
+            // kept for local tools and `text-summary` for the terminal.
+            reporter: ["text-summary", "json-summary", "json", "lcov"],
+            // Emit reports even when tests fail so the PR comment still
+            // has data to render.
+            reportOnFailure: true,
             reportsDirectory: "./coverage/integration",
             include: ["src/**/*.ts"],
             exclude: ["src/**/index.ts", "src/**/*.d.ts", "src/types/**"],
-
-            // No thresholds for integration runs — they exercise happy-path
-            // network flows and aren't expected to cover every branch in
-            // isolation. Codecov merges unit + integration coverage and the
-            // unit config in `vitest.config.ts` enforces the project-wide
-            // thresholds (80/70/80/80).
         },
     },
 });
