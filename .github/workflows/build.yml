@@ -118,10 +118,13 @@ jobs:
               uses: davelosert/vitest-coverage-report-action@3c054a2d2e2ca45446417ad5d6d5eb33092af8f1 # v2.12.1
               with:
                   name: "core / integration"
+                  # `working-directory` scopes the paths below; keep them
+                  # relative to `./packages/core` so the action resolves
+                  # them under it rather than doubling the prefix.
                   working-directory: ./packages/core
-                  json-summary-path: ./packages/core/coverage/integration/coverage-summary.json
-                  json-final-path: ./packages/core/coverage/integration/coverage-final.json
-                  vite-config-path: ./packages/core/test/vitest-integration.config.ts
+                  json-summary-path: ./coverage/integration/coverage-summary.json
+                  json-final-path: ./coverage/integration/coverage-final.json
+                  vite-config-path: ./test/vitest-integration.config.ts
                   file-coverage-mode: changes
 
             - name: Run unit tests
@@ -136,10 +139,13 @@ jobs:
               uses: davelosert/vitest-coverage-report-action@3c054a2d2e2ca45446417ad5d6d5eb33092af8f1 # v2.12.1
               with:
                   name: "core / unit"
+                  # `working-directory` scopes the paths below; keep them
+                  # relative to `./packages/core` so the action resolves
+                  # them under it rather than doubling the prefix.
                   working-directory: ./packages/core
-                  json-summary-path: ./packages/core/coverage/node/coverage-summary.json
-                  json-final-path: ./packages/core/coverage/node/coverage-final.json
-                  vite-config-path: ./packages/core/test/vitest.config.ts
+                  json-summary-path: ./coverage/node/coverage-summary.json
+                  json-final-path: ./coverage/node/coverage-final.json
+                  vite-config-path: ./test/vitest.config.ts
                   file-coverage-mode: changes
 
             - name: Extract unit coverage percentage
