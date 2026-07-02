@@ -24,6 +24,11 @@ jobs:
     build:
         name: Build and Test (Node ${{ matrix.node-version }})
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            # Needed by davelosert/vitest-coverage-report-action to post
+            # the coverage summary as a PR comment.
+            pull-requests: write
         strategy:
             fail-fast: false
             matrix:
@@ -75,11 +80,6 @@ jobs:
                   HIERO_MIRROR_NODE_URL: http://localhost:38081
 
             - name: Wait for Mirror Node gRPC (consensus stream)
-              # Streaming queries (TopicMessageQuery.subscribe) hit the
-              # mirror node's *gRPC* channel on port 5600, which is a
-              # separate service from the REST API on 38081 and can come
-              # up several seconds later. Without this probe the first
-              # subscribe test in the run frequently times out.
               run: |
                   echo "Waiting for Mirror Node gRPC (localhost:5600) to accept TCP connections..."
                   gRPC_READY=""
@@ -108,21 +108,24 @@ jobs:
                   HIERO_NETWORK: hiero-solo-action
                   HIERO_OPERATOR_ID: ${{ steps.solo.outputs.accountId }}
                   HIERO_OPERATOR_KEY: ${{ steps.solo.outputs.privateKey }}
-                  HIERO_OPERATOR_KEY_TYPE: der
+                  HIERO_OPERATOR_KEY_TYPE: DER
                   HIERO_NETWORK_NODES: "127.0.0.1:35211=0.0.3"
                   HIERO_MIRROR_NODE_URL: http://localhost:38081
               run: pnpm --filter @hiero-enterprise/core run test:integration:coverage
 
-            - name: Upload integration coverage to Codecov
+            - name: Report integration coverage
               if: ${{ always() && matrix.node-version == 24 }}
-              # TODO: pin to SHA via Dependabot once the workflow lands
-              uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+              uses: davelosert/vitest-coverage-report-action@3c054a2d2e2ca45446417ad5d6d5eb33092af8f1 # v2.12.1
               with:
-                  files: ./packages/core/coverage/integration/lcov.info
-                  flags: integration
-                  name: core-integration
-                  fail_ci_if_error: false
-                  token: ${{ secrets.CODECOV_TOKEN }}
+                  name: "core / integration"
+                  # `working-directory` scopes the paths below; keep them
+                  # relative to `./packages/core` so the action resolves
+                  # them under it rather than doubling the prefix.
+                  working-directory: ./packages/core
+                  json-summary-path: ./coverage/integration/coverage-summary.json
+                  json-final-path: ./coverage/integration/coverage-final.json
+                  vite-config-path: ./test/vitest-integration.config.ts
+                  file-coverage-mode: changes
 
             - name: Run unit tests
               env:
@@ -131,16 +134,41 @@ jobs:
                   HIERO_OPERATOR_KEY: ${{ steps.solo.outputs.privateKey }}
               run: pnpm --filter @hiero-enterprise/core run test:unit:coverage
 
-            - name: Upload unit coverage to Codecov
+            - name: Report unit coverage
               if: ${{ always() && matrix.node-version == 24 }}
-              # TODO: pin to SHA via Dependabot once the workflow lands
-              uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+              uses: davelosert/vitest-coverage-report-action@3c054a2d2e2ca45446417ad5d6d5eb33092af8f1 # v2.12.1
               with:
-                  files: ./packages/core/coverage/node/lcov.info
-                  flags: unit
-                  name: core-unit
-                  fail_ci_if_error: false
-                  token: ${{ secrets.CODECOV_TOKEN }}
+                  name: "core / unit"
+                  # `working-directory` scopes the paths below; keep them
+                  # relative to `./packages/core` so the action resolves
+                  # them under it rather than doubling the prefix.
+                  working-directory: ./packages/core
+                  json-summary-path: ./coverage/node/coverage-summary.json
+                  json-final-path: ./coverage/node/coverage-final.json
+                  vite-config-path: ./test/vitest.config.ts
+                  file-coverage-mode: changes
+
+            - name: Extract unit coverage percentage
+              # Only run on push to main so the badge reflects the merged
+              # state.
+              if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.node-version == 24 }}
+              id: coverage
+              run: |
+                  pct=$(node -e "console.log(require('./packages/core/coverage/node/coverage-summary.json').total.lines.pct)")
+                  echo "pct=$pct" >> "$GITHUB_OUTPUT"
+
+            - name: Update coverage badge gist
+              if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.node-version == 24 }}
+              uses: Schneegans/dynamic-badges-action@0e50b8bad39e7e1afd3e4e9c2b7dd145fad07501 # v1.8.0
+              with:
+                  auth: ${{ secrets.GIST_SECRET }}
+                  gistID: ${{ vars.COVERAGE_GIST_ID }}
+                  filename: hiero-enterprise-js-coverage.json
+                  label: coverage
+                  message: ${{ steps.coverage.outputs.pct }}%
+                  valColorRange: ${{ steps.coverage.outputs.pct }}
+                  minColorRange: 50
+                  maxColorRange: 95
 
             - name: Run examples
               env:
