@@ -337,8 +337,11 @@ export class MirrorNodeClient {
      *   honouring the `Retry-After` header when present. The only POST
      *   endpoint (`/contracts/call`) is a transient simulation, so it is
      *   as safe to retry as a GET.
-     * - Network errors (including AbortError caused by timeout) are
-     *   retried with exponential backoff, then surfaced as MirrorError.
+     * - Timeouts (AbortError / TimeoutError) are retried with exponential
+     *   backoff, then surfaced as a TimedOut MirrorError. Other network
+     *   errors (DNS, ECONNREFUSED, …) are surfaced immediately — they
+     *   almost always indicate a misconfigured base URL, not a transient
+     *   blip, so retrying only delays a certain failure.
      */
     private async fetchWithRetry<T>(
         path: string,

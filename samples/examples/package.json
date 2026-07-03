@@ -10,10 +10,10 @@
     },
     "dependencies": {
         "@hiero-enterprise/core": "workspace:*",
-        "@hiero-enterprise/mirror": "workspace:*"
+        "@hiero-enterprise/mirror": "workspace:*",
+        "dotenv": "^16.4.0"
     },
     "devDependencies": {
-        "@types/node": "^25.9.3",
-        "dotenv": "^16.4.0"
+        "@types/node": "^25.9.3"
     }
 }

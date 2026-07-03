@@ -30,13 +30,14 @@ function findExamples(dir: string, base = ""): string[] {
 
     for (const entry of entries) {
         const relative = path.join(base, entry.name);
+        const relativePosix = relative.split(path.sep).join("/");
         if (entry.isDirectory()) {
             files.push(...findExamples(path.join(dir, entry.name), relative));
         } else if (
             entry.isFile() &&
             entry.name.endsWith(".ts") &&
             !excludedFiles.includes(relative) &&
-            !skipPrefixes.some((prefix) => relative.startsWith(prefix))
+            !skipPrefixes.some((prefix) => relativePosix.startsWith(prefix))
         ) {
             files.push(relative);
         }
