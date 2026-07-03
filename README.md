@@ -15,10 +15,11 @@ It gives each major Node.js framework a native integration that matches how deve
 
 | Package | Description |
 |---------|-------------|
-| `@hiero-enterprise/core` | Standalone services, repositories, and types — use directly or with any framework |
-| `@hiero-enterprise/express` | Express middleware — `req.hiero.*` |
-| `@hiero-enterprise/fastify` | Fastify plugin — `fastify.hiero.*` |
-| `@hiero-enterprise/nest` | NestJS module — `HieroModule.forRoot()` with full DI |
+| `@hiero-enterprise/core` | SDK write-side: services, transactions, operator keys — use directly or with any framework |
+| `@hiero-enterprise/mirror` | Mirror node read-side: repositories, pagination, rate limiting, filters, unit helpers — **zero dependencies, no credentials** |
+| `@hiero-enterprise/express` | Express middleware — `req.hiero.*` (composes core + mirror) |
+| `@hiero-enterprise/fastify` | Fastify plugin — `fastify.hiero.*` (composes core + mirror) |
+| `@hiero-enterprise/nest` | NestJS module — `HieroModule.forRoot()` with full DI (composes core + mirror) |
 
 ## Quick Start
 
@@ -127,36 +128,29 @@ export class BalanceController {
 ## Architecture
 
 ```
-  Standalone             Framework adapters
-  ───────────    ────────────────────────────────────
-  import from    Express / Fastify / NestJS
-  core directly  req.hiero.* | fastify.hiero.* | @Inject()
-       │                │                │
-       │                ▼                ▼
-       │         ┌────────────────────────────┐
-       └───────► │   @hiero-enterprise/core   │
-                 ├────────────┬───────────────┤
-                 │  Services  │ Repositories  │
-                 │  Account   │ Account       │
-                 │  File      │ NFT           │
-                 │  Token     │ Token         │
-                 │  NFT       │ Topic         │
-                 │  Contract  │ Transaction   │
-                 │  Topic     │ Network       │
-                 ├────────────┴───────────────┤
-                 │  HieroContext │ MirrorNode  │
-                 │  (Hiero SDK)  │ (REST/HTTP) │
-                 └───────┬───────┴──────┬─────┘
-                         │              │
-                         └──────┬───────┘
-                                ▼
-                       Hiero Network
-                    (testnet / mainnet)
+          Express / Fastify / NestJS adapters
+     req.hiero.* | fastify.hiero.* | @Inject()
+              │ compose both packages │
+       ┌──────┴──────────┐  ┌─────────┴──────────┐
+       ▼                 ▼  ▼                    ▼
+┌───────────────────────┐  ┌────────────────────────┐
+│ @hiero-enterprise/core│  │@hiero-enterprise/mirror│
+│  SDK write-side       │  │  REST read-side        │
+│  Account / File /     │  │  9 repositories        │
+│  Token / Contract /   │  │  pagination + filters  │
+│  Topic / Schedule /   │  │  rate limiting, units  │
+│  Network services     │  │                        │
+│  HieroContext         │  │  MirrorNodeClient      │
+│  deps: @hiero-ledger  │  │  deps: none (fetch)    │
+└──────────┬────────────┘  └───────────┬────────────┘
+           ▼ gRPC (signed txns)        ▼ REST (free reads)
+                      Hiero Network
+                   (testnet / mainnet)
 ```
 
-`@hiero-enterprise/core` is the standalone package that owns all services, repositories, and types. Framework adapters (`express`, `fastify`, `nest`) are thin integration layers that wire core into their respective DI/middleware patterns. You can use core directly without any framework.
+`@hiero-enterprise/core` owns the SDK write-side (services, transactions, operator keys); `@hiero-enterprise/mirror` owns the REST read-side and has **zero dependencies** — analytics consumers can install it alone, with no SDK and no credentials. Framework adapters compose both behind one surface. Either package also works standalone.
 
-Clients handle write operations through the Hiero SDK — transactions that go on-chain. Repositories handle reads through the mirror node, which doesn't cost fees and returns historical or indexed data. `HieroContext` owns the SDK client and operator credentials; both sides share it so there's one config source.
+Writes go through the Hiero SDK — transactions that go on-chain, signed by the operator. Reads go through the mirror node, which doesn't cost fees and returns historical or indexed data.
 
 ## Services
 
@@ -168,16 +162,40 @@ Clients handle write operations through the Hiero SDK — transactions that go o
 | `ContractService` | Deploy and call EVM-compatible smart contracts |
 | `TopicService` | Create topics, manage keys, submit messages |
 
-## Mirror Node Queries
+## Mirror Node Queries — `@hiero-enterprise/mirror`
 
-| Repository | What it covers |
-|------------|---------------|
-| `AccountRepository` | Look up accounts by ID or alias, fetch balances |
-| `NftRepository` | Browse NFTs by owner, type, or serial number |
-| `TokenRepository` | Fetch token metadata or tokens held by an account |
-| `TopicRepository` | Read topic messages by sequence number |
-| `TransactionRepository` | Query transactions by account or type |
-| `NetworkRepository` | Exchange rates, supply stats, staking rewards |
+All mirror node REST reads live in the standalone, **dependency-free**
+[`@hiero-enterprise/mirror`](./packages/mirror) package — no SDK, no
+operator keys, just `fetch`. It covers the **complete mirror node REST
+API** (all 47 paths and 48 operations of the OpenAPI spec, including the
+contracts/EVM family, `contracts/call`, and HIP-1313 fee estimation) with
+typed repositories for accounts, blocks, contracts, NFTs, tokens, topics,
+transactions, schedules and network state, plus:
+
+- **Continuable pagination** — every list returns a `Page` with a bound
+  `next()`; `collectAll` / `paginate` drain or stream any listing.
+- **Pro-active rate limiting** — `maxConcurrent` + `maxRequestsPerSecond`
+  keep large pulls under the mirror node's limits before any 429.
+- **Rich filters** — `limit`/`order`, transaction type + consensus-timestamp
+  windows (time-series), point-in-time reads, and balance thresholds.
+- **Unit helpers** — tinybar⇄ℏ, token decimals, `Date`⇄consensus timestamps.
+
+```ts
+import { createMirrorNodeClient, TransactionRepository, collectAll } from '@hiero-enterprise/mirror';
+
+const mirror = createMirrorNodeClient({ network: 'mainnet', mirrorNodeMaxRequestsPerSecond: 50 });
+const transfers = await collectAll(
+  await new TransactionRepository(mirror).find({
+    transactionType: 'CRYPTOTRANSFER',
+    timestamp: { gte: '1700000000.0', lt: '1700086400.0' },
+  }),
+  { maxPages: 10 },
+);
+```
+
+See the [mirror package README](./packages/mirror/README.md) for the full
+guide. Framework adapters compose core + mirror automatically, so
+`req.hiero.accountRepository` etc. keep working unchanged.
 
 ## Samples
 

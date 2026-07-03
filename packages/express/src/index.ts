@@ -1,9 +1,10 @@
 import type { Request, Response, NextFunction } from "express";
-import type { HieroConfig, HieroServices } from "@hiero-enterprise/core";
-import {
-    createHieroServices,
-    assertEnvConfigValid,
-} from "@hiero-enterprise/core";
+import { assertEnvConfigValid } from "@hiero-enterprise/core";
+import type { HieroAdapterConfig, HieroServices } from "./runtime.js";
+import { createHieroRuntime } from "./runtime.js";
+
+export type { HieroAdapterConfig, HieroServices } from "./runtime.js";
+export { createHieroRuntime } from "./runtime.js";
 
 /**
  * Augment Express Request to include Hiero services.
@@ -19,7 +20,8 @@ declare global {
 
 /**
  * Express middleware that initializes the HieroContext and injects all
- * Hiero services into `req.hiero`.
+ * Hiero services into `req.hiero` — write-side services from core plus
+ * mirror node repositories from `@hiero-enterprise/mirror`.
  *
  * @example
  * ```ts
@@ -35,17 +37,14 @@ declare global {
  * });
  * ```
  */
-export function hieroMiddleware(config?: HieroConfig) {
+export function hieroMiddleware(config?: HieroAdapterConfig) {
     if (!config) {
         assertEnvConfigValid();
     }
-    const services: HieroServices = createHieroServices(config);
+    const services: HieroServices = createHieroRuntime(config);
 
     return (req: Request, _res: Response, next: NextFunction) => {
         req.hiero = services;
         next();
     };
 }
-
-// Consumers import types and services directly from @hiero-enterprise/core.
-// This adapter only provides the Express middleware integration.

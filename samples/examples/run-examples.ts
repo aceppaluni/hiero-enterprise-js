@@ -9,9 +9,22 @@ const srcDir = path.join(__dirname, "src");
 const excludedFiles: string[] = [];
 
 /**
+ * Comma-separated list of path prefixes to skip, e.g.
+ * `EXAMPLES_SKIP=mirror/` — used by CI to skip the mirror-node query
+ * examples, which showcase real public-network data (busy accounts,
+ * USDC, long-lived topics) that does not exist on a fresh solo network.
+ * They still run locally via `pnpm examples mirror` or `npx tsx`.
+ */
+const skipPrefixes = (process.env["EXAMPLES_SKIP"] ?? "")
+    .split(",")
+    .map((prefix) => prefix.trim())
+    .filter(Boolean);
+
+/**
  * Recursively finds all .ts files under a directory.
  */
 function findExamples(dir: string, base = ""): string[] {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- recursion rooted at the constant examples directory, no user input
     const entries = fs.readdirSync(dir, { withFileTypes: true });
     const files: string[] = [];
 
@@ -22,7 +35,8 @@ function findExamples(dir: string, base = ""): string[] {
         } else if (
             entry.isFile() &&
             entry.name.endsWith(".ts") &&
-            !excludedFiles.includes(relative)
+            !excludedFiles.includes(relative) &&
+            !skipPrefixes.some((prefix) => relative.startsWith(prefix))
         ) {
             files.push(relative);
         }
@@ -81,8 +95,7 @@ async function runSequential(examples: string[]): Promise<void> {
     console.log(`\nRunning ${total} examples against network...\n`);
     console.log("─".repeat(60));
 
-    for (let i = 0; i < total; i++) {
-        const file = examples[i];
+    for (const [i, file] of examples.entries()) {
         console.log(`\n⏳ [${i + 1}/${total}] ${file}`);
 
         const result = await runExample(file);

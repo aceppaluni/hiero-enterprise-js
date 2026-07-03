@@ -110,7 +110,10 @@ export class TokenAirdropNftValidator {
         field: "senderAccountId" | "receiverAccountId",
         prefix: string,
     ): void {
-        const value = airdrop[field];
+        const value =
+            field === "senderAccountId"
+                ? airdrop.senderAccountId
+                : airdrop.receiverAccountId;
 
         if (value == null) {
             throw normalizeError(

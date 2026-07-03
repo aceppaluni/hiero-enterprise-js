@@ -1,45 +1,6 @@
 import { describe, it, expect } from "vitest";
-import {
-    resolveConfigFromEnv,
-    resolveMirrorNodeUrl,
-} from "../../../src/config/index.js";
+import { resolveConfigFromEnv } from "../../../src/config/index.js";
 import { OperatorKeyType } from "../../../src/types/index.js";
-
-describe("resolveMirrorNodeUrl", () => {
-    it("resolves known networks", () => {
-        expect(resolveMirrorNodeUrl("testnet")).toBe(
-            "https://testnet.mirrornode.hedera.com",
-        );
-        expect(resolveMirrorNodeUrl("mainnet")).toBe(
-            "https://mainnet.mirrornode.hedera.com",
-        );
-        expect(resolveMirrorNodeUrl("previewnet")).toBe(
-            "https://previewnet.mirrornode.hedera.com",
-        );
-    });
-
-    it("resolves with hedera-prefixed names", () => {
-        expect(resolveMirrorNodeUrl("hedera-testnet")).toBe(
-            "https://testnet.mirrornode.hedera.com",
-        );
-    });
-
-    it("is case-insensitive", () => {
-        expect(resolveMirrorNodeUrl("TESTNET")).toBe(
-            "https://testnet.mirrornode.hedera.com",
-        );
-    });
-
-    it("uses explicit URL when provided", () => {
-        expect(resolveMirrorNodeUrl("testnet", "http://custom:8080")).toBe(
-            "http://custom:8080",
-        );
-    });
-
-    it("throws for unknown network without explicit URL", () => {
-        expect(() => resolveMirrorNodeUrl("devnet")).toThrow();
-    });
-});
 
 describe("resolveConfigFromEnv", () => {
     const env = process.env;
@@ -63,7 +24,6 @@ describe("resolveConfigFromEnv", () => {
             operatorId: "0.0.1",
             operatorKey: "key123",
             operatorKeyType: OperatorKeyType.ECDSA,
-            mirrorNodeUrl: undefined,
         });
         process.env = env;
     });
@@ -75,6 +35,21 @@ describe("resolveConfigFromEnv", () => {
             HIERO_OPERATOR_KEY: "key123",
         };
         expect(resolveConfigFromEnv()).toBeNull();
+        process.env = env;
+    });
+
+    it("parses HIERO_NETWORK_NODES for custom networks", () => {
+        process.env = {
+            HIERO_NETWORK: "local",
+            HIERO_OPERATOR_ID: "0.0.1",
+            HIERO_OPERATOR_KEY: "key123",
+            HIERO_OPERATOR_KEY_TYPE: "ed25519",
+            HIERO_NETWORK_NODES: "127.0.0.1:50211=0.0.3, 127.0.0.1:50212=0.0.4",
+        };
+        expect(resolveConfigFromEnv()?.networkNodes).toEqual({
+            "127.0.0.1:50211": "0.0.3",
+            "127.0.0.1:50212": "0.0.4",
+        });
         process.env = env;
     });
 });

@@ -1,5 +1,6 @@
 // @hiero-enterprise/core
-// Core services, repositories, and data models for the Hiero network
+// Core SDK services and data models for the Hiero network.
+// Mirror node REST reads live in @hiero-enterprise/mirror.
 
 // Data models
 export * from "./types/index.js";
@@ -32,17 +33,8 @@ export * from "./errors/index.js";
 // Context
 export * from "./context/index.js";
 
-// Mirror Node
-export * from "./mirror/index.js";
-
-// Repositories
-export * from "./repositories/index.js";
-
 // Services
 export * from "./services/index.js";
-
-// Factory helpers
-export * from "./factory/index.js";
 
 // Interceptors
 export * from "./listeners/index.js";

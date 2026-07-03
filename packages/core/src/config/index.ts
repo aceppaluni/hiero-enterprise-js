@@ -1,6 +1,2 @@
-export {
-    resolveConfigFromEnv,
-    resolveMirrorNodeUrl,
-    assertEnvConfigValid,
-} from "./HieroConfig.js";
+export { resolveConfigFromEnv, assertEnvConfigValid } from "./HieroConfig.js";
 export type { HieroConfig } from "./HieroConfig.js";

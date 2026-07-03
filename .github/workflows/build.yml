@@ -100,6 +100,12 @@ jobs:
             - name: ESLint
               run: pnpm run lint
 
+            # Response-field completeness: every schema reachable from a
+            # mirror node spec response must be carried by the wire types.
+            - name: Mirror spec field diff
+              working-directory: packages/mirror
+              run: node spec/diff-response-fields.mjs
+
             - name: Build packages
               run: pnpm run build
 
@@ -112,6 +118,19 @@ jobs:
                   HIERO_NETWORK_NODES: "127.0.0.1:35211=0.0.3"
                   HIERO_MIRROR_NODE_URL: http://localhost:38081
               run: pnpm --filter @hiero-enterprise/core run test:integration:coverage
+
+            # Write-then-read round-trips: core creates entities on Solo,
+            # the mirror repositories read them back from Solo's mirror
+            # node — the layer that catches mirror response-shape drift.
+            - name: Run mirror round-trip tests
+              env:
+                  HIERO_NETWORK: hiero-solo-action
+                  HIERO_OPERATOR_ID: ${{ steps.solo.outputs.accountId }}
+                  HIERO_OPERATOR_KEY: ${{ steps.solo.outputs.privateKey }}
+                  HIERO_OPERATOR_KEY_TYPE: DER
+                  HIERO_NETWORK_NODES: "127.0.0.1:35211=0.0.3"
+                  HIERO_MIRROR_NODE_URL: http://localhost:38081
+              run: pnpm --filter @hiero-enterprise/mirror run test:integration
 
             - name: Report integration coverage
               if: ${{ always() && matrix.node-version == 24 }}
@@ -148,6 +167,20 @@ jobs:
                   vite-config-path: ./test/vitest.config.ts
                   file-coverage-mode: changes
 
+            - name: Run mirror unit tests
+              run: pnpm --filter @hiero-enterprise/mirror run test:unit:coverage
+
+            - name: Report mirror unit coverage
+              if: ${{ always() && matrix.node-version == 24 }}
+              uses: davelosert/vitest-coverage-report-action@3c054a2d2e2ca45446417ad5d6d5eb33092af8f1 # v2.12.1
+              with:
+                  name: "mirror / unit"
+                  working-directory: ./packages/mirror
+                  json-summary-path: ./coverage/node/coverage-summary.json
+                  json-final-path: ./coverage/node/coverage-final.json
+                  vite-config-path: ./test/vitest.config.ts
+                  file-coverage-mode: changes
+
             - name: Extract unit coverage percentage
               # Only run on push to main so the badge reflects the merged
               # state.
@@ -179,4 +212,9 @@ jobs:
                   HIERO_ECDSA_OPERATOR_KEY: ${{ steps.solo.outputs.ecdsaPrivateKey }}
                   HIERO_MIRROR_NODE_URL: http://localhost:38081
                   HIERO_NETWORK_NODES: "127.0.0.1:35211=0.0.3"
+                  # The mirror-* query examples showcase real public-network
+                  # data (busy accounts, USDC, long-lived topics) that does
+                  # not exist on a fresh solo network — skip them here; they
+                  # run locally against mainnet (`pnpm examples mirror`).
+                  EXAMPLES_SKIP: mirror/
               run: pnpm --filter @hiero-enterprise/examples examples

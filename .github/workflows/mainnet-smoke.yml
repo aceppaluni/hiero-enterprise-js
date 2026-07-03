@@ -1,0 +1,72 @@
+name: Mainnet mirror smoke
+
+# Weekly live check: run every read-only mirror example against the
+# public mainnet mirror node. This is the only layer that catches
+# *deployment* drift — behavior changes that ship to mainnet before (or
+# without) an OpenAPI spec change. Failures open an issue; they never
+# block PRs (public-network flakiness is real).
+
+on:
+    schedule:
+        - cron: "0 7 * * 1" # Mondays 07:00 UTC, after the spec-drift check
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+jobs:
+    smoke:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            issues: write
+        steps:
+            - name: Harden Runner
+              uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+              with:
+                  egress-policy: audit
+
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+              with:
+                  persist-credentials: false
+
+            - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+              with:
+                  version: 10
+
+            - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+              with:
+                  node-version: 24
+                  cache: pnpm
+
+            - run: pnpm install --frozen-lockfile
+
+            - run: pnpm run build
+
+            - name: Run mirror examples against mainnet
+              id: smoke
+              env:
+                  HIERO_MIRROR_NODE_URL: https://mainnet.mirrornode.hedera.com
+              run: |
+                  set -o pipefail
+                  pnpm --filter @hiero-enterprise/examples examples mirror 2>&1 | tee /tmp/smoke.log
+
+            - name: Open smoke-failure issue
+              if: failure()
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  TITLE="Mainnet mirror smoke failure"
+                  if gh issue list --state open --search "in:title \"$TITLE\"" --json number --jq length | grep -qv '^0$'; then
+                      echo "Smoke-failure issue already open — skipping."
+                      exit 0
+                  fi
+                  {
+                      echo "The weekly read-only mirror smoke run failed against public mainnet — mainnet behavior may have drifted from the library's expectations (or the network was flaky; re-run the workflow to confirm)."
+                      echo
+                      echo "Last 120 lines of output:"
+                      echo '```'
+                      tail -120 /tmp/smoke.log
+                      echo '```'
+                  } > /tmp/issue-body.md
+                  gh issue create --title "$TITLE" --body-file /tmp/issue-body.md

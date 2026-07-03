@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { Module, Controller, Get, Post, Param, Body } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports

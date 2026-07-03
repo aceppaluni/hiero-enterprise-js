@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import { hieroMiddleware } from "@hiero-enterprise/express";
 
@@ -18,9 +19,10 @@ app.get("/", (_req, res) => {
             "Server is running. Try one of the endpoints below to view data.",
         endpoints: {
             accounts: [
-                "GET /api/balance",
-                "GET /api/accounts/:id",
-                "GET /api/accounts/:id/nfts",
+                "POST /api/accounts",
+                "GET  /api/balance",
+                "GET  /api/accounts/:id",
+                "GET  /api/accounts/:id/nfts",
             ],
             tokens: ["GET /api/tokens/:id"],
             topics: [
@@ -38,7 +40,7 @@ app.get("/", (_req, res) => {
 
 // ─── Account Routes ───────────────────────────────────────────
 
-app.post("/api/accounts/create", async (req, res) => {
+app.post("/api/accounts", async (req, res) => {
     try {
         const { publicKey, keyType, alias } = req.body;
         const account = await req.hiero.accountService.createAccount({

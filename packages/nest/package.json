@@ -39,7 +39,8 @@
         "test:watch": "vitest test/integration"
     },
     "dependencies": {
-        "@hiero-enterprise/core": "workspace:*"
+        "@hiero-enterprise/core": "workspace:*",
+        "@hiero-enterprise/mirror": "workspace:*"
     },
     "devDependencies": {
         "@nestjs/testing": "^11.1.24"

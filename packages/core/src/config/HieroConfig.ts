@@ -2,6 +2,9 @@ import { HieroError, HieroErrorCodes } from "../errors/index.js";
 
 /**
  * Configuration for connecting to a Hiero network.
+ *
+ * Mirror node REST configuration lives in `@hiero-enterprise/mirror`
+ * (`MirrorConfig`) — this config covers the SDK/consensus side only.
  */
 export interface HieroConfig {
     /** Network to connect to (e.g., "testnet", "mainnet", "previewnet", or custom) */
@@ -12,8 +15,6 @@ export interface HieroConfig {
     readonly operatorKey: string;
     /** Type of the operator private key — required to correctly parse the key material */
     readonly operatorKeyType: string;
-    /** Mirror node base URL (auto-resolved if not provided) */
-    readonly mirrorNodeUrl?: string;
     /**
      * Consensus node addresses for custom networks.
      * Map of "host:port" → "accountId" (e.g., { "127.0.0.1:50211": "0.0.3" }).
@@ -30,46 +31,6 @@ export interface HieroConfig {
     readonly minBackoffMs?: number;
     /** Maximum backoff in milliseconds (default: 8000) */
     readonly maxBackoffMs?: number;
-    /** Mirror node request timeout in milliseconds (default: 10000) */
-    readonly mirrorNodeTimeoutMs?: number;
-    /** Mirror node request max retries (default: 3) */
-    readonly mirrorNodeMaxRetries?: number;
-}
-
-/**
- * Known network names and their mirror node URLs.
- */
-const MIRROR_NODE_URLS: Record<string, string> = {
-    mainnet: "https://mainnet.mirrornode.hedera.com",
-    testnet: "https://testnet.mirrornode.hedera.com",
-    previewnet: "https://previewnet.mirrornode.hedera.com",
-    "hedera-mainnet": "https://mainnet.mirrornode.hedera.com",
-    "hedera-testnet": "https://testnet.mirrornode.hedera.com",
-    "hedera-previewnet": "https://previewnet.mirrornode.hedera.com",
-};
-
-/**
- * Resolve the mirror node URL for a given network.
- *
- * @param network - Network name or custom URL
- * @param explicitUrl - Explicitly provided mirror node URL (takes priority)
- * @returns The mirror node base URL
- */
-export function resolveMirrorNodeUrl(
-    network: string,
-    explicitUrl?: string,
-): string {
-    if (explicitUrl) {
-        return explicitUrl;
-    }
-    const url = MIRROR_NODE_URLS[network.toLowerCase()];
-    if (!url) {
-        throw new HieroError(
-            `Unknown network "${network}". Provide a mirrorNodeUrl in the config.`,
-            { code: HieroErrorCodes.ConfigInvalid },
-        );
-    }
-    return url;
 }
 
 /**
@@ -79,7 +40,8 @@ export function resolveMirrorNodeUrl(
  *   HIERO_NETWORK
  *   HIERO_OPERATOR_ID
  *   HIERO_OPERATOR_KEY
- *   HIERO_MIRROR_NODE_URL
+ *   HIERO_OPERATOR_KEY_TYPE
+ *   HIERO_NETWORK_NODES
  *
  * @returns A HieroConfig or null if required env vars are missing
  */
@@ -95,7 +57,6 @@ export function resolveConfigFromEnv(): HieroConfig | null {
         operatorKeyTypeRaw === "der"
             ? operatorKeyTypeRaw
             : undefined;
-    const mirrorNodeUrl = process.env["HIERO_MIRROR_NODE_URL"];
     const networkNodesRaw = process.env["HIERO_NETWORK_NODES"];
 
     if (!network || !operatorId || !operatorKey || !operatorKeyType) {
@@ -105,13 +66,14 @@ export function resolveConfigFromEnv(): HieroConfig | null {
     // Parse HIERO_NETWORK_NODES: "host:port=accountId,host:port=accountId"
     let networkNodes: Record<string, string> | undefined;
     if (networkNodesRaw) {
-        networkNodes = {};
+        const parsed = new Map<string, string>();
         for (const entry of networkNodesRaw.split(",")) {
             const [address, accountId] = entry.trim().split("=");
             if (address && accountId) {
-                networkNodes[address] = accountId;
+                parsed.set(address, accountId);
             }
         }
+        networkNodes = Object.fromEntries(parsed);
     }
 
     return {
@@ -119,7 +81,6 @@ export function resolveConfigFromEnv(): HieroConfig | null {
         operatorId,
         operatorKey,
         operatorKeyType,
-        mirrorNodeUrl,
         networkNodes,
     };
 }

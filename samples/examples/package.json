@@ -9,9 +9,11 @@
         "examples:account": "tsx -r dotenv/config run-examples.ts account"
     },
     "dependencies": {
-        "@hiero-enterprise/core": "workspace:*"
+        "@hiero-enterprise/core": "workspace:*",
+        "@hiero-enterprise/mirror": "workspace:*"
     },
     "devDependencies": {
+        "@types/node": "^25.9.3",
         "dotenv": "^16.4.0"
     }
 }

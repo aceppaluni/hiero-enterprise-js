@@ -62,6 +62,23 @@ pnpm lint
 pnpm format
 ```
 
+### Test quick reference
+
+| What it proves                             | Command                                                                                                                             | Network needed                              |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| All packages' unit tests                   | `pnpm test`                                                                                                                         | none                                        |
+| Mirror unit tests + spec-coverage tripwire | `pnpm --filter @hiero-enterprise/mirror test`                                                                                       | none                                        |
+| Mirror unit tests with coverage gates      | `pnpm --filter @hiero-enterprise/mirror run test:unit:coverage`                                                                     | none                                        |
+| Core SDK end-to-end                        | `pnpm --filter @hiero-enterprise/core run test:integration`                                                                         | local Solo                                  |
+| Mirror write→read round-trips              | `pnpm --filter @hiero-enterprise/mirror run test:integration`                                                                       | local Solo (self-skips without credentials) |
+| Live behavior of every mirror query        | `pnpm --filter @hiero-enterprise/examples examples mirror` (also weekly via [`mainnet-smoke`](.github/workflows/mainnet-smoke.yml)) | public mainnet (read-only, keyless)         |
+| Upstream OpenAPI spec drift                | weekly [`spec-drift`](.github/workflows/spec-drift.yml) workflow, or `gh workflow run spec-drift.yml`                               | GitHub                                      |
+| Response-field completeness                | `node spec/diff-response-fields.mjs` from `packages/mirror` (also a CI step)                                                        | none                                        |
+
+CI runs the first five automatically (Solo is provisioned in the workflow);
+the examples run there against Solo too, with the mainnet-dependent mirror
+tours skipped via `EXAMPLES_SKIP=mirror/`.
+
 ### Running Integration Tests
 
 Integration tests live under [`packages/core/test/integration/`](packages/core/test/integration) and exercise the SDK end-to-end against a live consensus + mirror node. They are designed to run against a local [Solo](https://solo.hiero.org) network.
@@ -70,32 +87,113 @@ Integration tests live under [`packages/core/test/integration/`](packages/core/t
 
 2. **Copy the env template:**
 
-   ```bash
-   cp packages/core/test/.env.example packages/core/test/.env
-   ```
+    ```bash
+    cp packages/core/test/.env.example packages/core/test/.env
+    ```
 
-   The defaults point at the Solo genesis treasury (`0.0.2`) and the standard Solo node + mirror ports, so no edits are needed for the common case. The test runner auto-loads `packages/core/test/.env` via [`test/utils/setup-env.ts`](packages/core/test/utils/setup-env.ts).
+    The defaults point at the Solo genesis treasury (`0.0.2`) and the standard Solo node + mirror ports, so no edits are needed for the common case. The test runner auto-loads `packages/core/test/.env` via [`test/utils/setup-env.ts`](packages/core/test/utils/setup-env.ts).
 
 3. **Run the integration suite:**
-   ```bash
-   pnpm run test:integration
 
-   # or with a coverage report (lcov + text summary written to
-   # packages/core/coverage/integration/)
-   pnpm run test:integration:coverage
-   ```
+    ```bash
+    pnpm run test:integration
 
- **Using a custom operator instead of the genesis treasury** — create a fresh account on the Solo deployment, then swap `HIERO_OPERATOR_ID` / `HIERO_OPERATOR_KEY` / `HIERO_OPERATOR_KEY_TYPE` in `.env` for the values Solo prints:
+    # or with a coverage report (lcov + text summary written to
+    # packages/core/coverage/integration/)
+    pnpm run test:integration:coverage
+    ```
 
- ```bash
- # ED25519 operator (default)
- solo ledger account create --deployment solo-deployment --hbar-amount 100 --private-key --dev
+**Using a custom operator instead of the genesis treasury** — create a fresh account on the Solo deployment, then swap `HIERO_OPERATOR_ID` / `HIERO_OPERATOR_KEY` / `HIERO_OPERATOR_KEY_TYPE` in `.env` for the values Solo prints:
 
- # ECDSA operator — also set HIERO_OPERATOR_KEY_TYPE=ecdsa in .env
- solo ledger account create --deployment solo-deployment --hbar-amount 100 --generate-ecdsa-key --private-key --dev
- ```
+```bash
+# ED25519 operator (default)
+solo ledger account create --deployment solo-deployment --hbar-amount 100 --private-key --dev
+
+# ECDSA operator — also set HIERO_OPERATOR_KEY_TYPE=ecdsa in .env
+solo ledger account create --deployment solo-deployment --hbar-amount 100 --generate-ecdsa-key --private-key --dev
+```
 
 Coverage thresholds (80% statements / 70% branches / 80% functions / 80% lines) are enforced by the unit run only; the integration run emits coverage without gating.
+
+### Mirror round-trip tests
+
+The mirror package has its own integration suite,
+[`packages/mirror/test/integration/`](packages/mirror/test/integration), which
+round-trips entities end-to-end: core _writes_ a topic/token on the network,
+the mirror repositories _read_ it back from the mirror node. This is the layer
+that catches mirror node response-shape drift — CI runs it against Solo's
+mirror node right after the core integration tests, using the same
+environment variables:
+
+```bash
+pnpm --filter @hiero-enterprise/mirror run test:integration
+```
+
+The suite auto-loads the same `packages/core/test/.env` described above, so
+one Solo env file drives both integration suites. Without credentials (no
+`.env` and nothing in the shell) it skips itself — `5 skipped` is the
+expected local output, not a failure — so plain `pnpm test` runs are
+unaffected.
+
+No Solo? The round-trips also work against **testnet** with a funded
+[testnet account](https://portal.hedera.com):
+
+```bash
+HIERO_NETWORK=testnet \
+HIERO_OPERATOR_ID=0.0.xxxx \
+HIERO_OPERATOR_KEY=... \
+HIERO_OPERATOR_KEY_TYPE=ECDSA \
+HIERO_MIRROR_NODE_URL=https://testnet.mirrornode.hedera.com \
+pnpm --filter @hiero-enterprise/mirror run test:integration
+```
+
+### Mirror spec coverage & drift
+
+`@hiero-enterprise/mirror` claims **complete** coverage of the mirror node
+REST API, and that claim is enforced rather than aspirational:
+
+- The official OpenAPI spec is vendored at
+  [`packages/mirror/spec/openapi.yml`](packages/mirror/spec) (upstream commit
+  pinned in `spec/SNAPSHOT`).
+- [`spec-coverage.test.ts`](packages/mirror/test/unit/spec-coverage.test.ts)
+  diffs every operation and query parameter against the coverage manifest in
+  both directions on every build.
+- The weekly [`spec-drift`](.github/workflows/spec-drift.yml) workflow diffs
+  the snapshot against upstream `main` and opens an issue when the API grows.
+
+### Adding a mirror endpoint
+
+The package is deliberately layered — raw wire type → converter → client
+method → repository method — so each concern is testable in isolation.
+Adding an endpoint touches one spot in each layer, in this order:
+
+1. **Raw type** in [`src/types/mirror-node.ts`](packages/mirror/src/types/mirror-node.ts) —
+   the snake_case shape the API sends (keep it in this file; the field-diff
+   tool parses it).
+2. **Public type** in the matching `src/types/*.ts` — the camelCase shape
+   consumers see. Export both from [`src/types/index.ts`](packages/mirror/src/types/index.ts).
+3. **Converter** in [`src/mirror-node-converters.ts`](packages/mirror/src/mirror-node-converters.ts)
+   mapping raw → public. Single-object endpoints also get a **validator**
+   in [`src/mirror-node-validators.ts`](packages/mirror/src/mirror-node-validators.ts).
+4. **Query type** in [`src/types/query.ts`](packages/mirror/src/types/query.ts)
+   for any filters (reuse `RangeFilter` / `EntityIdFilter` / `TimestampFilter`).
+5. **Client method** in the matching `// ───` section of
+   [`src/mirror-node-client.ts`](packages/mirror/src/mirror-node-client.ts) —
+   wrap every path parameter in `segment(...)`.
+6. **Repository method** in the matching `src/repositories/*.ts` (a thin
+   delegator). A brand-new repository also goes in
+   [`repositories/factory.ts`](packages/mirror/src/repositories/factory.ts) —
+   from there it flows into every adapter automatically.
+7. **Mock** entry in [`test/utils/mock-mirror-node.ts`](packages/mirror/test/utils/mock-mirror-node.ts)
+   (the mapped type makes a missing method a compile error).
+8. **Tests**: a URL-exactness + conversion case, a repository-forwarding
+   case, and — for a new endpoint or parameter — an update to
+   [`test/spec/coverage-manifest.ts`](packages/mirror/test/spec/coverage-manifest.ts).
+
+Then `pnpm --filter @hiero-enterprise/mirror test` — the spec-coverage and
+field-diff checks tell you immediately if a layer was missed. The refresh
+runbook for the vendored spec itself lives in
+[`packages/mirror/spec/README.md`](packages/mirror/spec/README.md).
 
 ## Feature Requests
 
