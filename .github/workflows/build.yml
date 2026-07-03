@@ -119,19 +119,6 @@ jobs:
                   HIERO_MIRROR_NODE_URL: http://localhost:38081
               run: pnpm --filter @hiero-enterprise/core run test:integration:coverage
 
-            # Write-then-read round-trips: core creates entities on Solo,
-            # the mirror repositories read them back from Solo's mirror
-            # node — the layer that catches mirror response-shape drift.
-            - name: Run mirror round-trip tests
-              env:
-                  HIERO_NETWORK: hiero-solo-action
-                  HIERO_OPERATOR_ID: ${{ steps.solo.outputs.accountId }}
-                  HIERO_OPERATOR_KEY: ${{ steps.solo.outputs.privateKey }}
-                  HIERO_OPERATOR_KEY_TYPE: DER
-                  HIERO_NETWORK_NODES: "127.0.0.1:35211=0.0.3"
-                  HIERO_MIRROR_NODE_URL: http://localhost:38081
-              run: pnpm --filter @hiero-enterprise/mirror run test:integration
-
             - name: Report integration coverage
               if: ${{ always() && matrix.node-version == 24 }}
               uses: davelosert/vitest-coverage-report-action@3c054a2d2e2ca45446417ad5d6d5eb33092af8f1 # v2.12.1
@@ -218,3 +205,19 @@ jobs:
                   # run locally against mainnet (`pnpm examples mirror`).
                   EXAMPLES_SKIP: mirror/
               run: pnpm --filter @hiero-enterprise/examples examples
+
+            # Write-then-read round-trips: core creates entities on Solo, the
+            # mirror repositories read them back — the layer that catches
+            # mirror response-shape drift. Runs LAST: it hits a live network
+            # with eventual-consistency polling, so it is the flakiest step;
+            # keeping it after the deterministic unit tests + coverage reports
+            # means a network blip here never blocks coverage reporting.
+            - name: Run mirror round-trip tests
+              env:
+                  HIERO_NETWORK: hiero-solo-action
+                  HIERO_OPERATOR_ID: ${{ steps.solo.outputs.accountId }}
+                  HIERO_OPERATOR_KEY: ${{ steps.solo.outputs.privateKey }}
+                  HIERO_OPERATOR_KEY_TYPE: DER
+                  HIERO_NETWORK_NODES: "127.0.0.1:35211=0.0.3"
+                  HIERO_MIRROR_NODE_URL: http://localhost:38081
+              run: pnpm --filter @hiero-enterprise/mirror run test:integration

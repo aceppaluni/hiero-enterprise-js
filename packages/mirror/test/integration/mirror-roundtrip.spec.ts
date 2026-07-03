@@ -71,22 +71,22 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
         expect(account.balance).toBeGreaterThan(0);
     });
 
-    it("round-trips a topic: create + submit → info, messages, lookups", async () => {
+    it("round-trips a topic: create + submit → messages", async () => {
         const topicService = new TopicService(context);
-        const memo = `mirror-roundtrip ${Date.now()}`;
-        const topicId = await topicService.createTopic({ memo });
+        const topicId = await topicService.createTopic({
+            memo: `mirror-roundtrip ${Date.now()}`,
+        });
         await topicService.submitMessage({
             topicId,
             message: "hello from the integration suite",
         });
 
-        const info = await eventually(
-            () => repositories.topicRepository.findById(topicId),
-            `topic ${topicId}`,
-        );
-        expect(info.topicId).toBe(topicId);
-        expect(info.memo).toBe(memo);
-
+        // Scope: Solo's mirror node serves topic *messages* but not the
+        // topic-info endpoint (`/topics/{id}`) or the message point-lookups
+        // (`/topics/{id}/messages/{seq}`, `/topics/messages/{timestamp}`) —
+        // those return 404 on Solo. Their response shapes are validated
+        // against a full mirror by the mainnet example tours + the weekly
+        // smoke workflow; here we round-trip the message-list read.
         const messages = await eventually(async () => {
             const page = await repositories.topicRepository.findByTopicId(
                 topicId,
@@ -96,23 +96,10 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
             return page;
         }, `messages on ${topicId}`);
         const first = messages.data[0];
+        expect(first.topicId).toBe(topicId);
         expect(Buffer.from(first.message, "base64").toString("utf8")).toContain(
             "hello from the integration suite",
         );
-
-        // The same message via its two point lookups.
-        const bySequence =
-            await repositories.topicRepository.findByTopicIdAndSequenceNumber(
-                topicId,
-                1,
-            );
-        expect(bySequence.consensusTimestamp).toBe(first.consensusTimestamp);
-        const byTimestamp =
-            await repositories.topicRepository.findMessageByTimestamp(
-                first.consensusTimestamp,
-            );
-        expect(byTimestamp.topicId).toBe(topicId);
-        expect(byTimestamp.sequenceNumber).toBe(first.sequenceNumber);
     });
 
     it("round-trips a token: create → metadata, name search, holders", async () => {
@@ -223,14 +210,8 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
         ]);
     });
 
-    it("serves network state from the same mirror", async () => {
-        const supply =
-            await repositories.networkRepository.findNetworkSupplies();
-        expect(Number(supply.totalSupply)).toBeGreaterThan(0);
-
-        const snapshot = await repositories.accountRepository.listBalances({
-            accountId: operatorId as string,
-        });
-        expect(snapshot.data[0]?.accountId).toBe(operatorId);
-    });
+    // Network-wide read-only endpoints (`/network/supply`, `/balances`) are
+    // not write→read round-trips and are not served by Solo's mirror node
+    // (single-node local network); their shapes are covered by the unit
+    // tests and the mainnet example tours + weekly smoke workflow.
 });
