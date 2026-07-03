@@ -9,121 +9,121 @@
 language: "en-US" # USA English
 
 knowledge_base:
-  web_search:
-    enabled: true # Verify HIP / mirror-node spec claims against current sources
+    web_search:
+        enabled: true # Verify HIP / mirror-node spec claims against current sources
 
 reviews:
-  profile: "chill" # Less, higher-signal feedback; not a nitpicker
-  high_level_summary: false # The walkthrough covers this
-  review_status: false # Spammy
-  commit_status: false # Spammy
-  collapse_walkthrough: false # Keep the walkthrough open (useful)
-  sequence_diagrams: false # Spammy
-  estimate_code_review_effort: false # Spammy
-  assess_linked_issues: true # Useful
-  related_issues: false # Spammy
-  related_prs: false # Spammy
-  suggested_labels: false # Spammy
-  suggested_reviewers: false # Spammy
-  in_progress_fortune: false # Spammy
-  poem: false # Spammy
-  enable_prompt_for_ai_agents: false # Spammy
-  slop_detection:
-    enabled: true
-    label: spam
+    profile: "chill" # Less, higher-signal feedback; not a nitpicker
+    high_level_summary: false # The walkthrough covers this
+    review_status: false # Spammy
+    commit_status: false # Spammy
+    collapse_walkthrough: false # Keep the walkthrough open (useful)
+    sequence_diagrams: false # Spammy
+    estimate_code_review_effort: false # Spammy
+    assess_linked_issues: true # Useful
+    related_issues: false # Spammy
+    related_prs: false # Spammy
+    suggested_labels: false # Spammy
+    suggested_reviewers: false # Spammy
+    in_progress_fortune: false # Spammy
+    poem: false # Spammy
+    enable_prompt_for_ai_agents: false # Spammy
+    slop_detection:
+        enabled: true
+        label: spam
 
-  # Do not review generated, vendored, or build artifacts. The upstream
-  # OpenAPI spec is a byte-for-byte vendored snapshot (not our code); dist,
-  # coverage, and lockfiles are generated.
-  path_filters:
-    - "!**/dist/**"
-    - "!**/coverage/**"
-    - "!pnpm-lock.yaml"
-    - "!packages/mirror/spec/openapi.yml"
+    # Do not review generated, vendored, or build artifacts. The upstream
+    # OpenAPI spec is a byte-for-byte vendored snapshot (not our code); dist,
+    # coverage, and lockfiles are generated.
+    path_filters:
+        - "!**/dist/**"
+        - "!**/coverage/**"
+        - "!pnpm-lock.yaml"
+        - "!packages/mirror/spec/openapi.yml"
 
-  # CI already runs these; let CodeRabbit skip its duplicates and focus on
-  # reasoning-level findings. Security scanners stay ON — they add value
-  # beyond the repo's own tooling.
-  tools:
-    eslint:
-      enabled: false
-    prettier:
-      enabled: false
-    gitleaks:
-      enabled: true # Secret scanning is genuinely useful here
-    semgrep:
-      enabled: true
-    actionlint:
-      enabled: true # Workflow correctness
+    # CI already runs these; let CodeRabbit skip its duplicates and focus on
+    # reasoning-level findings. Security scanners stay ON — they add value
+    # beyond the repo's own tooling.
+    tools:
+        eslint:
+            enabled: false
+        prettier:
+            enabled: false
+        gitleaks:
+            enabled: true # Secret scanning is genuinely useful here
+        semgrep:
+            enabled: true
+        actionlint:
+            enabled: true # Workflow correctness
 
-  path_instructions:
-    - path: "**"
-      instructions: |
-        Review ONLY for critical issues.
+    path_instructions:
+        - path: "**"
+          instructions: |
+              Review ONLY for critical issues.
 
-        Critical issues include:
-        - Bugs
-        - Security vulnerabilities
-        - Data inaccuracy
-        - Performance problems with real impact
+              Critical issues include:
+              - Bugs
+              - Security vulnerabilities
+              - Data inaccuracy
+              - Performance problems with real impact
 
-        Ignore completely:
-        - Code style, formatting, naming, or linting
-        - Refactoring suggestions
-        - Readability improvements
-        - Comments, documentation, or wording
-        - "Nice to have" improvements
+              Ignore completely:
+              - Code style, formatting, naming, or linting
+              - Refactoring suggestions
+              - Readability improvements
+              - Comments, documentation, or wording
+              - "Nice to have" improvements
 
-        Output rules:
-        - If no critical issues are found, return no comments.
-        - Do not provide suggestions unless they fix a critical issue.
-        - Do not explain obvious code behavior.
-        - Keep responses short and direct.
+              Output rules:
+              - If no critical issues are found, return no comments.
+              - Do not provide suggestions unless they fix a critical issue.
+              - Do not explain obvious code behavior.
+              - Keep responses short and direct.
 
-    - path: "packages/mirror/src/**"
-      instructions: |
-        This is a keyless, read-only HTTP client for the Hiero mirror node.
-        Flag only genuine correctness/security defects specific to it:
-        - Caller-supplied values interpolated into a URL PATH without
-          `segment()` / encoding (traversal or query-injection into a
-          different endpoint).
-        - Requests or response-body reads not bound by the timeout, or
-          RequestGate slots that can leak / never release (starvation).
-        - Retry loops that re-acquire a gate slot, deadlock, or retry a
-          non-idempotent write.
-        - Pagination that can loop forever or ignore its maxItems/maxPages
-          bounds.
-        - Converters that misread the wire shape (wrong field, dropped
-          null/undefined) producing inaccurate data.
-        Do NOT flag the deliberate per-endpoint boilerplate, the single
-        large client file, or the raw→public type duplication — these are
-        documented, intentional design choices.
+        - path: "packages/mirror/src/**"
+          instructions: |
+              This is a keyless, read-only HTTP client for the Hiero mirror node.
+              Flag only genuine correctness/security defects specific to it:
+              - Caller-supplied values interpolated into a URL PATH without
+                `segment()` / encoding (traversal or query-injection into a
+                different endpoint).
+              - Requests or response-body reads not bound by the timeout, or
+                RequestGate slots that can leak / never release (starvation).
+              - Retry loops that re-acquire a gate slot, deadlock, or retry a
+                non-idempotent write.
+              - Pagination that can loop forever or ignore its maxItems/maxPages
+                bounds.
+              - Converters that misread the wire shape (wrong field, dropped
+                null/undefined) producing inaccurate data.
+              Do NOT flag the deliberate per-endpoint boilerplate, the single
+              large client file, or the raw→public type duplication — these are
+              documented, intentional design choices.
 
-    - path: "packages/core/src/**"
-      instructions: |
-        This is the SDK write-side (signs and submits transactions).
-        Flag only: operator keys or secrets that could be logged, exposed
-        in errors, or leaked; incorrect signing / transaction construction;
-        swallowed or mis-propagated transaction errors. Ignore style.
+        - path: "packages/core/src/**"
+          instructions: |
+              This is the SDK write-side (signs and submits transactions).
+              Flag only: operator keys or secrets that could be logged, exposed
+              in errors, or leaked; incorrect signing / transaction construction;
+              swallowed or mis-propagated transaction errors. Ignore style.
 
-    - path: "**/*.test.ts"
-      instructions: |
-        Flag ONLY tests that assert nothing, cannot fail, or assert the
-        wrong thing (false confidence). Ignore everything else about tests.
+        - path: "**/*.test.ts"
+          instructions: |
+              Flag ONLY tests that assert nothing, cannot fail, or assert the
+              wrong thing (false confidence). Ignore everything else about tests.
 
-    - path: "{samples/**,packages/*/examples/**,packages/mirror/spec/*.mjs}"
-      instructions: |
-        Illustrative / maintainer tooling — not shipped runtime code. Flag
-        ONLY code that would actually throw at runtime or teach an unsafe
-        pattern (e.g. an unencoded user value in a URL). Ignore all style.
+        - path: "{samples/**,packages/*/examples/**,packages/mirror/spec/*.mjs}"
+          instructions: |
+              Illustrative / maintainer tooling — not shipped runtime code. Flag
+              ONLY code that would actually throw at runtime or teach an unsafe
+              pattern (e.g. an unencoded user value in a URL). Ignore all style.
 
-    - path: ".github/workflows/**"
-      instructions: |
-        Flag ONLY: untrusted input interpolated into `run:` (script
-        injection), over-broad `permissions:`, or unpinned third-party
-        actions. Ignore formatting.
+        - path: ".github/workflows/**"
+          instructions: |
+              Flag ONLY: untrusted input interpolated into `run:` (script
+              injection), over-broad `permissions:`, or unpinned third-party
+              actions. Ignore formatting.
 
 chat:
-  auto_reply: false
-  art: false # Spammy
-  allow_non_org_members: false # Only org members can trigger reviews
+    auto_reply: false
+    art: false # Spammy
+    allow_non_org_members: false # Only org members can trigger reviews

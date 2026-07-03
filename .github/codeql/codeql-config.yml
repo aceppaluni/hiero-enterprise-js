@@ -1,0 +1,13 @@
+name: "CodeQL config"
+
+# Exclude the example scripts from CodeQL analysis.
+#
+# `samples/` — runnable demos whose whole purpose is to print what they
+# queried to the console. CodeQL's `js/clear-text-logging` rule flags
+# `console.log(process.env["EXAMPLE_ACCOUNT_ID"] …)` as "logging sensitive
+# information", but Hedera account IDs (e.g. `0.0.98`) are public ledger
+# identifiers, not secrets — the alerts are false positives, and masking
+# the IDs would defeat the examples. All shipped library code under
+# `packages/**` remains fully scanned.
+paths-ignore:
+    - samples
