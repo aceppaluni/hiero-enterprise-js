@@ -108,6 +108,13 @@ export function createMirrorNodeClient(
     config?: MirrorConfig,
 ): MirrorNodeClient {
     const resolved = config ?? mirrorConfigFromEnv();
+    if (!resolved.network && !resolved.mirrorNodeUrl) {
+        throw new MirrorError(
+            'MirrorConfig must provide either "mirrorNodeUrl" or "network" ' +
+                "(or set HIERO_MIRROR_NODE_URL / HIERO_NETWORK).",
+            { code: MirrorErrorCodes.ConfigInvalid },
+        );
+    }
     const baseUrl = resolveMirrorNodeUrl(
         resolved.network ?? "",
         resolved.mirrorNodeUrl,

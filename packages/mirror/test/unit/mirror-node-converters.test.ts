@@ -287,6 +287,29 @@ describe("converter default branches", () => {
         ).toBeUndefined();
     });
 
+    it("defaults allCollectorsAreExempt to false when the flag is absent", () => {
+        const token = convertTokenInfo({
+            token_id: "0.0.5",
+            name: "T",
+            symbol: "T",
+            type: "FUNGIBLE_COMMON",
+            decimals: "0",
+            total_supply: "1",
+            max_supply: "0",
+            treasury_account_id: "0.0.2",
+            deleted: false,
+            custom_fees: {
+                fixed_fees: [{ amount: 1, collector_account_id: "0.0.3" }],
+                fractional_fees: [{ collector_account_id: "0.0.3" }],
+                royalty_fees: [{ collector_account_id: "0.0.3" }],
+            },
+        });
+        expect(token.customFees).toHaveLength(3);
+        for (const fee of token.customFees) {
+            expect(fee.allCollectorsAreExempt).toBe(false);
+        }
+    });
+
     it("handles a transaction with everything optional missing", () => {
         const tx = convertTransactionInfo({
             transaction_id: "0.0.1-1-1",

@@ -78,6 +78,12 @@ describe("createMirrorNodeClient", () => {
         );
     });
 
+    it("fails fast with a clear message when the config is empty", () => {
+        expect(() => createMirrorNodeClient({})).toThrow(
+            /must provide either "mirrorNodeUrl" or "network"/,
+        );
+    });
+
     it("surfaces invalid tuning through RequestGate validation", () => {
         expect(() =>
             createMirrorNodeClient({

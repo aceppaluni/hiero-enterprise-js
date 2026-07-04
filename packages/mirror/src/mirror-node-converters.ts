@@ -239,7 +239,7 @@ export function convertTokenInfo(raw: MirrorTokenResponse): MirrorTokenInfo {
                 type: "fixed",
                 amount: f.amount,
                 collectorAccountId: f.collector_account_id,
-                allCollectorsAreExempt: f.all_collectors_are_exempt,
+                allCollectorsAreExempt: f.all_collectors_are_exempt ?? false,
                 denominatingTokenId: f.denominating_token_id,
             } as MirrorFixedFee);
         }
@@ -254,7 +254,7 @@ export function convertTokenInfo(raw: MirrorTokenResponse): MirrorTokenInfo {
                 netOfTransfers: f.net_of_transfers,
                 collectorAccountId: f.collector_account_id,
                 denominatingTokenId: f.denominating_token_id,
-                allCollectorsAreExempt: f.all_collectors_are_exempt,
+                allCollectorsAreExempt: f.all_collectors_are_exempt ?? false,
             } as MirrorFractionalFee);
         }
         for (const f of raw.custom_fees.royalty_fees ?? []) {
@@ -270,7 +270,7 @@ export function convertTokenInfo(raw: MirrorTokenResponse): MirrorTokenInfo {
                       }
                     : undefined,
                 collectorAccountId: f.collector_account_id,
-                allCollectorsAreExempt: f.all_collectors_are_exempt,
+                allCollectorsAreExempt: f.all_collectors_are_exempt ?? false,
             } as MirrorRoyaltyFee);
         }
     }

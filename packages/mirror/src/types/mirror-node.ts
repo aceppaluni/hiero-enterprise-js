@@ -145,7 +145,7 @@ export interface MirrorFixedFeeRaw {
     amount: number;
     collector_account_id: string;
     denominating_token_id?: string;
-    all_collectors_are_exempt: boolean;
+    all_collectors_are_exempt?: boolean;
 }
 
 export interface MirrorFractionalFeeRaw {
