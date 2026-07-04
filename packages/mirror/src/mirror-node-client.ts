@@ -1352,12 +1352,26 @@ export class MirrorNodeClient {
             raw as MirrorPageResponse<never>,
             converter,
         );
+        // Balance-family responses carry the mirror's snapshot timestamp,
+        // but their next-page links do NOT — so unpinned pagination can
+        // straddle two snapshots if a new one lands mid-drain. Pin the
+        // snapshot onto the next link to keep every page consistent.
+        let nextLink = links.next;
+        if (
+            nextLink !== null &&
+            timestamp != null &&
+            !nextLink.includes("timestamp=")
+        ) {
+            nextLink +=
+                (nextLink.includes("?") ? "&" : "?") +
+                `timestamp=${encodeURIComponent(timestamp)}`;
+        }
         return {
             data,
-            links,
+            links: { ...links, next: nextLink },
             ...(timestamp !== undefined && { timestamp }),
-            next: links.next
-                ? () => this.getPage(links.next as string, converter)
+            next: nextLink
+                ? () => this.getPage(nextLink as string, converter)
                 : null,
         };
     }

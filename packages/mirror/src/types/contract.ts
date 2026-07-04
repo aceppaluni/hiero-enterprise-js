@@ -55,7 +55,12 @@ export interface MirrorContractDetail extends MirrorContract {
  * Nullability policy: fields the mirror node serializes on every result
  * row are `T | null` (null when they don't apply — e.g. the
  * ethereum-wrapped fields on a native HAPI call); fields the mirror node
- * omits entirely from some responses are optional (`?`).
+ * omits entirely from some responses are optional (`?`). In particular,
+ * LIST rows carry only a 15-field subset (verified live): the
+ * block/ethereum-envelope fields and `result`/`status` arrive only on
+ * per-result details, so they are optional here and re-required on
+ * `ContractResultDetails`. On list rows, success is
+ * `errorMessage == null`.
  */
 export interface ContractResult {
     /** EIP-2930 access list of a wrapped ethereum transaction */
@@ -66,18 +71,18 @@ export interface ContractResult {
     authorizationList?: AuthorizationListEntry[] | null;
     /** Amount sent to the function, in tinybars */
     amount: number | null;
-    /** Total gas used in the block */
-    blockGasUsed: number | null;
-    /** The block's hash */
-    blockHash: string | null;
-    /** The block height */
-    blockNumber: number | null;
+    /** Total gas used in the block (detail responses only) */
+    blockGasUsed?: number | null;
+    /** The block's hash (detail responses only) */
+    blockHash?: string | null;
+    /** The block height (detail responses only) */
+    blockNumber?: number | null;
     /** Hex encoded bloom filter of the result */
     bloom?: string | null;
     /** Hex encoded value returned by the function */
     callResult?: string | null;
-    /** The hex encoded chain id of a wrapped ethereum transaction */
-    chainId: string | null;
+    /** Chain id of a wrapped ethereum transaction (detail responses only) */
+    chainId?: string | null;
     /** The contract entity ID */
     contractId: string | null;
     /** Contracts created by this call */
@@ -94,34 +99,34 @@ export interface ContractResult {
     gasConsumed?: number | null;
     /** Gas limit for the execution */
     gasLimit: number;
-    /** Hex encoded gas price of a wrapped ethereum transaction, in tinybars */
-    gasPrice: string | null;
+    /** Gas price of a wrapped ethereum transaction (detail responses only) */
+    gasPrice?: string | null;
     /** Gas charged for the execution */
     gasUsed: number | null;
     /** Transaction hash (populated for ethereum transactions) */
     hash: string;
-    /** Max fee per gas of a wrapped ethereum transaction */
-    maxFeePerGas: string | null;
-    /** Max priority fee per gas of a wrapped ethereum transaction */
-    maxPriorityFeePerGas: string | null;
-    /** Nonce of a wrapped ethereum transaction */
-    nonce: number | null;
+    /** Max fee per gas of a wrapped ethereum tx (detail responses only) */
+    maxFeePerGas?: string | null;
+    /** Max priority fee per gas, ethereum tx (detail responses only) */
+    maxPriorityFeePerGas?: string | null;
+    /** Nonce of a wrapped ethereum transaction (detail responses only) */
+    nonce?: number | null;
     /** Hex signature r of a wrapped ethereum transaction */
     r?: string | null;
-    /** The transaction result, e.g. "SUCCESS" */
-    result: string;
+    /** The transaction result, e.g. "SUCCESS" (detail responses only) */
+    result?: string;
     /** Hex signature s of a wrapped ethereum transaction */
     s?: string | null;
-    /** `0x1` on success, `0x0` otherwise */
-    status: string;
+    /** `0x1` on success, `0x0` otherwise (detail responses only) */
+    status?: string;
     /** Consensus timestamp of the execution */
     timestamp: string;
     /** EVM address of the recipient */
     to: string | null;
-    /** Position of the transaction in the block */
-    transactionIndex: number | null;
-    /** Wrapped ethereum transaction type (0 pre-, 2 post-EIP-1559) */
-    type: number | null;
+    /** Position in the block (detail responses only) */
+    transactionIndex?: number | null;
+    /** Wrapped ethereum tx type, 0 pre-/2 post-EIP-1559 (detail only) */
+    type?: number | null;
     /** Signature recovery id of a wrapped ethereum transaction */
     v?: number | null;
 }
@@ -202,6 +207,30 @@ export interface ContractStateChange {
  * `/api/v1/contracts/{id}/results/{timestamp}`.
  */
 export interface ContractResultDetails extends ContractResult {
+    /** Total gas used in the block */
+    blockGasUsed: number | null;
+    /** The block's hash */
+    blockHash: string | null;
+    /** The block height */
+    blockNumber: number | null;
+    /** The hex encoded chain id of a wrapped ethereum transaction */
+    chainId: string | null;
+    /** Hex encoded gas price of a wrapped ethereum transaction */
+    gasPrice: string | null;
+    /** Max fee per gas of a wrapped ethereum transaction */
+    maxFeePerGas: string | null;
+    /** Max priority fee per gas of a wrapped ethereum transaction */
+    maxPriorityFeePerGas: string | null;
+    /** Nonce of a wrapped ethereum transaction */
+    nonce: number | null;
+    /** The transaction result, e.g. "SUCCESS" */
+    result: string;
+    /** `0x1` on success, `0x0` otherwise */
+    status: string;
+    /** Position of the transaction in the block */
+    transactionIndex: number | null;
+    /** Wrapped ethereum transaction type (0 pre-, 2 post-EIP-1559) */
+    type: number | null;
     /** Logs emitted during the execution */
     logs: ContractLogEntry[];
     /** Storage slots read/written during the execution */

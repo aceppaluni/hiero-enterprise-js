@@ -512,18 +512,26 @@ export interface MirrorAuthorizationListEntry {
     y_parity: string;
 }
 
-/** A single entry in the raw contract result listings. */
+/**
+ * A single entry in the raw contract result listings.
+ *
+ * The spec models list rows and `/contracts/results/{id}` details as
+ * one schema, but the mirror node serves only a 15-field subset on
+ * LIST rows (verified live): the block/ethereum-envelope fields and
+ * `result`/`status` arrive only on details. Those are optional here
+ * and re-required on `MirrorContractResultDetails`.
+ */
 export interface MirrorContractResult {
     access_list?: MirrorAccessListEntry[] | null;
     address?: string;
     authorization_list?: MirrorAuthorizationListEntry[] | null;
     amount: number | null;
-    block_gas_used: number | null;
-    block_hash: string | null;
-    block_number: number | null;
+    block_gas_used?: number | null;
+    block_hash?: string | null;
+    block_number?: number | null;
     bloom?: string | null;
     call_result?: string | null;
-    chain_id: string | null;
+    chain_id?: string | null;
     contract_id: string | null;
     created_contract_ids?: string[] | null;
     error_message?: string | null;
@@ -532,20 +540,20 @@ export interface MirrorContractResult {
     function_parameters?: string | null;
     gas_consumed?: number | null;
     gas_limit: number;
-    gas_price: string | null;
+    gas_price?: string | null;
     gas_used: number | null;
     hash: string;
-    max_fee_per_gas: string | null;
-    max_priority_fee_per_gas: string | null;
-    nonce: number | null;
+    max_fee_per_gas?: string | null;
+    max_priority_fee_per_gas?: string | null;
+    nonce?: number | null;
     r?: string | null;
-    result: string;
+    result?: string;
     s?: string | null;
-    status: string;
+    status?: string;
     timestamp: string;
     to: string | null;
-    transaction_index: number | null;
-    type: number | null;
+    transaction_index?: number | null;
+    type?: number | null;
     v?: number | null;
 }
 
@@ -570,6 +578,19 @@ export interface MirrorContractStateChange {
 
 /** Raw detailed contract result (single-result endpoints). */
 export interface MirrorContractResultDetails extends MirrorContractResult {
+    // Detail responses always carry the fields the list omits.
+    block_gas_used: number | null;
+    block_hash: string | null;
+    block_number: number | null;
+    chain_id: string | null;
+    gas_price: string | null;
+    max_fee_per_gas: string | null;
+    max_priority_fee_per_gas: string | null;
+    nonce: number | null;
+    result: string;
+    status: string;
+    transaction_index: number | null;
+    type: number | null;
     logs?: MirrorContractResultLog[];
     state_changes?: MirrorContractStateChange[];
 }

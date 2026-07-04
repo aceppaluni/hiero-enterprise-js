@@ -764,6 +764,20 @@ export function convertContractResultDetails(
 ): ContractResultDetails {
     return {
         ...convertContractResult(raw),
+        // Present on every detail response (re-required on the detail
+        // types; optional on the base because LIST rows omit them).
+        blockGasUsed: raw.block_gas_used,
+        blockHash: raw.block_hash,
+        blockNumber: raw.block_number,
+        chainId: raw.chain_id,
+        gasPrice: raw.gas_price,
+        maxFeePerGas: raw.max_fee_per_gas,
+        maxPriorityFeePerGas: raw.max_priority_fee_per_gas,
+        nonce: raw.nonce,
+        result: raw.result,
+        status: raw.status,
+        transactionIndex: raw.transaction_index,
+        type: raw.type,
         logs: (raw.logs ?? []).map(convertContractLogEntry),
         stateChanges: (raw.state_changes ?? []).map((change) => ({
             address: change.address,
