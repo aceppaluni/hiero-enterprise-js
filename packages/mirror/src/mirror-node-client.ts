@@ -326,6 +326,23 @@ export class MirrorNodeClient {
         return this.gate.run(() => this.fetchWithRetry<T>(path, body));
     }
 
+    /**
+     * Raw GET escape hatch: fetch any mirror node path + query (e.g.
+     * `/api/v1/topics/0.0.1/messages?order=asc&limit=100`) and return
+     * the parsed JSON body, untyped.
+     *
+     * The request goes through the same gate (concurrency + rate
+     * limit), timeout, retry, and error mapping as every typed query —
+     * use this for endpoints or parameters the typed surface does not
+     * cover yet, or to drive tooling that composes its own paths (it
+     * also makes this client a drop-in transport for such tools). The
+     * caller is responsible for percent-encoding anything interpolated
+     * into `pathAndQuery`.
+     */
+    get<T = unknown>(pathAndQuery: string): Promise<T> {
+        return this.request<T>(pathAndQuery);
+    }
+
     // ─── HTTP Helper ─────────────────────────────────────────────
 
     /**
