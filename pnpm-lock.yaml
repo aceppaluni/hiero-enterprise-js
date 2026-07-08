@@ -176,6 +176,12 @@ importers:
         specifier: ^5.8.5
         version: 5.8.5
 
+  samples/mirror-standalone:
+    dependencies:
+      '@hiero-enterprise/mirror':
+        specifier: workspace:*
+        version: link:../../packages/mirror
+
   samples/nest-sample:
     dependencies:
       '@hiero-enterprise/nest':

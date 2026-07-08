@@ -219,6 +219,7 @@ Working examples are in [`samples/`](./samples). Each one is a minimal but real 
 | Sample | Framework |
 |--------|-----------|
 | [examples](./samples/examples) | Standalone `@hiero-enterprise/core` scripts |
+| [mirror-standalone](./samples/mirror-standalone) | Minimal-footprint proof: a project whose only dependency is `@hiero-enterprise/mirror` — no credentials, no build step |
 | [express-sample](./samples/express-sample) | Express |
 | [fastify-sample](./samples/fastify-sample) | Fastify |
 | [nest-sample](./samples/nest-sample) | NestJS |

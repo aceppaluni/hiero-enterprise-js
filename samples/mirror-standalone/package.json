@@ -1,0 +1,17 @@
+{
+    "name": "mirror-standalone-sample",
+    "version": "0.0.1",
+    "private": true,
+    "description": "The entire footprint of @hiero-enterprise/mirror: one dependency, no credentials, no build step",
+    "license": "Apache-2.0",
+    "type": "module",
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "scripts": {
+        "start": "node src/main.js"
+    },
+    "dependencies": {
+        "@hiero-enterprise/mirror": "workspace:*"
+    }
+}
