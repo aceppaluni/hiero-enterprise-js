@@ -119,6 +119,7 @@ export function convertAccountInfo(
     return {
         accountId: raw.account,
         evmAddress: raw.evm_address,
+        delegationAddress: raw.delegation_address ?? undefined,
         key: raw.key?.key,
         balance: raw.balance?.balance ?? 0,
         deleted: raw.deleted ?? false,
@@ -158,7 +159,7 @@ export function convertTokenHolder(raw: MirrorTokenHolderBalance): TokenHolder {
     return {
         accountId: raw.account,
         balance: String(raw.balance),
-        decimals: raw.decimals,
+        decimals: raw.decimals ?? undefined,
     };
 }
 
@@ -206,10 +207,10 @@ export function convertAccountTokenBalance(
         tokenId: raw.token_id,
         balance: String(raw.balance),
         decimals: raw.decimals ?? 0,
-        automaticAssociation: raw.automatic_association,
-        createdTimestamp: raw.created_timestamp,
-        freezeStatus: raw.freeze_status,
-        kycStatus: raw.kyc_status,
+        automaticAssociation: raw.automatic_association ?? undefined,
+        createdTimestamp: raw.created_timestamp ?? undefined,
+        freezeStatus: raw.freeze_status ?? undefined,
+        kycStatus: raw.kyc_status ?? undefined,
     };
 }
 
@@ -230,6 +231,13 @@ export function convertNft(raw: MirrorNft): Nft {
 }
 
 // ─── Tokens ──────────────────────────────────────────────────────
+
+/** Epoch nanoseconds (as a JS number) → "seconds.nnnnnnnnn". */
+function nanosToTimestamp(nanos: number): string {
+    const seconds = Math.floor(nanos / 1e9);
+    const remainder = Math.round(nanos - seconds * 1e9);
+    return `${seconds}.${String(remainder).padStart(9, "0")}`;
+}
 
 export function convertTokenInfo(raw: MirrorTokenResponse): MirrorTokenInfo {
     const customFees: MirrorCustomFee[] = [];
@@ -298,7 +306,12 @@ export function convertTokenInfo(raw: MirrorTokenResponse): MirrorTokenInfo {
         paused: raw.pause_status === "PAUSED",
         customFees,
         createdTimestamp: raw.created_timestamp,
-        expirationTimestamp: raw.expiry_timestamp,
+        // Normalize the tokens-only numeric-nanoseconds form to the
+        // canonical "seconds.nanoseconds" string used everywhere else.
+        expirationTimestamp:
+            typeof raw.expiry_timestamp === "number"
+                ? nanosToTimestamp(raw.expiry_timestamp)
+                : raw.expiry_timestamp,
         memo: raw.memo,
         autoRenewAccount: raw.auto_renew_account,
         autoRenewPeriod: raw.auto_renew_period,
@@ -723,7 +736,7 @@ export function convertContractResult(
         contractId: raw.contract_id,
         createdContractIds: raw.created_contract_ids,
         errorMessage: raw.error_message,
-        failedInitcode: raw.failed_initcode,
+        failedInitcode: raw.failed_initcode ?? undefined,
         from: raw.from,
         functionParameters: raw.function_parameters,
         gasConsumed: raw.gas_consumed,

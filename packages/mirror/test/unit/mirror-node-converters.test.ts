@@ -287,6 +287,31 @@ describe("converter default branches", () => {
         ).toBeUndefined();
     });
 
+    it("tolerates fixture-revealed nulls the spec does not document", () => {
+        const holder = convertTokenHolder({
+            account: "0.0.9",
+            balance: 1,
+            decimals: null,
+        });
+        expect(holder.decimals).toBeUndefined();
+    });
+
+    it("normalizes the tokens-only numeric expiry_timestamp to a string", () => {
+        const token = convertTokenInfo({
+            token_id: "0.0.5",
+            name: "T",
+            symbol: "T",
+            type: "FUNGIBLE_COMMON",
+            decimals: "0",
+            total_supply: "1",
+            max_supply: "0",
+            treasury_account_id: "0.0.2",
+            deleted: false,
+            expiry_timestamp: 1632175380000000000,
+        });
+        expect(token.expirationTimestamp).toBe("1632175380.000000000");
+    });
+
     it("defaults allCollectorsAreExempt to false when the flag is absent", () => {
         const token = convertTokenInfo({
             token_id: "0.0.5",

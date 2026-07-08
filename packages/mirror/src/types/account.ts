@@ -6,6 +6,8 @@ export interface MirrorAccountInfo {
     accountId: string;
     /** The EVM address */
     evmAddress?: string;
+    /** EIP-7702 delegation indicator ("0x" when none) */
+    delegationAddress?: string;
     /** The public key */
     key?: string;
     /** Account balance in tinybars */

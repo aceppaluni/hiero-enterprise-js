@@ -16,6 +16,14 @@ export interface MirrorAccountResponse {
     account: string;
     alias?: string;
     evm_address?: string;
+    /**
+     * EIP-7702 delegation indicator ("0x" when none). Implemented on
+     * upstream main (rest/model/entity.js, HIP-1340) and returned by
+     * its test fixtures, but absent from the OpenAPI spec and not yet
+     * in a deployed release as of 0.157.1 — found by
+     * spec/check-fixtures.mjs.
+     */
+    delegation_address?: string | null;
     key?: { key: string };
     balance?: {
         timestamp?: string | null;
@@ -47,7 +55,7 @@ export interface MirrorTokenBalance {
 export interface MirrorTokenHolderBalance {
     account: string;
     balance: number;
-    decimals?: number;
+    decimals?: number | null;
 }
 
 /** A raw gRPC/REST service endpoint published by a node. */
@@ -85,11 +93,11 @@ export interface MirrorNetworkNode {
 export interface MirrorAccountTokenBalance {
     token_id: string;
     balance: number;
-    decimals?: number;
-    automatic_association?: boolean;
-    created_timestamp?: string;
-    freeze_status?: string;
-    kyc_status?: string;
+    decimals?: number | null;
+    automatic_association?: boolean | null;
+    created_timestamp?: string | null;
+    freeze_status?: string | null;
+    kyc_status?: string | null;
 }
 
 export interface MirrorNft {
@@ -129,7 +137,14 @@ export interface MirrorTokenResponse {
         royalty_fees?: MirrorRoyaltyFeeRaw[];
     };
     created_timestamp?: string;
-    expiry_timestamp?: string;
+    /**
+     * Upstream wart (documented in the mirror node's own V2-API notes):
+     * tokens return this as epoch NANOSECONDS as a JSON number — unlike
+     * the `seconds.nanoseconds` strings everywhere else. Values exceed
+     * MAX_SAFE_INTEGER, so JSON.parse has already rounded to ~512ns
+     * granularity by the time we see it.
+     */
+    expiry_timestamp?: number | string;
     memo?: string;
     auto_renew_account?: string | null;
     auto_renew_period?: number | null;
@@ -535,7 +550,7 @@ export interface MirrorContractResult {
     contract_id: string | null;
     created_contract_ids?: string[] | null;
     error_message?: string | null;
-    failed_initcode?: string;
+    failed_initcode?: string | null;
     from: string | null;
     function_parameters?: string | null;
     gas_consumed?: number | null;
