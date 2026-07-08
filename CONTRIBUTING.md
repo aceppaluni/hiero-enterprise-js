@@ -195,6 +195,26 @@ field-diff checks tell you immediately if a layer was missed. The refresh
 runbook for the vendored spec itself lives in
 [`packages/mirror/spec/README.md`](packages/mirror/spec/README.md).
 
+## Verifying the Published Type Surface
+
+The `.d.ts` / `.d.cts` files under each package's `dist/` are generated,
+and their correctness is a chain — each link has a one-command local
+check (all from the repo root; CI runs every one of these on push):
+
+| Claim | Check | Pass looks like |
+|---|---|---|
+| Source types compile (strict) | `pnpm --filter @hiero-enterprise/mirror exec tsc --noEmit` | no output |
+| Packed `exports` serve matching JS + declarations in every consumer mode | `cd packages/mirror && npx @arethetypeswrong/cli --pack` | all 🟢, "No problems found" |
+| Wire types match the mirror node OpenAPI spec, field by field | `cd packages/mirror && node spec/diff-response-fields.mjs` | exit 0 |
+| Converters behave, not just typecheck | `pnpm --filter @hiero-enterprise/mirror test` | all tests pass |
+| Types survive real mainnet responses | `pnpm --filter mirror-standalone-sample start` | live figures, no `undefined`/`NaN` |
+
+The same applies to every package (`core`, `express`, `fastify`,
+`nest`) — substitute the package name in the first two commands. The
+adapters and samples typecheck against the **built** `dist`
+declarations, so a full `pnpm run build` followed by per-package
+`tsc --noEmit` re-validates the exact surface an npm consumer sees.
+
 ## Feature Requests
 
 Feature requests are also submitted through the [Issues][issues] page.
