@@ -7,7 +7,14 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 
-Integrating a Hiero sdk into a production Node.js service has historically meant a lot of glue code that has nothing to do with your actual business logic: instantiating clients, managing config, plumbing operator keys, handling errors. Hiero Enterprise JS does that work for you. Drop in the middleware or module for your framework of choice and your routes get typed access to accounts, tokens, NFTs, smart contracts, topics, and mirror node queries — without any of the setup code.
+Integrating a Hiero sdk into a production Node.js service has historically meant a lot of glue code that has nothing to do with your actual business logic: instantiating clients, managing config, plumbing operator keys, handling errors. 
+Similarly, using data from the mirror node has involved creating custom ways to hit the end-points.
+
+Hiero Enterprise JS does that work for you. 
+
+Drop in the middleware or module for your framework of choice and your routes get typed access to accounts, tokens, NFTs, smart contracts, topics, and mirror node queries — without any of the setup code.
+
+The mirror node package uses hiero mirror node endpoints and enables easy filtering, pagination and error handling - without maintaining any of this code yourself.
 
 It gives each major Node.js framework a native integration that matches how developers already think about that framework — middleware for Express/Fastify, dependency injection for NestJS. Write operations (creating accounts, minting tokens) go through the network client directly. Read operations (looking up balances, browsing NFTs) go through the mirror node REST API, which is faster and doesn't carry transaction fees. Both are exposed through a consistent interface so you don't have to think about which path to use.
 
@@ -29,6 +36,10 @@ It gives each major Node.js framework a native integration that matches how deve
 
 ```bash
 npm install @hiero-enterprise/core
+```
+
+```bash
+npm install @hiero-enterprise/mirror
 ```
 
 ```ts
@@ -148,7 +159,11 @@ export class BalanceController {
                    (testnet / mainnet)
 ```
 
-`@hiero-enterprise/core` owns the SDK write-side (services, transactions, operator keys); `@hiero-enterprise/mirror` owns the REST read-side and has **zero dependencies** — analytics consumers can install it alone, with no SDK and no credentials. Framework adapters compose both behind one surface. Either package also works standalone.
+`@hiero-enterprise/core` owns the SDK write-side (services, transactions, operator keys).
+
+`@hiero-enterprise/mirror` owns the REST read-side and has **zero dependencies** — analytics consumers can install it alone, with no SDK and no credentials. 
+
+Framework adapters compose both behind one surface. Either package also works standalone.
 
 Writes go through the Hiero SDK — transactions that go on-chain, signed by the operator. Reads go through the mirror node, which doesn't cost fees and returns historical or indexed data.
 
