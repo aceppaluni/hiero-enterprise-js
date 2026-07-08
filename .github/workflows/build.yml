@@ -109,6 +109,19 @@ jobs:
             - name: Build packages
               run: pnpm run build
 
+            # Published-surface type check: pack each package and verify
+            # its `exports` serve matching JavaScript + declarations under
+            # every consumer resolution mode (node10, node16-CJS,
+            # node16-ESM, bundler). Guards against ESM/CJS declaration
+            # mismatches that tsc on our own source cannot see.
+            - name: Check published types (attw)
+              run: |
+                  for pkg in core mirror express fastify nest; do
+                    echo "::group::attw $pkg"
+                    (cd "packages/$pkg" && pnpm dlx @arethetypeswrong/cli@0.18.4 --pack)
+                    echo "::endgroup::"
+                  done
+
             - name: Run integration tests
               env:
                   HIERO_NETWORK: hiero-solo-action
