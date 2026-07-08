@@ -16,6 +16,7 @@
         "example": "pnpm --filter @hiero-enterprise/examples examples"
     },
     "devDependencies": {
+        "@arethetypeswrong/cli": "0.18.4",
         "@eslint/js": "^10.0.1",
         "@types/node": "^25.9.1",
         "eslint": "^10.4.0",

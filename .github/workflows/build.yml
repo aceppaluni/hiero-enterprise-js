@@ -40,6 +40,8 @@ jobs:
                   egress-policy: audit
 
             - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+              with:
+                  persist-credentials: false
 
             - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
               with:
@@ -118,7 +120,7 @@ jobs:
               run: |
                   for pkg in core mirror express fastify nest; do
                     echo "::group::attw $pkg"
-                    (cd "packages/$pkg" && pnpm dlx @arethetypeswrong/cli@0.18.4 --pack)
+                    (cd "packages/$pkg" && pnpm exec attw --pack)
                     echo "::endgroup::"
                   done
 
