@@ -55,12 +55,15 @@ console.log(`    next    : $${usdPerHbar(rates.nextRate)} / ℏ`);
 
 // ── 2 · supply, now and one year ago ─────────────────────────────
 const supply = await network.findNetworkSupplies();
-const released = Number(supply.releasedSupply);
-const total = Number(supply.totalSupply);
+// Supply magnitudes exceed Number.MAX_SAFE_INTEGER in tinybar, so
+// arithmetic stays in BigInt; `hbar()` is display-only rounding.
+const released = BigInt(supply.releasedSupply);
+const total = BigInt(supply.totalSupply);
+const releasedPct = Number((released * 10_000n) / total) / 100;
 console.log(`\n2 · findNetworkSupplies()  @ ${supply.timestamp}`);
-console.log(`    total    : ${hbar(total)} ℏ`);
+console.log(`    total    : ${hbar(supply.totalSupply)} ℏ`);
 console.log(
-    `    released : ${hbar(released)} ℏ (${((released / total) * 100).toFixed(2)}%)`,
+    `    released : ${hbar(supply.releasedSupply)} ℏ (${releasedPct.toFixed(2)}%)`,
 );
 
 // Point-in-time read: the same query with `{ timestamp }` returns supply as
@@ -68,10 +71,10 @@ console.log(
 // `toConsensusTimestamp` converts a Date/epoch-ms to seconds.nanoseconds.
 const yearAgo = toConsensusTimestamp(Date.now() - 365 * 24 * 3600 * 1000);
 const supplyThen = await network.findNetworkSupplies({ timestamp: yearAgo });
-const releasedThen = Number(supplyThen.releasedSupply);
+const releasedThen = BigInt(supplyThen.releasedSupply);
 console.log(
-    `    released one year ago: ${hbar(releasedThen)} ℏ ` +
-        `(+${hbar(released - releasedThen)} ℏ since)`,
+    `    released one year ago: ${hbar(supplyThen.releasedSupply)} ℏ ` +
+        `(+${hbar((released - releasedThen).toString())} ℏ since)`,
 );
 
 // ── 3 · staking ──────────────────────────────────────────────────

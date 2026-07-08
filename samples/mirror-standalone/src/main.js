@@ -20,8 +20,10 @@ const network = new NetworkRepository(mirror);
 const supply = await network.findNetworkSupplies();
 const released = tinybarToHbar(supply.releasedSupply);
 const total = tinybarToHbar(supply.totalSupply);
+const whole = { maximumFractionDigits: 0 };
 console.log(
-    `Released supply: ${released.toLocaleString()} of ${total.toLocaleString()} ℏ` +
+    `Released supply: ${released.toLocaleString(undefined, whole)}` +
+        ` of ${total.toLocaleString(undefined, whole)} ℏ` +
         ` (${((released / total) * 100).toFixed(1)}%)`,
 );
 
