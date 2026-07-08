@@ -3,18 +3,16 @@
 [![CI](../../actions/workflows/build.yml/badge.svg)](../../actions/workflows/build.yml)
 [![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/Jexsie/4a3c4fd2dae12f95e6177ae3bc807403/raw/hiero-enterprise-js-coverage.json)](../../actions/workflows/build.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/hiero-hackers/hiero-enterprise-js/badge)](https://scorecard.dev/viewer/?uri=github.com/hiero-hackers/hiero-enterprise-js)
-[![Node.js](https://img.shields.io/badge/Node.js-≥20-green.svg)](https://nodejs.org)
+[![Node.js](https://img.shields.io/badge/Node.js-≥18-green.svg)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 
-Integrating a Hiero sdk into a production Node.js service has historically meant a lot of glue code that has nothing to do with your actual business logic: instantiating clients, managing config, plumbing operator keys, handling errors. 
-Similarly, using data from the mirror node has involved creating custom ways to hit the end-points.
+Integrating the Hiero SDK into a production Node.js service has historically meant a lot of glue code that has nothing to do with your actual business logic: instantiating clients, managing config, plumbing operator keys, handling errors. 
+Similarly, reading data from the mirror node has meant hand-rolling REST calls, pagination, and rate limiting.
 
 Hiero Enterprise JS does that work for you. 
 
 Drop in the middleware or module for your framework of choice and your routes get typed access to accounts, tokens, NFTs, smart contracts, topics, and mirror node queries — without any of the setup code.
-
-The mirror node package uses hiero mirror node endpoints and enables easy filtering, pagination and error handling - without maintaining any of this code yourself.
 
 It gives each major Node.js framework a native integration that matches how developers already think about that framework — middleware for Express/Fastify, dependency injection for NestJS. Write operations (creating accounts, minting tokens) go through the network client directly. Read operations (looking up balances, browsing NFTs) go through the mirror node REST API, which is faster and doesn't carry transaction fees. Both are exposed through a consistent interface so you don't have to think about which path to use.
 
@@ -28,6 +26,14 @@ It gives each major Node.js framework a native integration that matches how deve
 | `@hiero-enterprise/fastify` | Fastify plugin — `fastify.hiero.*` (composes core + mirror) |
 | `@hiero-enterprise/nest` | NestJS module — `HieroModule.forRoot()` with full DI (composes core + mirror) |
 
+### Which package do I install?
+
+| You are building… | Install / import | Reads | Writes |
+|---|---|---|---|
+| An Express / Fastify / NestJS service | **the adapter only** — repositories and services arrive pre-composed on `req.hiero.*` / `app.hiero.*` / DI; you never import core or mirror directly | ✓ | ✓ |
+| A read-only tool, dashboard, or indexer | `@hiero-enterprise/mirror` only — no credentials needed ([smallest possible project](./samples/mirror-standalone)) | ✓ | — |
+| A script or worker that submits transactions | `@hiero-enterprise/core` (add `mirror` if it also reads) | opt-in | ✓ |
+
 ## Quick Start
 
 > **Note:** These packages are not yet published to npm. The guide below shows how installation will work once they are. To run the project locally for development, see [CONTRIBUTING.md](./CONTRIBUTING.md).
@@ -39,8 +45,19 @@ npm install @hiero-enterprise/core
 ```
 
 ```bash
-npm install @hiero-enterprise/mirror
+npm install @hiero-enterprise/mirror   # read-only? this is the only package you need
 ```
+
+Reads need no credentials at all:
+
+```ts
+import { createMirrorNodeClient, AccountRepository } from '@hiero-enterprise/mirror';
+
+const mirror = createMirrorNodeClient({ network: 'mainnet' });
+const account = await new AccountRepository(mirror).findByAccountId('0.0.800');
+```
+
+Writes go through core, with an operator account:
 
 ```ts
 import { HieroContext, AccountService } from '@hiero-enterprise/core';
@@ -169,13 +186,15 @@ Writes go through the Hiero SDK — transactions that go on-chain, signed by the
 
 ## Services
 
-| Client | What it covers |
+| Service | What it covers |
 |--------|---------------|
 | `AccountService` | Create, update, delete, approve allowances, check balances |
 | `FileService` | Store and retrieve file content on-chain |
-| `TokenService` | Create, mint, burn, and transfer fungible tokens and nfts |
+| `TokenService` | Create, mint, burn, and transfer fungible tokens and NFTs |
 | `ContractService` | Deploy and call EVM-compatible smart contracts |
 | `TopicService` | Create topics, manage keys, submit messages |
+| `ScheduleService` | Create and sign scheduled transactions |
+| `NetworkService` | Network-level queries via the SDK client |
 
 ## Mirror Node Queries — `@hiero-enterprise/mirror`
 
