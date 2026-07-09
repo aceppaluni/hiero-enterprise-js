@@ -31,7 +31,7 @@ It gives each major Node.js framework a native integration that matches how deve
 | You are building… | Install / import | Reads | Writes |
 |---|---|---|---|
 | An Express / Fastify / NestJS service | **the adapter only** — repositories and services arrive pre-composed on `req.hiero.*` / `app.hiero.*` / DI; you never import core or mirror directly | ✓ | ✓ |
-| A read-only tool, dashboard, or indexer | `@hiero-enterprise/mirror` only — no credentials needed ([smallest possible project](./samples/mirror-standalone)) | ✓ | — |
+| A read-only tool, dashboard, or indexer | `@hiero-enterprise/mirror` only — no credentials needed ([smallest possible project](./samples/mirror-standalone-sample)) | ✓ | — |
 | A script or worker that submits transactions | `@hiero-enterprise/core` (add `mirror` if it also reads) | opt-in | ✓ |
 
 ## Quick Start
@@ -238,7 +238,7 @@ Working examples are in [`samples/`](./samples). Each one is a minimal but real 
 | Sample | Framework |
 |--------|-----------|
 | [examples](./samples/examples) | Standalone `@hiero-enterprise/core` scripts |
-| [mirror-standalone](./samples/mirror-standalone) | Minimal-footprint proof: a project whose only dependency is `@hiero-enterprise/mirror` — no credentials, no build step |
+| [mirror-standalone](./samples/mirror-standalone-sample) | Minimal-footprint proof: a project whose only dependency is `@hiero-enterprise/mirror` — no credentials, no build step |
 | [express-sample](./samples/express-sample) | Express |
 | [fastify-sample](./samples/fastify-sample) | Fastify |
 | [nest-sample](./samples/nest-sample) | NestJS |

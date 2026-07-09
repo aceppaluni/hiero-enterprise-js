@@ -1,4 +1,4 @@
-# mirror-standalone
+# mirror-standalone-sample
 
 The smallest possible `@hiero-enterprise/mirror` project:
 

@@ -1,5 +1,6 @@
 {
     "name": "@hiero-enterprise/examples",
+    "version": "1.0.0",
     "private": true,
     "type": "module",
     "description": "Example scripts demonstrating hiero-enterprise-js service operations",

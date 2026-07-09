@@ -179,7 +179,7 @@ importers:
         specifier: ^5.8.5
         version: 5.8.5
 
-  samples/mirror-standalone:
+  samples/mirror-standalone-sample:
     dependencies:
       '@hiero-enterprise/mirror':
         specifier: workspace:*

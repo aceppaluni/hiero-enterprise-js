@@ -195,6 +195,12 @@ field-diff checks tell you immediately if a layer was missed. The refresh
 runbook for the vendored spec itself lives in
 [`packages/mirror/spec/README.md`](packages/mirror/spec/README.md).
 
+## Test File Naming
+
+Unit tests are `*.test.ts` (under `test/unit/`); integration tests are
+`*.spec.ts` (under `test/integration/`). Every package follows this
+split — keep new tests on the matching suffix.
+
 ## Verifying the Published Type Surface
 
 The `.d.ts` / `.d.cts` files under each package's `dist/` are generated,
