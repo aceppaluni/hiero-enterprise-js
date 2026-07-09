@@ -4,8 +4,8 @@ import {
     mirrorConfigFromEnv,
     createMirrorNodeClient,
 } from "../../src/config.js";
-import { MirrorNodeClient } from "../../src/mirror-node-client.js";
-import { MirrorError } from "../../src/errors.js";
+import { MirrorNodeClient } from "../../src/MirrorNodeClient.js";
+import { MirrorError } from "../../src/MirrorError.js";
 
 describe("resolveMirrorNodeUrl", () => {
     it("resolves known networks (case-insensitive)", () => {
@@ -105,7 +105,7 @@ describe("config default branches", () => {
 
     it("MirrorError defaults its code when none is provided", async () => {
         const { MirrorError, MirrorErrorCodes } =
-            await import("../../src/errors.js");
+            await import("../../src/MirrorError.js");
         const error = new MirrorError("boom");
         expect(error.code).toBe(MirrorErrorCodes.MirrorNodeError);
         expect(error.context).toBeUndefined();

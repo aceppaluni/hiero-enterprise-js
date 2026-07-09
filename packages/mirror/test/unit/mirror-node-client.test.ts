@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach, beforeEach, vi } from "vitest";
-import { MirrorNodeClient } from "../../src/mirror-node-client.js";
-import { MirrorError, MirrorErrorCodes } from "../../src/errors.js";
+import { MirrorNodeClient } from "../../src/MirrorNodeClient.js";
+import { MirrorError, MirrorErrorCodes } from "../../src/MirrorError.js";
 
 describe("MirrorNodeClient", () => {
     let client: MirrorNodeClient;

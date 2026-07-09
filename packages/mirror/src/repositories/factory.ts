@@ -1,13 +1,13 @@
-import type { MirrorNodeClient } from "../mirror-node-client.js";
-import { AccountRepository } from "./account-repository.js";
-import { NftRepository } from "./nft-repository.js";
-import { TokenRepository } from "./token-repository.js";
-import { TopicRepository } from "./topic-repository.js";
-import { TransactionRepository } from "./transaction-repository.js";
-import { NetworkRepository } from "./network-repository.js";
-import { ScheduleRepository } from "./schedule-repository.js";
-import { BlockRepository } from "./block-repository.js";
-import { ContractRepository } from "./contract-repository.js";
+import type { MirrorNodeClient } from "../MirrorNodeClient.js";
+import { AccountRepository } from "./AccountRepository.js";
+import { NftRepository } from "./NftRepository.js";
+import { TokenRepository } from "./TokenRepository.js";
+import { TopicRepository } from "./TopicRepository.js";
+import { TransactionRepository } from "./TransactionRepository.js";
+import { NetworkRepository } from "./NetworkRepository.js";
+import { ScheduleRepository } from "./ScheduleRepository.js";
+import { BlockRepository } from "./BlockRepository.js";
+import { ContractRepository } from "./ContractRepository.js";
 
 /**
  * Every repository in this package, constructed over one shared client.

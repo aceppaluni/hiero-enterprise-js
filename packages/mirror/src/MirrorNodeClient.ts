@@ -91,7 +91,7 @@ import type {
     MirrorContractCallResponse,
     MirrorFeeEstimateResponse,
 } from "./types/index.js";
-import { MirrorError, MirrorErrorCodes } from "./errors.js";
+import { MirrorError, MirrorErrorCodes } from "./MirrorError.js";
 import {
     convertPage,
     convertAccountInfo,
@@ -150,7 +150,7 @@ import {
     assertContractCallResponse,
     assertFeeEstimateResponse,
 } from "./mirror-node-validators.js";
-import { RequestGate } from "./request-gate.js";
+import { RequestGate } from "./RequestGate.js";
 import { appendQuery, segment } from "./mirror-node-query.js";
 
 /** Default per-request timeout, in milliseconds. */

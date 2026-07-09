@@ -1,12 +1,12 @@
-export { AccountRepository } from "./account-repository.js";
-export { NftRepository } from "./nft-repository.js";
-export { TokenRepository } from "./token-repository.js";
-export { TopicRepository } from "./topic-repository.js";
-export { TransactionRepository } from "./transaction-repository.js";
-export { NetworkRepository } from "./network-repository.js";
-export { ScheduleRepository } from "./schedule-repository.js";
-export { BlockRepository } from "./block-repository.js";
-export { ContractRepository } from "./contract-repository.js";
+export { AccountRepository } from "./AccountRepository.js";
+export { NftRepository } from "./NftRepository.js";
+export { TokenRepository } from "./TokenRepository.js";
+export { TopicRepository } from "./TopicRepository.js";
+export { TransactionRepository } from "./TransactionRepository.js";
+export { NetworkRepository } from "./NetworkRepository.js";
+export { ScheduleRepository } from "./ScheduleRepository.js";
+export { BlockRepository } from "./BlockRepository.js";
+export { ContractRepository } from "./ContractRepository.js";
 export {
     createMirrorRepositories,
     MIRROR_REPOSITORY_TOKENS,

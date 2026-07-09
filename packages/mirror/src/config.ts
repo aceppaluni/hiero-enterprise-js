@@ -1,6 +1,6 @@
-import { MirrorError, MirrorErrorCodes } from "./errors.js";
-import type { MirrorNodeClientOptions } from "./mirror-node-client.js";
-import { MirrorNodeClient } from "./mirror-node-client.js";
+import { MirrorError, MirrorErrorCodes } from "./MirrorError.js";
+import type { MirrorNodeClientOptions } from "./MirrorNodeClient.js";
+import { MirrorNodeClient } from "./MirrorNodeClient.js";
 
 /**
  * Configuration for connecting to a mirror node. All fields are optional;

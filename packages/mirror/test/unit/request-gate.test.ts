@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { RequestGate, DEFAULT_MAX_CONCURRENT } from "../../src/request-gate.js";
-import { MirrorError, MirrorErrorCodes } from "../../src/errors.js";
+import { RequestGate, DEFAULT_MAX_CONCURRENT } from "../../src/RequestGate.js";
+import { MirrorError, MirrorErrorCodes } from "../../src/MirrorError.js";
 
 /** Flush the microtask + macrotask queue (real timers). */
 const tick = () => new Promise((r) => setTimeout(r, 0));

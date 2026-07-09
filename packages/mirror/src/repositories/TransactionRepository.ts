@@ -4,7 +4,7 @@ import type {
     TransactionQuery,
     TransactionLookupQuery,
 } from "../types/index.js";
-import type { MirrorNodeClient } from "../mirror-node-client.js";
+import type { MirrorNodeClient } from "../MirrorNodeClient.js";
 
 /**
  * Repository for querying transaction data from the mirror node.

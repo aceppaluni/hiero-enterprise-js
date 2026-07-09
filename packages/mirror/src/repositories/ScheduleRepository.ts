@@ -1,5 +1,5 @@
 import type { MirrorSchedule, Page, SchedulesQuery } from "../types/index.js";
-import type { MirrorNodeClient } from "../mirror-node-client.js";
+import type { MirrorNodeClient } from "../MirrorNodeClient.js";
 
 /**
  * Repository for querying scheduled transactions from the mirror node —

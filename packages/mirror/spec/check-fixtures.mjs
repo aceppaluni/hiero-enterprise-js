@@ -264,7 +264,8 @@ console.log(
         `${unmatched} unmatched urls, ${sorted.length} distinct findings`,
 );
 const hard = sorted.filter(
-    (issue) => issue.kind === "type-mismatch" || issue.kind === "null-not-allowed",
+    (issue) =>
+        issue.kind === "type-mismatch" || issue.kind === "null-not-allowed",
 );
 console.log(
     `hard contract violations (type-mismatch / null-not-allowed): ${hard.length}`,

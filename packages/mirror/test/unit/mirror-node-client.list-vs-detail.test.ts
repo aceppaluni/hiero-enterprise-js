@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { MirrorNodeClient } from "../../src/mirror-node-client.js";
+import { MirrorNodeClient } from "../../src/MirrorNodeClient.js";
 import { convertContractResult } from "../../src/mirror-node-converters.js";
 import type { MirrorContractResult } from "../../src/types/index.js";
 import { jsonResponse } from "../utils/http.js";

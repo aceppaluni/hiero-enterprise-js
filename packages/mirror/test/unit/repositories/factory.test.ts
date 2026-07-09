@@ -4,7 +4,7 @@ import {
     MIRROR_REPOSITORY_TOKENS,
 } from "../../../src/repositories/factory.js";
 import { createMockMirrorNodeClient } from "../../utils/mock-mirror-node.js";
-import type { MirrorNodeClient } from "../../../src/mirror-node-client.js";
+import type { MirrorNodeClient } from "../../../src/MirrorNodeClient.js";
 
 describe("createMirrorRepositories", () => {
     const client = createMockMirrorNodeClient() as unknown as MirrorNodeClient;

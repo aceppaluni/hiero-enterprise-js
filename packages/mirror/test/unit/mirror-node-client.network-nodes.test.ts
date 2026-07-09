@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { MirrorNodeClient } from "../../src/mirror-node-client.js";
+import { MirrorNodeClient } from "../../src/MirrorNodeClient.js";
 import { jsonResponse } from "../utils/http.js";
 
 describe("MirrorNodeClient network nodes", () => {

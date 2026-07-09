@@ -19,7 +19,7 @@ import type {
     OpcodesQuery,
     Page,
 } from "../types/index.js";
-import type { MirrorNodeClient } from "../mirror-node-client.js";
+import type { MirrorNodeClient } from "../MirrorNodeClient.js";
 
 /**
  * Repository for the EVM read surface — contracts, execution results,

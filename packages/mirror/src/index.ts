@@ -6,16 +6,16 @@
 export * from "./types/index.js";
 
 // Errors
-export * from "./errors.js";
+export * from "./MirrorError.js";
 
 // Configuration
 export * from "./config.js";
 
 // Client
-export { MirrorNodeClient } from "./mirror-node-client.js";
-export type { MirrorNodeClientOptions } from "./mirror-node-client.js";
-export { RequestGate, DEFAULT_MAX_CONCURRENT } from "./request-gate.js";
-export type { RequestGateOptions } from "./request-gate.js";
+export { MirrorNodeClient } from "./MirrorNodeClient.js";
+export type { MirrorNodeClientOptions } from "./MirrorNodeClient.js";
+export { RequestGate, DEFAULT_MAX_CONCURRENT } from "./RequestGate.js";
+export type { RequestGateOptions } from "./RequestGate.js";
 
 // Repositories
 export * from "./repositories/index.js";

@@ -4,7 +4,7 @@ import {
     TokenService,
     TopicService,
 } from "@hiero-enterprise/core";
-import { MirrorNodeClient } from "../../src/mirror-node-client.js";
+import { MirrorNodeClient } from "../../src/MirrorNodeClient.js";
 import { createMirrorRepositories } from "../../src/repositories/factory.js";
 import type { MirrorRepositories } from "../../src/repositories/factory.js";
 

@@ -1,4 +1,4 @@
-import { MirrorError, MirrorErrorCodes } from "./errors.js";
+import { MirrorError, MirrorErrorCodes } from "./MirrorError.js";
 
 /** Default maximum number of concurrent requests through the gate. */
 export const DEFAULT_MAX_CONCURRENT = 25;

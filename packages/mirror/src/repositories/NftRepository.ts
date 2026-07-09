@@ -6,7 +6,7 @@ import type {
     TokenNftsQuery,
     Page,
 } from "../types/index.js";
-import type { MirrorNodeClient } from "../mirror-node-client.js";
+import type { MirrorNodeClient } from "../MirrorNodeClient.js";
 
 /**
  * Repository for querying NFT data from the mirror node.

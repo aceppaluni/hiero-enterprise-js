@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { TokenRepository } from "../../../src/repositories/token-repository.js";
+import { TokenRepository } from "../../../src/repositories/TokenRepository.js";
 import { createMockMirrorNodeClient } from "../../utils/mock-mirror-node.js";
-import type { MirrorNodeClient } from "../../../src/mirror-node-client.js";
+import type { MirrorNodeClient } from "../../../src/MirrorNodeClient.js";
 
 describe("TokenRepository", () => {
     let repo: TokenRepository;

@@ -1,4 +1,4 @@
-import { MirrorError, MirrorErrorCodes } from "./errors.js";
+import { MirrorError, MirrorErrorCodes } from "./MirrorError.js";
 import type {
     MirrorAccountResponse,
     MirrorExchangeRatesResponse,

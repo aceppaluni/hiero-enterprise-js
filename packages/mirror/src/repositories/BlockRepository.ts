@@ -1,5 +1,5 @@
 import type { Block, BlocksQuery, Page } from "../types/index.js";
-import type { MirrorNodeClient } from "../mirror-node-client.js";
+import type { MirrorNodeClient } from "../MirrorNodeClient.js";
 
 /**
  * Repository for querying blocks (record files) from the mirror node.

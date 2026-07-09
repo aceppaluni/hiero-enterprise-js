@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { RequestGate } from "../../src/request-gate.js";
-import { MirrorNodeClient } from "../../src/mirror-node-client.js";
+import { RequestGate } from "../../src/RequestGate.js";
+import { MirrorNodeClient } from "../../src/MirrorNodeClient.js";
 import { collectAll, paginate } from "../../src/pagination.js";
 import {
     convertAccountInfo,

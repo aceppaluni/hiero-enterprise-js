@@ -22,8 +22,8 @@ import type {
     Hook,
     HookStorageSlot,
 } from "../types/index.js";
-import type { MirrorNodeClient } from "../mirror-node-client.js";
-import { MirrorError, MirrorErrorCodes } from "../errors.js";
+import type { MirrorNodeClient } from "../MirrorNodeClient.js";
+import { MirrorError, MirrorErrorCodes } from "../MirrorError.js";
 
 /**
  * Repository for querying account data from the mirror node.

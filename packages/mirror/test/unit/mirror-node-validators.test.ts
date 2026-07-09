@@ -11,7 +11,7 @@ import {
     assertNetworkSupplyResponse,
     assertNetworkStakeResponse,
 } from "../../src/mirror-node-validators.js";
-import { MirrorError } from "../../src/errors.js";
+import { MirrorError } from "../../src/MirrorError.js";
 
 describe("mirror node response validators", () => {
     it("accept well-formed payloads", () => {

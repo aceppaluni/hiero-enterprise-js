@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { MirrorNodeClient } from "../../src/mirror-node-client.js";
-import { MirrorError } from "../../src/errors.js";
+import { MirrorNodeClient } from "../../src/MirrorNodeClient.js";
+import { MirrorError } from "../../src/MirrorError.js";
 import { jsonResponse } from "../utils/http.js";
 
 function accountResponse(): Response {

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { BlockRepository } from "../../../src/repositories/block-repository.js";
+import { BlockRepository } from "../../../src/repositories/BlockRepository.js";
 import { createMockMirrorNodeClient } from "../../utils/mock-mirror-node.js";
-import type { MirrorNodeClient } from "../../../src/mirror-node-client.js";
+import type { MirrorNodeClient } from "../../../src/MirrorNodeClient.js";
 
 describe("BlockRepository", () => {
     let repo: BlockRepository;

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { NftRepository } from "../../../src/repositories/nft-repository.js";
+import { NftRepository } from "../../../src/repositories/NftRepository.js";
 import { createMockMirrorNodeClient } from "../../utils/mock-mirror-node.js";
-import type { MirrorNodeClient } from "../../../src/mirror-node-client.js";
+import type { MirrorNodeClient } from "../../../src/MirrorNodeClient.js";
 
 describe("NftRepository", () => {
     let repo: NftRepository;

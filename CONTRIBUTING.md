@@ -178,7 +178,7 @@ Adding an endpoint touches one spot in each layer, in this order:
 4. **Query type** in [`src/types/query.ts`](packages/mirror/src/types/query.ts)
    for any filters (reuse `RangeFilter` / `EntityIdFilter` / `TimestampFilter`).
 5. **Client method** in the matching `// ───` section of
-   [`src/mirror-node-client.ts`](packages/mirror/src/mirror-node-client.ts) —
+   [`src/MirrorNodeClient.ts`](packages/mirror/src/MirrorNodeClient.ts) —
    wrap every path parameter in `segment(...)`.
 6. **Repository method** in the matching `src/repositories/*.ts` (a thin
    delegator). A brand-new repository also goes in
