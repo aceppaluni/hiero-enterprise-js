@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { MirrorNodeClient } from "../../src/MirrorNodeClient.js";
-import { segment } from "../../src/mirror-node-query.js";
+import { MirrorNodeClient } from "../../src/client/MirrorNodeClient.js";
+import { segment } from "../../src/utils/MirrorNodeQuery.js";
 import { jsonResponse } from "../utils/http.js";
 
 /**

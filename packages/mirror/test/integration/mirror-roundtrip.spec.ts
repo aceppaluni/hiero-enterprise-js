@@ -4,7 +4,7 @@ import {
     TokenService,
     TopicService,
 } from "@hiero-enterprise/core";
-import { MirrorNodeClient } from "../../src/MirrorNodeClient.js";
+import { MirrorNodeClient } from "../../src/client/MirrorNodeClient.js";
 import { createMirrorRepositories } from "../../src/repositories/factory.js";
 import type { MirrorRepositories } from "../../src/repositories/factory.js";
 
@@ -182,7 +182,8 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
             }),
         );
         const all = await eventually(async () => {
-            const { collectAll } = await import("../../src/pagination.js");
+            const { collectAll } =
+                await import("../../src/utils/Pagination.js");
             const drained = await collectAll(
                 await gated.topicRepository.findByTopicId(topicId, {
                     limit: 5,

@@ -14,7 +14,7 @@ import type {
     RegisteredNodesQuery,
     Page,
 } from "../types/index.js";
-import type { MirrorNodeClient } from "../MirrorNodeClient.js";
+import type { MirrorNodeClient } from "../client/MirrorNodeClient.js";
 
 /**
  * Repository for querying network-level data from the mirror node.

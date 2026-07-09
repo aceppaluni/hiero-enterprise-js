@@ -43,7 +43,8 @@
         "test:unit:coverage": "vitest run -c test/vitest.config.ts --coverage",
         "test": "pnpm run test:unit",
         "test:integration": "vitest run -c test/vitest-integration.config.ts",
-        "test:integration:coverage": "vitest run -c test/vitest-integration.config.ts --coverage"
+        "test:integration:coverage": "vitest run -c test/vitest-integration.config.ts --coverage",
+        "test:watch": "vitest -c test/vitest.config.ts"
     },
     "devDependencies": {
         "@hiero-enterprise/core": "workspace:*",

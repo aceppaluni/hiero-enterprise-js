@@ -1,4 +1,4 @@
-import type { MirrorNodeClient } from "../MirrorNodeClient.js";
+import type { MirrorNodeClient } from "../client/MirrorNodeClient.js";
 import { AccountRepository } from "./AccountRepository.js";
 import { NftRepository } from "./NftRepository.js";
 import { TokenRepository } from "./TokenRepository.js";

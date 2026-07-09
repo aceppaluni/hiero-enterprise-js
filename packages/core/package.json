@@ -42,7 +42,8 @@
         "test:unit:coverage": "vitest run -c test/vitest.config.ts --coverage",
         "test:integration": "vitest run -c test/vitest-integration.config.ts",
         "test:integration:coverage": "vitest run -c test/vitest-integration.config.ts --coverage",
-        "test": "pnpm run test:unit && pnpm run test:integration"
+        "test": "pnpm run test:unit && pnpm run test:integration",
+        "test:watch": "vitest -c test/vitest.config.ts"
     },
     "dependencies": {
         "@hiero-ledger/sdk": "^2.84.0",

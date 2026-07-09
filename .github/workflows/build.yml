@@ -102,6 +102,11 @@ jobs:
             - name: ESLint
               run: pnpm run lint
 
+            # Naming & structure conventions (CONTRIBUTING.md) — class-file
+            # naming, unit-test mirroring, barrels, sample naming.
+            - name: Check conventions
+              run: node scripts/check-conventions.mjs
+
             # Response-field completeness: every schema reachable from a
             # mirror node spec response must be carried by the wire types.
             - name: Mirror spec field diff

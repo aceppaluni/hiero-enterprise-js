@@ -1,4 +1,4 @@
-import type { MirrorNodeClient } from "../../src/MirrorNodeClient.js";
+import type { MirrorNodeClient } from "../../src/client/MirrorNodeClient.js";
 import type {
     MirrorAccountInfo,
     Balance,

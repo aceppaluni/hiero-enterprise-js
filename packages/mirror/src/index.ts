@@ -6,22 +6,16 @@
 export * from "./types/index.js";
 
 // Errors
-export * from "./MirrorError.js";
+export * from "./errors/index.js";
 
-// Configuration
-export * from "./config.js";
+// Configuration + client factory
+export * from "./config/index.js";
 
-// Client
-export { MirrorNodeClient } from "./MirrorNodeClient.js";
-export type { MirrorNodeClientOptions } from "./MirrorNodeClient.js";
-export { RequestGate, DEFAULT_MAX_CONCURRENT } from "./RequestGate.js";
-export type { RequestGateOptions } from "./RequestGate.js";
+// REST client + request gate
+export * from "./client/index.js";
 
-// Repositories
+// Typed repositories
 export * from "./repositories/index.js";
 
-// Pagination helpers
-export * from "./pagination.js";
-
-// Unit & timestamp conversion helpers
-export * from "./units.js";
+// Public utilities: pagination + unit helpers
+export * from "./utils/index.js";

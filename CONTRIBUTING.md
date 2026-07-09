@@ -178,7 +178,7 @@ Adding an endpoint touches one spot in each layer, in this order:
 4. **Query type** in [`src/types/query.ts`](packages/mirror/src/types/query.ts)
    for any filters (reuse `RangeFilter` / `EntityIdFilter` / `TimestampFilter`).
 5. **Client method** in the matching `// ───` section of
-   [`src/MirrorNodeClient.ts`](packages/mirror/src/MirrorNodeClient.ts) —
+   [`src/client/MirrorNodeClient.ts`](packages/mirror/src/client/MirrorNodeClient.ts) —
    wrap every path parameter in `segment(...)`.
 6. **Repository method** in the matching `src/repositories/*.ts` (a thin
    delegator). A brand-new repository also goes in
@@ -195,11 +195,26 @@ field-diff checks tell you immediately if a layer was missed. The refresh
 runbook for the vendored spec itself lives in
 [`packages/mirror/spec/README.md`](packages/mirror/spec/README.md).
 
-## Test File Naming
+## Naming & Structure Conventions
 
-Unit tests are `*.test.ts` (under `test/unit/`); integration tests are
-`*.spec.ts` (under `test/integration/`). Every package follows this
-split — keep new tests on the matching suffix.
+Machine-checked by `node scripts/check-conventions.mjs` (runs in CI) —
+if it passes, you follow the conventions.
+
+| Thing | Convention | Example |
+| --- | --- | --- |
+| Class-bearing source file | PascalCase, named after the class | `MirrorNodeClient.ts` |
+| Function-only / type module | lowercase, in a domain directory | `config.ts`, `types/account.ts` |
+| Cross-domain function modules | `src/utils/` (PascalCase modules) | `utils/MirrorNodeConverters.ts` |
+| Source directory | every multi-file dir has an `index.ts` barrel; the root index exports via barrels only | `repositories/index.ts` |
+| Unit test | `*.test.ts`, mirrors `src/` path, named after the implementation file | `test/unit/utils/Units.test.ts` |
+| Large-surface unit tests | facet suffix on the implementation name | `MirrorNodeClient.pagination.test.ts` |
+| Cross-cutting unit suites | `test/unit/` root, descriptive kebab name | `spec-coverage.test.ts` |
+| Integration test | `*.spec.ts`, grouped by feature domain | `test/integration/account/…` |
+| Cross-domain integration flows | `test/integration/` root | `key-types.spec.ts` |
+| Sample directory / package | `<thing>-sample` / `hiero-<thing>-sample`, version `1.0.0` | `mirror-standalone-sample` |
+| Shared types | in `src/types/`, exported via the `types/index.ts` barrel | `types/page.ts` |
+| Companion types (one class's options) | stay in the class's file; named type re-exports use `export type` | `export type { MirrorNodeClientOptions }` |
+
 
 ## Verifying the Published Type Surface
 

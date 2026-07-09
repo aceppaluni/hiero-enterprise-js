@@ -4,7 +4,7 @@ import type {
     Page,
     TopicMessagesQuery,
 } from "../types/index.js";
-import type { MirrorNodeClient } from "../MirrorNodeClient.js";
+import type { MirrorNodeClient } from "../client/MirrorNodeClient.js";
 
 /**
  * Repository for querying topic messages from the mirror node.

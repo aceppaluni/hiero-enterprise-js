@@ -9,7 +9,7 @@ import {
     convertNetworkNode,
     convertNetworkStake,
     convertContractResult,
-} from "../../src/mirror-node-converters.js";
+} from "../../src/utils/MirrorNodeConverters.js";
 
 /**
  * Conversion coverage for the response-field completion: every field the

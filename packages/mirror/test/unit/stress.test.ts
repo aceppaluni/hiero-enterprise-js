@@ -1,14 +1,14 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { RequestGate } from "../../src/RequestGate.js";
-import { MirrorNodeClient } from "../../src/MirrorNodeClient.js";
-import { collectAll, paginate } from "../../src/pagination.js";
+import { RequestGate } from "../../src/client/RequestGate.js";
+import { MirrorNodeClient } from "../../src/client/MirrorNodeClient.js";
+import { collectAll, paginate } from "../../src/utils/Pagination.js";
 import {
     convertAccountInfo,
     convertTransactionInfo,
     convertTokenInfo,
     convertNetworkNode,
     convertContractResult,
-} from "../../src/mirror-node-converters.js";
+} from "../../src/utils/MirrorNodeConverters.js";
 import { jsonResponse } from "../utils/http.js";
 
 /**
