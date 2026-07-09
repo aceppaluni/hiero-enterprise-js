@@ -30,6 +30,7 @@
         "analytics",
         "hiero-enterprise"
     ],
+    "sideEffects": false,
     "files": [
         "dist"
     ],

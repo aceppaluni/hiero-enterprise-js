@@ -243,16 +243,17 @@ export function convertTokenInfo(raw: MirrorTokenResponse): MirrorTokenInfo {
     const customFees: MirrorCustomFee[] = [];
     if (raw.custom_fees) {
         for (const f of raw.custom_fees.fixed_fees ?? []) {
-            customFees.push({
+            const fee: MirrorFixedFee = {
                 type: "fixed",
                 amount: f.amount,
                 collectorAccountId: f.collector_account_id,
                 allCollectorsAreExempt: f.all_collectors_are_exempt ?? false,
                 denominatingTokenId: f.denominating_token_id,
-            } as MirrorFixedFee);
+            };
+            customFees.push(fee);
         }
         for (const f of raw.custom_fees.fractional_fees ?? []) {
-            customFees.push({
+            const fee: MirrorFractionalFee = {
                 type: "fractional",
                 // The mirror node nests the fraction under `amount`.
                 numerator: f.amount?.numerator,
@@ -263,10 +264,11 @@ export function convertTokenInfo(raw: MirrorTokenResponse): MirrorTokenInfo {
                 collectorAccountId: f.collector_account_id,
                 denominatingTokenId: f.denominating_token_id,
                 allCollectorsAreExempt: f.all_collectors_are_exempt ?? false,
-            } as MirrorFractionalFee);
+            };
+            customFees.push(fee);
         }
         for (const f of raw.custom_fees.royalty_fees ?? []) {
-            customFees.push({
+            const fee: MirrorRoyaltyFee = {
                 type: "royalty",
                 numerator: f.amount?.numerator,
                 denominator: f.amount?.denominator,
@@ -274,12 +276,13 @@ export function convertTokenInfo(raw: MirrorTokenResponse): MirrorTokenInfo {
                     ? {
                           amount: f.fallback_fee.amount,
                           denominatingTokenId:
-                              f.fallback_fee.denominating_token_id,
+                              f.fallback_fee.denominating_token_id ?? undefined,
                       }
                     : undefined,
                 collectorAccountId: f.collector_account_id,
                 allCollectorsAreExempt: f.all_collectors_are_exempt ?? false,
-            } as MirrorRoyaltyFee);
+            };
+            customFees.push(fee);
         }
     }
 

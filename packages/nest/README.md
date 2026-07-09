@@ -10,6 +10,8 @@ directly; every class you inject is re-exported from this package.
 npm install @hiero-enterprise/nest
 ```
 
+> **Note:** not yet published to npm — see [CONTRIBUTING](../../CONTRIBUTING.md) to run from the repo.
+
 ```ts
 import { Module, Controller, Get, Param } from "@nestjs/common";
 import {

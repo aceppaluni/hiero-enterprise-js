@@ -12,6 +12,8 @@ instead and receive both sides pre-composed.
 npm install @hiero-enterprise/core
 ```
 
+> **Note:** not yet published to npm — see [CONTRIBUTING](../../CONTRIBUTING.md) to run from the repo.
+
 ```ts
 import { HieroContext, AccountService } from "@hiero-enterprise/core";
 

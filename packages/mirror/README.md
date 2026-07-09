@@ -13,6 +13,8 @@ framework adapter.
 npm install @hiero-enterprise/mirror
 ```
 
+> **Note:** not yet published to npm — see [CONTRIBUTING](../../CONTRIBUTING.md) to run from the repo.
+
 ```ts
 import {
   MirrorNodeClient,

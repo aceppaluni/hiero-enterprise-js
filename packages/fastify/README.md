@@ -10,6 +10,8 @@ directly.
 npm install @hiero-enterprise/fastify
 ```
 
+> **Note:** not yet published to npm — see [CONTRIBUTING](../../CONTRIBUTING.md) to run from the repo.
+
 ```ts
 import Fastify from "fastify";
 import { hieroPlugin } from "@hiero-enterprise/fastify";

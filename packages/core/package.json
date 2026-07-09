@@ -29,6 +29,7 @@
         "transactions",
         "hiero-enterprise"
     ],
+    "sideEffects": false,
     "files": [
         "dist"
     ],

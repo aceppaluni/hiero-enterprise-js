@@ -10,6 +10,8 @@ directly.
 npm install @hiero-enterprise/express
 ```
 
+> **Note:** not yet published to npm — see [CONTRIBUTING](../../CONTRIBUTING.md) to run from the repo.
+
 ```ts
 import express from "express";
 import { hieroMiddleware } from "@hiero-enterprise/express";

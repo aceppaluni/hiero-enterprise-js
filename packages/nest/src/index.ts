@@ -192,7 +192,8 @@ export class HieroModule {
     }
 }
 
-// Re-export service and repository classes used as NestJS DI tokens.
+// Re-export the DI-token classes. Symbols already imported above are
+// exported as local bindings; the rest re-export from their package.
 export {
     AccountService,
     ScheduleService,
@@ -200,11 +201,10 @@ export {
     TokenService,
     ContractService,
     TopicService,
-    AccountType,
-    OperatorKeyType,
-} from "@hiero-enterprise/core";
-export {
     MirrorNodeClient,
+};
+export { AccountType, OperatorKeyType } from "@hiero-enterprise/core";
+export {
     AccountRepository,
     NftRepository,
     TokenRepository,
@@ -216,7 +216,8 @@ export {
     ContractRepository,
 } from "@hiero-enterprise/mirror";
 export type { HieroConfig } from "@hiero-enterprise/core";
-export type { HieroAdapterConfig, HieroServices } from "./runtime.js";
+export type { HieroAdapterConfig };
+export type { HieroServices } from "./runtime.js";
 
 // Nest-specific decorator helpers
 export { InjectHieroContext, InjectHieroConfig } from "./decorators.js";

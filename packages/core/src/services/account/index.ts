@@ -1,12 +1,10 @@
 export { AccountService } from "./AccountService.js";
-export type { CreateAccountOptions } from "./operations/index.js";
-export type { AutoCreateEvmAccountOptions } from "./operations/index.js";
 export type {
+    CreateAccountOptions,
+    AutoCreateEvmAccountOptions,
     DeleteAccountOptions,
     ScheduleDeleteAccountOptions,
-} from "./operations/index.js";
-export type { UpdateAccountOptions } from "./operations/index.js";
-export type {
+    UpdateAccountOptions,
     ApproveAllowanceOptions,
     ApproveHbarAllowanceOptions,
     ApproveTokenAllowanceOptions,
@@ -14,8 +12,6 @@ export type {
     HbarAllowanceApproval,
     TokenAllowanceApproval,
     NftAllowanceApproval,
-} from "./operations/index.js";
-export type {
     TransferHbarOptions,
     TransferTokenOptions,
     TransferNftOptions,
