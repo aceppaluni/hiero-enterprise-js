@@ -20,11 +20,15 @@ It gives each major Node.js framework a native integration that matches how deve
 
 | Package | Description |
 |---------|-------------|
-| `@hiero-enterprise/core` | SDK write-side: services, transactions, operator keys — use directly or with any framework |
-| `@hiero-enterprise/mirror` | Mirror node read-side: repositories, pagination, rate limiting, filters, unit helpers — **zero dependencies, no credentials** |
-| `@hiero-enterprise/express` | Express middleware — `req.hiero.*` (composes core + mirror) |
-| `@hiero-enterprise/fastify` | Fastify plugin — `fastify.hiero.*` (composes core + mirror) |
-| `@hiero-enterprise/nest` | NestJS module — `HieroModule.forRoot()` with full DI (composes core + mirror) |
+| [`@hiero-enterprise/core`](./packages/core) | SDK write-side: services, transactions, operator keys — use directly or with any framework |
+| [`@hiero-enterprise/mirror`](./packages/mirror) | Mirror node read-side: repositories, pagination, rate limiting, filters, unit helpers — **zero dependencies, no credentials** |
+| [`@hiero-enterprise/express`](./packages/express) | Express middleware — `req.hiero.*` (composes core + mirror) |
+| [`@hiero-enterprise/fastify`](./packages/fastify) | Fastify plugin — `fastify.hiero.*` (composes core + mirror) |
+| [`@hiero-enterprise/nest`](./packages/nest) | NestJS module — `HieroModule.forRoot()` with full DI (composes core + mirror) |
+
+Each package README documents its full surface — the adapter READMEs
+list everything available on `req.hiero` / `app.hiero` / via DI, so you
+never have to guess what arrived pre-composed.
 
 ### Which package do I install?
 
