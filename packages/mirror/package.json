@@ -46,12 +46,6 @@
         "test:integration:coverage": "vitest run -c test/vitest-integration.config.ts --coverage",
         "test:watch": "vitest -c test/vitest.config.ts"
     },
-    "devDependencies": {
-        "@hiero-enterprise/core": "workspace:*",
-        "@types/node": "^25.9.3",
-        "@vitest/coverage-v8": "^4.1.8",
-        "yaml": "^2.9.0"
-    },
     "publishConfig": {
         "access": "public",
         "provenance": true

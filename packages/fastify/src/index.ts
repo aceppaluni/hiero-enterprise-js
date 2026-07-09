@@ -4,8 +4,8 @@ import { assertEnvConfigValid } from "@hiero-enterprise/core";
 import type { HieroAdapterConfig, HieroServices } from "./runtime.js";
 import { createHieroRuntime } from "./runtime.js";
 
-export type { HieroAdapterConfig, HieroServices } from "./runtime.js";
-export { createHieroRuntime } from "./runtime.js";
+export type { HieroAdapterConfig, HieroServices };
+export { createHieroRuntime };
 
 /**
  * Augment Fastify instance to include Hiero services.
