@@ -10,10 +10,6 @@ const excludedFiles: string[] = [];
 
 /**
  * Comma-separated list of path prefixes to skip, e.g.
- * `EXAMPLES_SKIP=mirror/` — used by CI to skip the mirror-node query
- * examples, which showcase real public-network data (busy accounts,
- * USDC, long-lived topics) that does not exist on a fresh solo network.
- * They still run locally via `pnpm examples mirror` or `npx tsx`.
  */
 const skipPrefixes = (process.env["EXAMPLES_SKIP"] ?? "")
     .split(",")

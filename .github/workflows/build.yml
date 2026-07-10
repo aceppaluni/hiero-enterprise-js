@@ -218,11 +218,6 @@ jobs:
                   HIERO_ECDSA_OPERATOR_KEY: ${{ steps.solo.outputs.ecdsaPrivateKey }}
                   HIERO_MIRROR_NODE_URL: http://localhost:38081
                   HIERO_NETWORK_NODES: "127.0.0.1:35211=0.0.3"
-                  # The mirror-* query examples showcase real public-network
-                  # data (busy accounts, USDC, long-lived topics) that does
-                  # not exist on a fresh solo network — skip them here; they
-                  # run locally against mainnet (`pnpm examples mirror`).
-                  EXAMPLES_SKIP: mirror/
               run: pnpm --filter @hiero-enterprise/examples examples
 
             # Write-then-read round-trips: core creates entities on Solo, the
