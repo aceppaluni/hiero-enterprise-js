@@ -6,26 +6,23 @@ import {
     type ForwardReference,
     type InjectionToken,
 } from "@nestjs/common";
-import type { HieroConfig } from "@hiero-enterprise/core";
 import {
-    createHieroRuntime,
-    type HieroRuntime,
     resolveConfigFromEnv,
     assertEnvConfigValid,
-    MirrorNodeClient,
     AccountService,
     ScheduleService,
     FileService,
     TokenService,
     ContractService,
     TopicService,
-    AccountRepository,
-    NftRepository,
-    TokenRepository,
-    TopicRepository,
-    TransactionRepository,
-    NetworkRepository,
 } from "@hiero-enterprise/core";
+import {
+    MirrorNodeClient,
+    mirrorConfigFromEnv,
+    MIRROR_REPOSITORY_TOKENS,
+} from "@hiero-enterprise/mirror";
+import type { HieroAdapterConfig, HieroRuntime } from "./runtime.js";
+import { createHieroRuntime } from "./runtime.js";
 
 // ─── Injection Tokens ──────────────────────────────────────────
 
@@ -35,8 +32,9 @@ const HIERO_RUNTIME = "HIERO_RUNTIME";
 
 /**
  * Single source of truth: DI class token → HieroRuntime property key.
- * Adding a service to createHieroRuntime in core flows through here
- * automatically
+ * Core services are listed here; the mirror repositories come from
+ * MIRROR_REPOSITORY_TOKENS, so a repository added to mirror registers
+ * itself with no change in this package.
  */
 const SERVICE_TOKENS = [
     [MirrorNodeClient, "mirrorNodeClient"],
@@ -46,12 +44,7 @@ const SERVICE_TOKENS = [
     [TokenService, "tokenService"],
     [ContractService, "contractService"],
     [TopicService, "topicService"],
-    [AccountRepository, "accountRepository"],
-    [NftRepository, "nftRepository"],
-    [TokenRepository, "tokenRepository"],
-    [TopicRepository, "topicRepository"],
-    [TransactionRepository, "transactionRepository"],
-    [NetworkRepository, "networkRepository"],
+    ...MIRROR_REPOSITORY_TOKENS,
 ] as const satisfies ReadonlyArray<
     readonly [Type<unknown>, keyof HieroRuntime]
 >;
@@ -75,7 +68,9 @@ export interface HieroModuleAsyncOptions {
     /** Imports needed for config injection */
     imports?: NestImport[];
     /** Factory function returning HieroConfig */
-    useFactory: (...args: unknown[]) => HieroConfig | Promise<HieroConfig>;
+    useFactory: (
+        ...args: unknown[]
+    ) => HieroAdapterConfig | Promise<HieroAdapterConfig>;
     /** Dependencies to inject into the factory */
     inject?: InjectionToken[];
     /** Whether this module should be global in the Nest container */
@@ -124,7 +119,7 @@ export class HieroModule {
      * @returns Dynamic NestJS module definition
      */
     static forRoot(
-        config?: HieroConfig,
+        config?: HieroAdapterConfig,
         opts?: { global?: boolean },
     ): DynamicModule {
         if (!config) {
@@ -133,7 +128,10 @@ export class HieroModule {
             // with steps to fix the issue.
             assertEnvConfigValid();
         }
-        const resolved = config ?? resolveConfigFromEnv()!;
+        const resolved = config ?? {
+            ...resolveConfigFromEnv()!,
+            ...mirrorConfigFromEnv(),
+        };
         const runtime = createHieroRuntime(resolved);
 
         const providers: Provider[] = [
@@ -167,7 +165,8 @@ export class HieroModule {
             },
             {
                 provide: HIERO_RUNTIME,
-                useFactory: (config: HieroConfig) => createHieroRuntime(config),
+                useFactory: (config: HieroAdapterConfig) =>
+                    createHieroRuntime(config),
                 inject: [HIERO_CONFIG],
             },
             {
@@ -193,25 +192,32 @@ export class HieroModule {
     }
 }
 
-// Re-export service and repository classes used as NestJS DI tokens.
+// Re-export the DI-token classes. Symbols already imported above are
+// exported as local bindings; the rest re-export from their package.
 export {
-    MirrorNodeClient,
     AccountService,
     ScheduleService,
     FileService,
     TokenService,
     ContractService,
     TopicService,
+    MirrorNodeClient,
+};
+export { AccountType, OperatorKeyType } from "@hiero-enterprise/core";
+export {
     AccountRepository,
     NftRepository,
     TokenRepository,
     TopicRepository,
     TransactionRepository,
     NetworkRepository,
-    AccountType,
-    OperatorKeyType,
-} from "@hiero-enterprise/core";
-export type { HieroConfig, HieroServices } from "@hiero-enterprise/core";
+    ScheduleRepository,
+    BlockRepository,
+    ContractRepository,
+} from "@hiero-enterprise/mirror";
+export type { HieroConfig } from "@hiero-enterprise/core";
+export type { HieroAdapterConfig };
+export type { HieroServices } from "./runtime.js";
 
 // Nest-specific decorator helpers
 export { InjectHieroContext, InjectHieroConfig } from "./decorators.js";

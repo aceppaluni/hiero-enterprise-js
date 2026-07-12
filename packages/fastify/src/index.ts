@@ -1,10 +1,11 @@
 import fp from "fastify-plugin";
 import type { FastifyInstance, FastifyPluginOptions } from "fastify";
-import type { HieroConfig, HieroServices } from "@hiero-enterprise/core";
-import {
-    createHieroRuntime,
-    assertEnvConfigValid,
-} from "@hiero-enterprise/core";
+import { assertEnvConfigValid } from "@hiero-enterprise/core";
+import type { HieroAdapterConfig, HieroServices } from "./runtime.js";
+import { createHieroRuntime } from "./runtime.js";
+
+export type { HieroAdapterConfig, HieroServices };
+export { createHieroRuntime };
 
 /**
  * Augment Fastify instance to include Hiero services.
@@ -16,15 +17,18 @@ declare module "fastify" {
 }
 
 /**
- * Plugin options — accepts a HieroConfig or reads from environment.
+ * Plugin options — accepts a combined core + mirror config or reads from
+ * environment.
  */
 export interface HieroPluginOptions extends FastifyPluginOptions {
-    config?: HieroConfig;
+    config?: HieroAdapterConfig;
 }
 
 /**
  * Fastify plugin that initializes the HieroContext and decorates the
- * Fastify instance with all Hiero services at `fastify.hiero`.
+ * Fastify instance with all Hiero services at `fastify.hiero` —
+ * write-side services from core plus mirror node repositories from
+ * `@hiero-enterprise/mirror`.
  *
  * @example
  * ```ts
@@ -58,6 +62,3 @@ const plugin = function (fastify: FastifyInstance, opts: HieroPluginOptions) {
 export const hieroPlugin = fp(plugin, {
     name: "@hiero-enterprise/fastify",
 });
-
-// Consumers import types and services directly from @hiero-enterprise/core.
-// This adapter only provides the Fastify plugin integration.

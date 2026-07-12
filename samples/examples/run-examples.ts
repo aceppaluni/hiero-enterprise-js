@@ -9,20 +9,31 @@ const srcDir = path.join(__dirname, "src");
 const excludedFiles: string[] = [];
 
 /**
+ * Comma-separated list of path prefixes to skip, e.g.
+ */
+const skipPrefixes = (process.env["EXAMPLES_SKIP"] ?? "")
+    .split(",")
+    .map((prefix) => prefix.trim())
+    .filter(Boolean);
+
+/**
  * Recursively finds all .ts files under a directory.
  */
 function findExamples(dir: string, base = ""): string[] {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- recursion rooted at the constant examples directory, no user input
     const entries = fs.readdirSync(dir, { withFileTypes: true });
     const files: string[] = [];
 
     for (const entry of entries) {
         const relative = path.join(base, entry.name);
+        const relativePosix = relative.split(path.sep).join("/");
         if (entry.isDirectory()) {
             files.push(...findExamples(path.join(dir, entry.name), relative));
         } else if (
             entry.isFile() &&
             entry.name.endsWith(".ts") &&
-            !excludedFiles.includes(relative)
+            !excludedFiles.includes(relative) &&
+            !skipPrefixes.some((prefix) => relativePosix.startsWith(prefix))
         ) {
             files.push(relative);
         }
@@ -81,8 +92,7 @@ async function runSequential(examples: string[]): Promise<void> {
     console.log(`\nRunning ${total} examples against network...\n`);
     console.log("─".repeat(60));
 
-    for (let i = 0; i < total; i++) {
-        const file = examples[i];
+    for (const [i, file] of examples.entries()) {
         console.log(`\n⏳ [${i + 1}/${total}] ${file}`);
 
         const result = await runExample(file);

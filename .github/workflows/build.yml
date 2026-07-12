@@ -40,10 +40,11 @@ jobs:
                   egress-policy: audit
 
             - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+              with:
+                  persist-credentials: false
 
             - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
-              with:
-                  version: 10
+              # version comes from package.json "packageManager"
 
             - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
               with:
@@ -100,8 +101,32 @@ jobs:
             - name: ESLint
               run: pnpm run lint
 
+            # Naming & structure conventions (CONTRIBUTING.md) — class-file
+            # naming, unit-test mirroring, barrels, sample naming.
+            - name: Check conventions
+              run: node scripts/check-conventions.mjs
+
+            # Response-field completeness: every schema reachable from a
+            # mirror node spec response must be carried by the wire types.
+            - name: Mirror spec field diff
+              working-directory: packages/mirror
+              run: node spec/diff-response-fields.mjs
+
             - name: Build packages
               run: pnpm run build
+
+            # Published-surface type check: pack each package and verify
+            # its `exports` serve matching JavaScript + declarations under
+            # every consumer resolution mode (node10, node16-CJS,
+            # node16-ESM, bundler). Guards against ESM/CJS declaration
+            # mismatches that tsc on our own source cannot see.
+            - name: Check published types (attw)
+              run: |
+                  for pkg in core mirror express fastify nest; do
+                    echo "::group::attw $pkg"
+                    (cd "packages/$pkg" && pnpm exec attw --pack)
+                    echo "::endgroup::"
+                  done
 
             - name: Run integration tests
               env:
@@ -148,6 +173,20 @@ jobs:
                   vite-config-path: ./test/vitest.config.ts
                   file-coverage-mode: changes
 
+            - name: Run mirror unit tests
+              run: pnpm --filter @hiero-enterprise/mirror run test:unit:coverage
+
+            - name: Report mirror unit coverage
+              if: ${{ always() && matrix.node-version == 24 }}
+              uses: davelosert/vitest-coverage-report-action@3c054a2d2e2ca45446417ad5d6d5eb33092af8f1 # v2.12.1
+              with:
+                  name: "mirror / unit"
+                  working-directory: ./packages/mirror
+                  json-summary-path: ./coverage/node/coverage-summary.json
+                  json-final-path: ./coverage/node/coverage-final.json
+                  vite-config-path: ./test/vitest.config.ts
+                  file-coverage-mode: changes
+
             - name: Extract unit coverage percentage
               # Only run on push to main so the badge reflects the merged
               # state.
@@ -180,3 +219,19 @@ jobs:
                   HIERO_MIRROR_NODE_URL: http://localhost:38081
                   HIERO_NETWORK_NODES: "127.0.0.1:35211=0.0.3"
               run: pnpm --filter @hiero-enterprise/examples examples
+
+            # Write-then-read round-trips: core creates entities on Solo, the
+            # mirror repositories read them back — the layer that catches
+            # mirror response-shape drift. Runs LAST: it hits a live network
+            # with eventual-consistency polling, so it is the flakiest step;
+            # keeping it after the deterministic unit tests + coverage reports
+            # means a network blip here never blocks coverage reporting.
+            - name: Run mirror round-trip tests
+              env:
+                  HIERO_NETWORK: hiero-solo-action
+                  HIERO_OPERATOR_ID: ${{ steps.solo.outputs.accountId }}
+                  HIERO_OPERATOR_KEY: ${{ steps.solo.outputs.privateKey }}
+                  HIERO_OPERATOR_KEY_TYPE: DER
+                  HIERO_NETWORK_NODES: "127.0.0.1:35211=0.0.3"
+                  HIERO_MIRROR_NODE_URL: http://localhost:38081
+              run: pnpm --filter @hiero-enterprise/mirror run test:integration

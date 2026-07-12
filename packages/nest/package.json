@@ -10,9 +10,14 @@
     "exports": {
         "./package.json": "./package.json",
         ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js",
-            "require": "./dist/index.cjs"
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "default": "./dist/index.cjs"
+            }
         }
     },
     "repository": "https://github.com/hiero-hackers/hiero-enterprise-js",
@@ -24,6 +29,7 @@
         "transactions",
         "hiero-enterprise"
     ],
+    "sideEffects": false,
     "files": [
         "dist"
     ],
@@ -39,10 +45,8 @@
         "test:watch": "vitest test/integration"
     },
     "dependencies": {
-        "@hiero-enterprise/core": "workspace:*"
-    },
-    "devDependencies": {
-        "@nestjs/testing": "^11.1.24"
+        "@hiero-enterprise/core": "workspace:*",
+        "@hiero-enterprise/mirror": "workspace:*"
     },
     "peerDependencies": {
         "@nestjs/common": "^11.1.24",

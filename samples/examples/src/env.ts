@@ -30,7 +30,6 @@ export function getED25519Config(): HieroConfig {
         operatorId: process.env["HIERO_ED25519_OPERATOR_ID"]!,
         operatorKey: process.env["HIERO_ED25519_OPERATOR_KEY"]!,
         operatorKeyType: "ed25519",
-        mirrorNodeUrl: process.env["HIERO_MIRROR_NODE_URL"],
         networkNodes: parseNetworkNodes(process.env["HIERO_NETWORK_NODES"]),
     };
 }
@@ -45,7 +44,6 @@ export function getEcdsaExampleConfig(): HieroConfig {
         operatorId: process.env["HIERO_ECDSA_OPERATOR_ID"]!,
         operatorKey: process.env["HIERO_ECDSA_OPERATOR_KEY"]!,
         operatorKeyType: "ecdsa",
-        mirrorNodeUrl: process.env["HIERO_MIRROR_NODE_URL"],
         networkNodes: parseNetworkNodes(process.env["HIERO_NETWORK_NODES"]),
     };
 }

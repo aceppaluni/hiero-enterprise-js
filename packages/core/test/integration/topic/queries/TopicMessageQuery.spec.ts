@@ -13,7 +13,20 @@ import type { SubscribedMessage } from "../../../../src/services/topic/index.js"
 // AFTER the subscription is live.
 const MIRROR_INGEST_MS = 5_000; // create → subscribe
 const STREAM_ESTABLISH_MS = 2_000; // subscribe → first submit
-const DELIVERY_WINDOW_MS = 5_000; // last submit → assertion
+// Delivery is polled, not fixed-slept: a freshly booted Solo mirror can
+// lag well past any fixed window (observed >12s in CI), while a warm
+// one delivers in ~1s. Poll returns as soon as the condition holds.
+const DELIVERY_TIMEOUT_MS = 60_000;
+// Fixed window for NEGATIVE assertions only (proving a message does
+// NOT arrive) — absence cannot be polled for.
+const NO_DELIVERY_WINDOW_MS = 5_000;
+
+async function waitForDelivery(condition: () => boolean): Promise<void> {
+    const deadline = Date.now() + DELIVERY_TIMEOUT_MS;
+    while (!condition() && Date.now() < deadline) {
+        await wait(500);
+    }
+}
 
 describe("TopicMessageQuery", () => {
     let topicService: TopicService;
@@ -64,7 +77,7 @@ describe("TopicMessageQuery", () => {
 
         // Wait for the mirror to publish the submitted message on the
         // open stream.
-        await wait(DELIVERY_WINDOW_MS);
+        await waitForDelivery(() => received.length >= 1);
         handle.unsubscribe();
 
         expect(received).toHaveLength(1);
@@ -107,7 +120,7 @@ describe("TopicMessageQuery", () => {
         await topicService.submitMessage({ topicId, message: "beta" });
         await topicService.submitMessage({ topicId, message: "gamma" });
 
-        await wait(DELIVERY_WINDOW_MS);
+        await waitForDelivery(() => received.length >= 3);
         handle.unsubscribe();
 
         const payloads = received.map((m) =>
@@ -141,16 +154,16 @@ describe("TopicMessageQuery", () => {
         await wait(STREAM_ESTABLISH_MS);
 
         await topicService.submitMessage({ topicId, message: "one" });
-        await wait(DELIVERY_WINDOW_MS);
+        await waitForDelivery(() => received.length >= 1);
 
         expect(received).toHaveLength(1);
 
         // Stop the stream, then submit another message — it must NOT
-        // reach the (now-disposed) listener even after the delivery
-        // window elapses.
+        // reach the (now-disposed) listener even after a generous
+        // delivery window elapses.
         handle.unsubscribe();
         await topicService.submitMessage({ topicId, message: "two" });
-        await wait(DELIVERY_WINDOW_MS);
+        await wait(NO_DELIVERY_WINDOW_MS);
 
         expect(received).toHaveLength(1);
     });

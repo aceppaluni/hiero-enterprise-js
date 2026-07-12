@@ -1,0 +1,54 @@
+{
+    "name": "@hiero-enterprise/mirror",
+    "version": "0.1.0",
+    "description": "Dependency-free Hiero mirror node REST client — repositories, pagination, rate limiting, filters, and unit helpers",
+    "license": "Apache-2.0",
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        "./package.json": "./package.json",
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "default": "./dist/index.cjs"
+            }
+        }
+    },
+    "repository": "https://github.com/hiero-hackers/hiero-enterprise-js",
+    "bugs": "https://github.com/hiero-hackers/hiero-enterprise-js/issues",
+    "keywords": [
+        "mirror-node",
+        "hiero",
+        "hedera",
+        "rest",
+        "analytics",
+        "hiero-enterprise"
+    ],
+    "sideEffects": false,
+    "files": [
+        "dist"
+    ],
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "scripts": {
+        "build": "tsup",
+        "clean": "rm -rf dist",
+        "test:unit": "vitest run -c test/vitest.config.ts",
+        "test:unit:coverage": "vitest run -c test/vitest.config.ts --coverage",
+        "test": "pnpm run test:unit",
+        "test:integration": "vitest run -c test/vitest-integration.config.ts",
+        "test:integration:coverage": "vitest run -c test/vitest-integration.config.ts --coverage",
+        "test:watch": "vitest -c test/vitest.config.ts"
+    },
+    "publishConfig": {
+        "access": "public",
+        "provenance": true
+    }
+}

@@ -188,7 +188,7 @@ export function buildMockTxBundle(
     tx.schedule.mockReturnValue(scheduleTx);
 
     for (const method of extraMethods) {
-        tx[method] = vi.fn().mockReturnThis();
+        Reflect.set(tx, method, vi.fn().mockReturnThis());
     }
 
     return { tx, scheduleTx, response, receipt };

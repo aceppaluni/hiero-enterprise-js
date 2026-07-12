@@ -1,0 +1,70 @@
+name: Mirror spec drift
+
+# Weekly check: has the upstream mirror node OpenAPI spec changed since
+# the snapshot vendored in packages/mirror/spec/openapi.yml? On drift,
+# open an issue so coverage can be consciously extended (the spec-coverage
+# unit test enforces the manifest against the snapshot on every build).
+
+on:
+    schedule:
+        - cron: "0 6 * * 1" # Mondays 06:00 UTC
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+jobs:
+    check:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            issues: write
+        steps:
+            - name: Harden Runner
+              uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+              with:
+                  egress-policy: audit
+
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+              with:
+                  persist-credentials: false
+
+            - name: Fetch latest upstream spec
+              run: |
+                  curl -fsSL \
+                    https://raw.githubusercontent.com/hiero-ledger/hiero-mirror-node/main/rest/api/v1/openapi.yml \
+                    -o /tmp/upstream-openapi.yml
+
+            - name: Diff against vendored snapshot
+              id: diff
+              run: |
+                  if diff -q packages/mirror/spec/openapi.yml /tmp/upstream-openapi.yml > /dev/null; then
+                      echo "drift=false" >> "$GITHUB_OUTPUT"
+                      echo "No spec drift."
+                  else
+                      echo "drift=true" >> "$GITHUB_OUTPUT"
+                      diff -u packages/mirror/spec/openapi.yml /tmp/upstream-openapi.yml > /tmp/spec.diff || true
+                      head -100 /tmp/spec.diff
+                  fi
+
+            - name: Open drift issue
+              if: steps.diff.outputs.drift == 'true'
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  TITLE="Mirror node OpenAPI spec drift detected"
+                  if gh issue list --state open --search "in:title \"$TITLE\"" --json number --jq length | grep -qv '^0$'; then
+                      echo "Drift issue already open — skipping."
+                      exit 0
+                  fi
+                  {
+                      echo "The upstream mirror node OpenAPI spec has changed since the vendored snapshot in \`packages/mirror/spec/openapi.yml\`."
+                      echo
+                      echo "To adopt: refresh the snapshot (and \`spec/SNAPSHOT\`), run the mirror unit tests — \`spec-coverage.test.ts\` will list exactly which operations/parameters are new or removed — then extend coverage or document omissions in \`test/spec/coverage-manifest.ts\`."
+                      echo
+                      echo "First 100 lines of the diff:"
+                      echo '```diff'
+                      head -100 /tmp/spec.diff
+                      echo '```'
+                  } > /tmp/issue-body.md
+                  gh issue create --title "$TITLE" --body-file /tmp/issue-body.md
