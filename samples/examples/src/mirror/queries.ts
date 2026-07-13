@@ -31,6 +31,11 @@ const accountId = process.env["EXAMPLE_ACCOUNT_ID"] ?? "0.0.98";
 const mirror = new MirrorNodeClient(mirrorUrl, {
     maxConcurrent: 5,
     maxRequestsPerSecond: 50,
+    // Canary tolerance: this example doubles as the weekly public-mainnet
+    // smoke run, and the public mirror's p99 occasionally exceeds the
+    // 10s library default. A patient canary alerts on real drift, not on
+    // one slow day (the library default stays 10s for real consumers).
+    timeoutMs: 30_000,
 });
 
 console.log(`Mirror queries example`);

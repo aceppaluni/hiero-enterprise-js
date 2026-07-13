@@ -8,8 +8,5 @@
         "skipLibCheck": true,
         "noEmit": true
     },
-    "include": [
-        "src",
-        "run-examples.ts"
-    ]
+    "include": ["src", "run-examples.ts"]
 }

@@ -2,3 +2,7 @@ dist
 node_modules
 pnpm-lock.yaml
 *.md
+
+# Vendored byte-for-byte from upstream (spec-drift.yml compares raw bytes);
+# formatting it locally re-creates false drift alarms.
+packages/mirror/spec/openapi.yml
