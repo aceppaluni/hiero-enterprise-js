@@ -28,9 +28,12 @@ const NO_DELIVERY_WINDOW_MS = 5_000;
 // stream. Give subscriptions a generous retry allowance in CI.
 const SUBSCRIBE_MAX_ATTEMPTS = 20;
 
-// Poll until `condition`, but fail FAST if the stream reported a fatal
-// error, and fail LOUD (with the caller's diagnostic) on deadline —
-// a silent hang is the one outcome this helper refuses to produce.
+// Poll until `condition` holds, or until the delivery deadline. Stream
+// errors are NOT treated as fatal: the SDK's retry machinery may recover
+// from a transient gRPC blip and still deliver, so failing on the first
+// errorHandler callback would make this flaky. Errors are collected and
+// surfaced only if the poll ultimately times out — a silent hang is the
+// one outcome this helper refuses to produce.
 async function waitForDelivery(
     condition: () => boolean,
     diagnostics: () => string,
@@ -38,18 +41,17 @@ async function waitForDelivery(
 ): Promise<void> {
     const deadline = Date.now() + DELIVERY_TIMEOUT_MS;
     while (!condition() && Date.now() < deadline) {
-        if (streamErrors.length > 0) {
-            throw new Error(
-                `subscription stream errored while waiting: ${streamErrors
-                    .map((e) => e.message)
-                    .join("; ")} — ${diagnostics()}`,
-            );
-        }
         await wait(500);
     }
     if (!condition()) {
+        const errorSummary =
+            streamErrors.length > 0
+                ? ` — stream errors observed while waiting: ${streamErrors
+                      .map((e) => e.message)
+                      .join("; ")}`
+                : "";
         throw new Error(
-            `timed out after ${DELIVERY_TIMEOUT_MS}ms waiting for delivery — ${diagnostics()}`,
+            `timed out after ${DELIVERY_TIMEOUT_MS}ms waiting for delivery — ${diagnostics()}${errorSummary}`,
         );
     }
 }
