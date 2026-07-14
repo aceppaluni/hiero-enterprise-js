@@ -154,6 +154,45 @@ Snapshot endpoints (`/balances`, `/tokens/{id}/balances`) also report the
 consensus moment their figures describe — it's carried through as
 `page.timestamp`.
 
+### Bidirectional (prev/next) pagination
+
+`Page.next()` walks the mirror node's `links.next` forward — perfect for a
+drain, but the mirror node emits **no `links.prev`**, so it can't step an
+interactive table *backward*. `KeysetPaginator` closes that: it reconstructs
+the missing direction with keyset (cursor) pagination — for a previous page it
+queries strictly before the current first row in the inverted order and
+reverses the result — over the same repository methods and `RangeFilter`
+params. You supply a one-line `load` adapter (bound → keyset param) and a
+`keyOf` (item → that same field); the paginator owns the operator/order
+algebra.
+
+```ts
+import { TransactionRepository, KeysetPaginator } from '@hiero-enterprise/mirror';
+
+const transactions = new TransactionRepository(mirror);
+const pager = new KeysetPaginator({
+  order: 'desc',
+  limit: 25,
+  keyOf: (t) => t.consensusTimestamp,
+  load: (bound, order, limit) =>
+    transactions
+      .findByAccount('0.0.98', {
+        order,
+        limit,
+        timestamp: bound ? { [bound.operator]: bound.key } : undefined,
+      })
+      .then((page) => page.data),
+});
+
+const first = await pager.first();     // newest 25
+const older = await pager.next();      // next 25, older
+const back  = await pager.previous();  // ← back to `first`
+pager.hasPrevious; // false — we're on page one again
+```
+
+`hasNext` / `hasPrevious` gate the table's arrows; `first`/`next`/`previous`
+mutate one shared window, so await each before the next.
+
 **Page size & ordering.** Every list method takes `{ limit, order }`. The
 mirror node caps `limit` (typically at 100) and `order` sorts by the
 endpoint's primary key — both are preserved across `links.next`.
