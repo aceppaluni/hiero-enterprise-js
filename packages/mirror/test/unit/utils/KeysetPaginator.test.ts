@@ -194,9 +194,7 @@ describe("KeysetPaginator — edges", () => {
         expect(calls[0]).toEqual({ bound: null, order: "desc" });
     });
 
-    it("recovers page one via an empty backward fetch when the head key shifts", async () => {
-        // Contrived load whose head can't be matched by the head-key check,
-        // forcing the empty-fetch fallback for atStart detection.
+    it("recognises page one again when stepping back onto the original head", async () => {
         const store = makeStore([1, 2, 3, 4, 5, 6]);
         const pager = new KeysetPaginator({
             load: store.load,

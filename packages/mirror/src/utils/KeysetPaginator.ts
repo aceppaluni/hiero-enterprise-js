@@ -150,9 +150,9 @@ export class KeysetPaginator<T, K extends string | number = string | number> {
     }
 
     /**
-     * Whether a previous page exists — `false` on the first page. Exact: it
-     * tracks whether the current window is the head of the listing, not a
-     * length heuristic.
+     * Whether a previous page exists — `false` on the first page.
+     * Exact for a stable listing; if data changes while paging, `hasPrevious`
+     * may remain `true` until a backward fetch confirms the head.
      */
     get hasPrevious(): boolean {
         return this.started && !this.atStart;
