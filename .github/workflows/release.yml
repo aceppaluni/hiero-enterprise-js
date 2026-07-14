@@ -1,0 +1,98 @@
+# SPDX-License-Identifier: Apache-2.0
+# Publishes the @hiero-enterprise/* packages to npm on a version tag. The token
+# lives ONLY as an org-owned repo secret — never on a developer's machine — so
+# publishing happens here in CI, auditably. Provenance is attached via GitHub's
+# OIDC (`id-token: write`), cryptographically linking each published package to
+# this workflow + commit.
+#
+# ⚠️ SECRET NAME: references `secrets.TOKEN_ENTERPRISE_JS`. Confirm the repo
+# secret is named exactly that, or edit the reference below to match.
+#
+# This is a pnpm workspace, so `pnpm -r publish` (not `npm publish`) is used: it
+# skips `private` packages (the samples and the repo root), rewrites every
+# `workspace:*` dependency to the concrete version being published, and
+# publishes in dependency order (core/mirror before the express/fastify/nest
+# adapters). Re-running after a version already exists on npm fails cleanly, so
+# there is no double-publish.
+#
+# To release: bump the version across the whole workspace (root + every
+# packages/* — keep them in lockstep), merge to main, then push a matching tag:
+#   git tag -s v0.2.0 && git push origin v0.2.0
+# The tag push triggers this workflow. `workflow_dispatch` is a manual fallback
+# (it skips the tag/version guards).
+name: Release
+
+on:
+    push:
+        tags: ["v*.*.*"]
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+jobs:
+    publish:
+        name: Publish to npm
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            id-token: write # npm provenance
+        steps:
+            - name: Harden Runner
+              uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20
+              with:
+                  egress-policy: audit
+
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+              with:
+                  persist-credentials: false
+
+            - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+              # version comes from package.json "packageManager"
+
+            - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: "22"
+                  registry-url: "https://registry.npmjs.org"
+                  cache: pnpm
+
+            - run: pnpm install --frozen-lockfile
+
+            # A tag must match the workspace version — otherwise a mistaken tag
+            # would publish the wrong version. (Skipped on manual runs.)
+            - name: Tag matches workspace version
+              if: startsWith(github.ref, 'refs/tags/')
+              run: |
+                  root=$(node -p "require('./package.json').version")
+                  tag="${GITHUB_REF_NAME#v}"
+                  if [ "$root" != "$tag" ]; then
+                      echo "::error::tag v$tag does not match workspace version $root"
+                      exit 1
+                  fi
+                  echo "publishing $root"
+
+            # Every publishable package must carry that same version — guards
+            # against a half-bumped workspace publishing mixed versions.
+            - name: Packages share the workspace version
+              if: startsWith(github.ref, 'refs/tags/')
+              run: |
+                  root=$(node -p "require('./package.json').version")
+                  for p in packages/*/; do
+                      name=$(node -p "require('./${p}package.json').name")
+                      priv=$(node -p "require('./${p}package.json').private === true")
+                      [ "$priv" = "true" ] && continue
+                      v=$(node -p "require('./${p}package.json').version")
+                      if [ "$v" != "$root" ]; then
+                          echo "::error::$name is $v, expected $root"
+                          exit 1
+                      fi
+                  done
+
+            # dist/ must exist before publish (each package ships `files: [dist]`).
+            - name: Build
+              run: pnpm -r run build
+
+            - name: Publish
+              run: pnpm -r publish --provenance --access public --no-git-checks
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.TOKEN_ENTERPRISE_JS }}
