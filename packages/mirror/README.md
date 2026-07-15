@@ -167,7 +167,7 @@ params. You supply a one-line `load` adapter (bound → keyset param) and a
 algebra.
 
 ```ts
-import { TransactionRepository, KeysetPaginator } from '@hiero-enterprise/mirror';
+import { TransactionRepository, KeysetPaginator } from '@hiero-hackers/enterprise-mirror';
 
 const transactions = new TransactionRepository(mirror);
 const pager = new KeysetPaginator({

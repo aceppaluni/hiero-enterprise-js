@@ -35,7 +35,7 @@ import type { SortOrder } from "../types/index.js";
  * @example Bidirectional table over an account's transactions (keyed on
  * consensus timestamp):
  * ```ts
- * import { TransactionRepository, KeysetPaginator } from '@hiero-enterprise/mirror';
+ * import { TransactionRepository, KeysetPaginator } from '@hiero-hackers/enterprise-mirror';
  *
  * const transactions = new TransactionRepository(mirror);
  * const pager = new KeysetPaginator({
