@@ -20,11 +20,11 @@ It gives each major Node.js framework a native integration that matches how deve
 
 | Package | Description |
 |---------|-------------|
-| [`@hiero-enterprise/core`](./packages/core) | SDK write-side: services, transactions, operator keys — use directly or with any framework |
-| [`@hiero-enterprise/mirror`](./packages/mirror) | Mirror node read-side: repositories, pagination, rate limiting, filters, unit helpers — **zero dependencies, no credentials** |
-| [`@hiero-enterprise/express`](./packages/express) | Express middleware — `req.hiero.*` (composes core + mirror) |
-| [`@hiero-enterprise/fastify`](./packages/fastify) | Fastify plugin — `fastify.hiero.*` (composes core + mirror) |
-| [`@hiero-enterprise/nest`](./packages/nest) | NestJS module — `HieroModule.forRoot()` with full DI (composes core + mirror) |
+| [`@hiero-hackers/enterprise-core`](./packages/core) | SDK write-side: services, transactions, operator keys — use directly or with any framework |
+| [`@hiero-hackers/enterprise-mirror`](./packages/mirror) | Mirror node read-side: repositories, pagination, rate limiting, filters, unit helpers — **zero dependencies, no credentials** |
+| [`@hiero-hackers/enterprise-express`](./packages/express) | Express middleware — `req.hiero.*` (composes core + mirror) |
+| [`@hiero-hackers/enterprise-fastify`](./packages/fastify) | Fastify plugin — `fastify.hiero.*` (composes core + mirror) |
+| [`@hiero-hackers/enterprise-nest`](./packages/nest) | NestJS module — `HieroModule.forRoot()` with full DI (composes core + mirror) |
 
 Each package README documents its full surface — the adapter READMEs
 list everything available on `req.hiero` / `app.hiero` / via DI, so you
@@ -35,8 +35,8 @@ never have to guess what arrived pre-composed.
 | You are building… | Install / import | Reads | Writes |
 |---|---|---|---|
 | An Express / Fastify / NestJS service | **the adapter only** — repositories and services arrive pre-composed on `req.hiero.*` / `app.hiero.*` / DI; you never import core or mirror directly | ✓ | ✓ |
-| A read-only tool, dashboard, or indexer | `@hiero-enterprise/mirror` only — no credentials needed ([smallest possible project](./samples/mirror-standalone-sample)) | ✓ | — |
-| A script or worker that submits transactions | `@hiero-enterprise/core` (add `mirror` if it also reads) | opt-in | ✓ |
+| A read-only tool, dashboard, or indexer | `@hiero-hackers/enterprise-mirror` only — no credentials needed ([smallest possible project](./samples/mirror-standalone-sample)) | ✓ | — |
+| A script or worker that submits transactions | `@hiero-hackers/enterprise-core` (add `mirror` if it also reads) | opt-in | ✓ |
 
 ## Quick Start
 
@@ -45,17 +45,17 @@ never have to guess what arrived pre-composed.
 ### Standalone (no framework)
 
 ```bash
-npm install @hiero-enterprise/core
+npm install @hiero-hackers/enterprise-core
 ```
 
 ```bash
-npm install @hiero-enterprise/mirror   # read-only? this is the only package you need
+npm install @hiero-hackers/enterprise-mirror   # read-only? this is the only package you need
 ```
 
 Reads need no credentials at all:
 
 ```ts
-import { createMirrorNodeClient, AccountRepository } from '@hiero-enterprise/mirror';
+import { createMirrorNodeClient, AccountRepository } from '@hiero-hackers/enterprise-mirror';
 
 const mirror = createMirrorNodeClient({ network: 'mainnet' });
 const account = await new AccountRepository(mirror).findByAccountId('0.0.800');
@@ -64,7 +64,7 @@ const account = await new AccountRepository(mirror).findByAccountId('0.0.800');
 Writes go through core, with an operator account:
 
 ```ts
-import { HieroContext, AccountService } from '@hiero-enterprise/core';
+import { HieroContext, AccountService } from '@hiero-hackers/enterprise-core';
 
 const context = new HieroContext({
   network: 'testnet',
@@ -84,9 +84,9 @@ context.close();
 
 ```bash
 # Install your framework adapter 
-npm install @hiero-enterprise/express
-npm install @hiero-enterprise/fastify
-npm install @hiero-enterprise/nest
+npm install @hiero-hackers/enterprise-express
+npm install @hiero-hackers/enterprise-fastify
+npm install @hiero-hackers/enterprise-nest
 ```
 
 Set your operator credentials as environment variables:
@@ -112,7 +112,7 @@ Or pass config directly when registering the integration.
 
 ```ts
 import express from 'express';
-import { hieroMiddleware } from '@hiero-enterprise/express';
+import { hieroMiddleware } from '@hiero-hackers/enterprise-express';
 
 const app = express();
 app.use(hieroMiddleware());
@@ -127,7 +127,7 @@ app.get('/balance', async (req, res) => {
 
 ```ts
 import Fastify from 'fastify';
-import { hieroPlugin } from '@hiero-enterprise/fastify';
+import { hieroPlugin } from '@hiero-hackers/enterprise-fastify';
 
 const app = Fastify();
 await app.register(hieroPlugin);
@@ -141,7 +141,7 @@ app.get('/balance', async () => {
 
 ```ts
 import { Module } from '@nestjs/common';
-import { HieroModule, AccountService } from '@hiero-enterprise/nest';
+import { HieroModule, AccountService } from '@hiero-hackers/enterprise-nest';
 
 @Module({ imports: [HieroModule.forRoot()] })
 export class AppModule {}
@@ -166,7 +166,7 @@ export class BalanceController {
        ┌──────┴──────────┐  ┌─────────┴──────────┐
        ▼                 ▼  ▼                    ▼
 ┌───────────────────────┐  ┌────────────────────────┐
-│ @hiero-enterprise/core│  │@hiero-enterprise/mirror│
+│ @hiero-hackers/enterprise-core│  │@hiero-hackers/enterprise-mirror│
 │  SDK write-side       │  │  REST read-side        │
 │  Account / File /     │  │  9 repositories        │
 │  Token / Contract /   │  │  pagination + filters  │
@@ -180,9 +180,9 @@ export class BalanceController {
                    (testnet / mainnet)
 ```
 
-`@hiero-enterprise/core` owns the SDK write-side (services, transactions, operator keys).
+`@hiero-hackers/enterprise-core` owns the SDK write-side (services, transactions, operator keys).
 
-`@hiero-enterprise/mirror` owns the REST read-side and has **zero dependencies** — analytics consumers can install it alone, with no SDK and no credentials. 
+`@hiero-hackers/enterprise-mirror` owns the REST read-side and has **zero dependencies** — analytics consumers can install it alone, with no SDK and no credentials. 
 
 Framework adapters compose both behind one surface. Either package also works standalone.
 
@@ -200,10 +200,10 @@ Writes go through the Hiero SDK — transactions that go on-chain, signed by the
 | `ScheduleService` | Create and sign scheduled transactions |
 | `NetworkService` | Network-level queries via the SDK client |
 
-## Mirror Node Queries — `@hiero-enterprise/mirror`
+## Mirror Node Queries — `@hiero-hackers/enterprise-mirror`
 
 All mirror node REST reads live in the standalone, **dependency-free**
-[`@hiero-enterprise/mirror`](./packages/mirror) package — no SDK, no
+[`@hiero-hackers/enterprise-mirror`](./packages/mirror) package — no SDK, no
 operator keys, just `fetch`. It covers the **complete mirror node REST
 API** (all 47 paths and 48 operations of the OpenAPI spec, including the
 contracts/EVM family, `contracts/call`, and HIP-1313 fee estimation) with
@@ -219,7 +219,7 @@ transactions, schedules and network state, plus:
 - **Unit helpers** — tinybar⇄ℏ, token decimals, `Date`⇄consensus timestamps.
 
 ```ts
-import { createMirrorNodeClient, TransactionRepository, collectAll } from '@hiero-enterprise/mirror';
+import { createMirrorNodeClient, TransactionRepository, collectAll } from '@hiero-hackers/enterprise-mirror';
 
 const mirror = createMirrorNodeClient({ network: 'mainnet', mirrorNodeMaxRequestsPerSecond: 50 });
 const transfers = await collectAll(
@@ -241,8 +241,8 @@ Working examples are in [`samples/`](./samples). Each one is a minimal but real 
 
 | Sample | Framework |
 |--------|-----------|
-| [examples](./samples/examples) | Standalone `@hiero-enterprise/core` scripts |
-| [mirror-standalone](./samples/mirror-standalone-sample) | Minimal-footprint proof: a project whose only dependency is `@hiero-enterprise/mirror` — no credentials, no build step |
+| [examples](./samples/examples) | Standalone `@hiero-hackers/enterprise-core` scripts |
+| [mirror-standalone](./samples/mirror-standalone-sample) | Minimal-footprint proof: a project whose only dependency is `@hiero-hackers/enterprise-mirror` — no credentials, no build step |
 | [express-sample](./samples/express-sample) | Express |
 | [fastify-sample](./samples/fastify-sample) | Fastify |
 | [nest-sample](./samples/nest-sample) | NestJS |
@@ -253,13 +253,13 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for how to report bugs, request feature
 
 ## Releasing
 
-Publishing is done by [`.github/workflows/release.yml`](./.github/workflows/release.yml) — it runs when a `v*.*.*` tag is pushed and publishes every public `@hiero-enterprise/*` package to npm with provenance. Developers never publish from their machines; the npm token lives only as the org-owned `TOKEN_ENTERPRISE_JS` repository secret.
+Publishing is done by [`.github/workflows/release.yml`](./.github/workflows/release.yml) — it runs when a `v*.*.*` tag is pushed and publishes every public `@hiero-hackers/*` package to npm with provenance. Developers never publish from their machines; the npm token lives only as the org-owned `TOKEN_ENTERPRISE_JS` repository secret.
 
 A release ships **whatever is on `main` at the tagged commit** — it is not tied to any one feature branch. Merge everything you want included first, then cut the release as its own step.
 
 All five packages are versioned **in lockstep**: one version number, one tag. The workflow refuses to publish if the tag, the root `package.json`, and every `packages/*` version don't all agree.
 
-**Prerequisite (one-time):** an npm automation token with publish rights to the `@hiero-enterprise` scope, stored as the `TOKEN_ENTERPRISE_JS` repository secret.
+**Prerequisite (one-time):** an npm automation token with publish rights to the `@hiero-hackers` scope, stored as the `TOKEN_ENTERPRISE_JS` repository secret.
 
 **To cut a release:**
 

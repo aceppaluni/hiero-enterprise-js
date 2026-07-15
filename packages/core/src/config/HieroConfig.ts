@@ -3,7 +3,7 @@ import { HieroError, HieroErrorCodes } from "../errors/index.js";
 /**
  * Configuration for connecting to a Hiero network.
  *
- * Mirror node REST configuration lives in `@hiero-enterprise/mirror`
+ * Mirror node REST configuration lives in `@hiero-hackers/enterprise-mirror`
  * (`MirrorConfig`) — this config covers the SDK/consensus side only.
  */
 export interface HieroConfig {

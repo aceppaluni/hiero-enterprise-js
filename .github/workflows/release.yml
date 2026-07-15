@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Publishes the @hiero-enterprise/* packages to npm on a version tag. The token
+# Publishes the @hiero-hackers/* packages to npm on a version tag. The token
 # lives ONLY as an org-owned repo secret — never on a developer's machine — so
 # publishing happens here in CI, auditably. Provenance is attached via GitHub's
 # OIDC (`id-token: write`), cryptographically linking each published package to

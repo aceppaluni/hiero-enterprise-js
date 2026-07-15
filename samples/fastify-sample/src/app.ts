@@ -1,6 +1,6 @@
 import "dotenv/config";
 import Fastify from "fastify";
-import { hieroPlugin } from "@hiero-enterprise/fastify";
+import { hieroPlugin } from "@hiero-hackers/enterprise-fastify";
 
 const app = Fastify({ logger: true });
 

@@ -24,7 +24,7 @@ import {
     PrivateKey,
     Hbar,
     TransferTransaction,
-} from "@hiero-enterprise/core";
+} from "@hiero-hackers/enterprise-core";
 import { getED25519Config } from "../env.js";
 
 /**

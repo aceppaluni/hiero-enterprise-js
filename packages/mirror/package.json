@@ -1,5 +1,5 @@
 {
-    "name": "@hiero-enterprise/mirror",
+    "name": "@hiero-hackers/enterprise-mirror",
     "version": "0.1.0",
     "description": "Dependency-free Hiero mirror node REST client — repositories, pagination, rate limiting, filters, and unit helpers",
     "license": "Apache-2.0",

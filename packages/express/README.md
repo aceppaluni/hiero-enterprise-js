@@ -1,20 +1,20 @@
-# @hiero-enterprise/express
+# @hiero-hackers/enterprise-express
 
 Express middleware for Hiero. **This is the only package you install** —
-it composes `@hiero-enterprise/core` (write-side SDK services) and
-`@hiero-enterprise/mirror` (read-side REST repositories) and hands you
+it composes `@hiero-hackers/enterprise-core` (write-side SDK services) and
+`@hiero-hackers/enterprise-mirror` (read-side REST repositories) and hands you
 the finished object on `req.hiero`. You never import core or mirror
 directly.
 
 ```bash
-npm install @hiero-enterprise/express
+npm install @hiero-hackers/enterprise-express
 ```
 
 > **Note:** not yet published to npm — see [CONTRIBUTING](../../CONTRIBUTING.md) to run from the repo.
 
 ```ts
 import express from "express";
-import { hieroMiddleware } from "@hiero-enterprise/express";
+import { hieroMiddleware } from "@hiero-hackers/enterprise-express";
 
 const app = express();
 app.use(hieroMiddleware()); // config from HIERO_* env vars, or pass a config object
@@ -78,7 +78,7 @@ same shape feeds both the SDK and mirror sides.
 
 Only using reads? The repositories work without operator credentials —
 but if your service never writes, consider depending on
-`@hiero-enterprise/mirror` alone instead
+`@hiero-hackers/enterprise-mirror` alone instead
 ([smallest possible project](../../samples/mirror-standalone-sample)).
 
 A runnable service using this adapter:

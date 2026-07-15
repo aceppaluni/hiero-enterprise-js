@@ -1,6 +1,6 @@
 # Fastify Sample
 
-A REST API built with [Fastify](https://fastify.dev/) and `@hiero-enterprise/fastify` demonstrating how to query accounts, tokens, NFTs, topics, and network data from a Hiero network.
+A REST API built with [Fastify](https://fastify.dev/) and `@hiero-hackers/enterprise-fastify` demonstrating how to query accounts, tokens, NFTs, topics, and network data from a Hiero network.
 
 ## Setup
 
@@ -46,7 +46,7 @@ pnpm --filter hiero-fastify-sample start
 Register the Hiero plugin with your Fastify instance:
 
 ```ts
-import { hieroPlugin } from '@hiero-enterprise/fastify';
+import { hieroPlugin } from '@hiero-hackers/enterprise-fastify';
 
 await app.register(hieroPlugin);
 ```

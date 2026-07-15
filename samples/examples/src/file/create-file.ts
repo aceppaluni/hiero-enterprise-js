@@ -19,7 +19,7 @@
  * Run: pnpm tsx src/file/create-file.ts
  */
 
-import { FileService, HieroContext, PrivateKey } from "@hiero-enterprise/core";
+import { FileService, HieroContext, PrivateKey } from "@hiero-hackers/enterprise-core";
 import { getED25519Config } from "../env.js";
 
 /**

@@ -1,6 +1,6 @@
 # NestJS Sample
 
-A REST API built with [NestJS](https://nestjs.com/) and `@hiero-enterprise/nest` demonstrating dependency injection of Hiero services into controllers.
+A REST API built with [NestJS](https://nestjs.com/) and `@hiero-hackers/enterprise-nest` demonstrating dependency injection of Hiero services into controllers.
 
 ## Setup
 
@@ -46,7 +46,7 @@ pnpm --filter hiero-nest-sample start
 Import `HieroModule.forRoot()` in your `AppModule`:
 
 ```ts
-import { HieroModule } from '@hiero-enterprise/nest';
+import { HieroModule } from '@hiero-hackers/enterprise-nest';
 
 @Module({
   imports: [HieroModule.forRoot()],

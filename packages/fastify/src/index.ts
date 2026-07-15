@@ -1,6 +1,6 @@
 import fp from "fastify-plugin";
 import type { FastifyInstance, FastifyPluginOptions } from "fastify";
-import { assertEnvConfigValid } from "@hiero-enterprise/core";
+import { assertEnvConfigValid } from "@hiero-hackers/enterprise-core";
 import type { HieroAdapterConfig, HieroServices } from "./runtime.js";
 import { createHieroRuntime } from "./runtime.js";
 
@@ -28,12 +28,12 @@ export interface HieroPluginOptions extends FastifyPluginOptions {
  * Fastify plugin that initializes the HieroContext and decorates the
  * Fastify instance with all Hiero services at `fastify.hiero` —
  * write-side services from core plus mirror node repositories from
- * `@hiero-enterprise/mirror`.
+ * `@hiero-hackers/enterprise-mirror`.
  *
  * @example
  * ```ts
  * import Fastify from 'fastify';
- * import { hieroPlugin } from '@hiero-enterprise/fastify';
+ * import { hieroPlugin } from '@hiero-hackers/enterprise-fastify';
  *
  * const app = Fastify();
  * app.register(hieroPlugin, { config: { network: 'testnet', operatorId: '0.0.1', operatorKey: '302e...' } });
@@ -60,5 +60,5 @@ const plugin = function (fastify: FastifyInstance, opts: HieroPluginOptions) {
 };
 
 export const hieroPlugin = fp(plugin, {
-    name: "@hiero-enterprise/fastify",
+    name: "@hiero-hackers/enterprise-fastify",
 });

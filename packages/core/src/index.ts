@@ -1,6 +1,6 @@
-// @hiero-enterprise/core
+// @hiero-hackers/enterprise-core
 // Core SDK services and data models for the Hiero network.
-// Mirror node REST reads live in @hiero-enterprise/mirror.
+// Mirror node REST reads live in @hiero-hackers/enterprise-mirror.
 
 // Data models
 export * from "./types/index.js";

@@ -1,4 +1,4 @@
-# @hiero-enterprise/mirror
+# @hiero-hackers/enterprise-mirror
 
 Dependency-free client for the Hiero mirror node REST API — typed
 repositories, continuable pagination, pro-active rate limiting, rich query
@@ -6,11 +6,11 @@ filters, and unit helpers.
 
 Mirror node reads are free and keyless: no SDK, no operator credentials, no
 gRPC. This package's only runtime requirement is global `fetch` (Node 18+).
-If you also submit transactions, pair it with `@hiero-enterprise/core` or a
+If you also submit transactions, pair it with `@hiero-hackers/enterprise-core` or a
 framework adapter.
 
 ```bash
-npm install @hiero-enterprise/mirror
+npm install @hiero-hackers/enterprise-mirror
 ```
 
 > **Note:** not yet published to npm — see [CONTRIBUTING](../../CONTRIBUTING.md) to run from the repo.
@@ -20,7 +20,7 @@ import {
   MirrorNodeClient,
   TransactionRepository,
   collectAll,
-} from '@hiero-enterprise/mirror';
+} from '@hiero-hackers/enterprise-mirror';
 
 const mirror = new MirrorNodeClient('https://mainnet.mirrornode.hedera.com', {
   maxConcurrent: 25,
@@ -37,7 +37,7 @@ const recent = await transactions.findByAccount('0.0.98', {
 Or resolve everything from environment variables:
 
 ```ts
-import { createMirrorNodeClient } from '@hiero-enterprise/mirror';
+import { createMirrorNodeClient } from '@hiero-hackers/enterprise-mirror';
 const mirror = createMirrorNodeClient(); // reads HIERO_NETWORK / HIERO_MIRROR_NODE_*
 ```
 
@@ -66,7 +66,7 @@ Construct repositories individually, or all of them over one shared
 client (they draw from the same rate limiter either way):
 
 ```ts
-import { createMirrorRepositories } from '@hiero-enterprise/mirror';
+import { createMirrorRepositories } from '@hiero-hackers/enterprise-mirror';
 const { accountRepository, contractRepository } =
   createMirrorRepositories(mirror);
 ```
@@ -95,7 +95,7 @@ execute read-only calls. `contracts/call` is the API's one POST, but it is
 still free, keyless, and goes through the same rate gate:
 
 ```ts
-import { ContractRepository } from '@hiero-enterprise/mirror';
+import { ContractRepository } from '@hiero-hackers/enterprise-mirror';
 const contracts = new ContractRepository(mirror);
 
 // ERC-20 read via the HTS facade: USDC decimals()
@@ -130,7 +130,7 @@ re-declare. Two generic helpers, `collectAll` and `paginate`, drive any
 page, so you never hand-roll a `while (links.next)` loop:
 
 ```ts
-import { collectAll, paginate } from '@hiero-enterprise/mirror';
+import { collectAll, paginate } from '@hiero-hackers/enterprise-mirror';
 
 // Collect everything, bounded so a surprise-huge result can't blow up memory:
 const all = await collectAll(await nftRepository.findByOwner('0.0.12345'), {
@@ -247,7 +247,7 @@ import {
   formatUnits, parseUnits,               // "2500000" @ 6 decimals ⇄ 2.5 USDC
   toConsensusTimestamp, fromConsensusTimestamp, // Date/ms ⇄ "seconds.nanoseconds"
   timestampRange,                        // { from, to } dates → { gte, lt } window
-} from '@hiero-enterprise/mirror';
+} from '@hiero-hackers/enterprise-mirror';
 
 await transactionRepository.find({
   transactionType: 'CRYPTOTRANSFER',

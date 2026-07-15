@@ -1,13 +1,13 @@
 # Samples
 
-Sample projects demonstrating how to use `@hiero-enterprise/*` packages with different Node.js frameworks.
+Sample projects demonstrating how to use `@hiero-hackers/*` packages with different Node.js frameworks.
 
 | Sample | Framework | Port | Integration Style |
 |--------|-----------|------|-------------------|
 | [express-sample](./express-sample) | Express | 3000 | Middleware — `req.hiero.*` |
 | [fastify-sample](./fastify-sample) | Fastify | 3001 | Plugin — `app.hiero.*` |
 | [nest-sample](./nest-sample) | NestJS | 3002 | DI — `@Inject()` constructors |
-| [mirror-standalone](./mirror-standalone-sample) | none | — | Single-dependency project: `@hiero-enterprise/mirror` only, plain `node`, no `.env` |
+| [mirror-standalone](./mirror-standalone-sample) | none | — | Single-dependency project: `@hiero-hackers/enterprise-mirror` only, plain `node`, no `.env` |
 
 Also in this directory: [examples](./examples), a gallery of standalone
 scripts by domain (account, token, topic, …, mirror). The mirror scripts

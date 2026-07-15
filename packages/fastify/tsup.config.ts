@@ -7,5 +7,5 @@ export default defineConfig({
     sourcemap: true,
     clean: true,
     target: "node20",
-    external: ["fastify", "fastify-plugin", "@hiero-enterprise/core"],
+    external: ["fastify", "fastify-plugin", "@hiero-hackers/enterprise-core"],
 });

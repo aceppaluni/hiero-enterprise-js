@@ -2,7 +2,7 @@
     "name": "hiero-express-sample",
     "version": "1.0.0",
     "private": true,
-    "description": "Sample Express app using @hiero-enterprise/express",
+    "description": "Sample Express app using @hiero-hackers/enterprise-express",
     "type": "module",
     "scripts": {
         "dev": "tsx src/app.ts",
@@ -10,7 +10,7 @@
         "start": "node dist/app.js"
     },
     "dependencies": {
-        "@hiero-enterprise/express": "workspace:*",
+        "@hiero-hackers/enterprise-express": "workspace:*",
         "dotenv": "^16.4.0",
         "express": "^5.1.0"
     },

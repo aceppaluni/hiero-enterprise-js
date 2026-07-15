@@ -1,5 +1,5 @@
 {
-    "name": "@hiero-enterprise/examples",
+    "name": "@hiero-hackers/examples",
     "version": "1.0.0",
     "private": true,
     "type": "module",
@@ -10,8 +10,8 @@
         "examples:account": "tsx -r dotenv/config run-examples.ts account"
     },
     "dependencies": {
-        "@hiero-enterprise/core": "workspace:*",
-        "@hiero-enterprise/mirror": "workspace:*",
+        "@hiero-hackers/enterprise-core": "workspace:*",
+        "@hiero-hackers/enterprise-mirror": "workspace:*",
         "dotenv": "^16.4.0"
     },
     "devDependencies": {

@@ -1,4 +1,4 @@
-// @hiero-enterprise/mirror
+// @hiero-hackers/enterprise-mirror
 // Dependency-free Hiero mirror node REST client: repositories, pagination,
 // pro-active rate limiting, filters, and unit helpers.
 

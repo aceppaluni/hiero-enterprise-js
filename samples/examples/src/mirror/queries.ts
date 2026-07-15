@@ -2,7 +2,7 @@
  * Run this example with:
  *   npx tsx samples/examples/src/mirror/queries.ts
  *
- * The two things worth demoing about `@hiero-enterprise/mirror`: passing
+ * The two things worth demoing about `@hiero-hackers/enterprise-mirror`: passing
  * extra query properties, and walking pagination. Every other method on
  * `MirrorNodeClient` is a `getX` / `queryX(id)` you can discover from the
  * types — see `packages/mirror/README.md` for the full surface.
@@ -19,7 +19,7 @@ import {
     MirrorNodeClient,
     collectAll,
     paginate,
-} from "@hiero-enterprise/mirror";
+} from "@hiero-hackers/enterprise-mirror";
 
 const mirrorUrl =
     process.env["HIERO_MIRROR_NODE_URL"] ??
