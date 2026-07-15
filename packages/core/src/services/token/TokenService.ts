@@ -875,7 +875,7 @@ export class TokenService {
      *
      * @example
      * ```typescript
-     * import { PendingAirdropId, NftId, TokenId } from "@hiero-enterprise/core";
+     * import { PendingAirdropId, NftId, TokenId } from "@hiero-hackers/enterprise-core";
      *
      * await tokenService.claimAirdrop({
      *   pendingAirdropIds: [
@@ -937,7 +937,7 @@ export class TokenService {
      *
      * @example
      * ```typescript
-     * import { PendingAirdropId, NftId, TokenId } from "@hiero-enterprise/core";
+     * import { PendingAirdropId, NftId, TokenId } from "@hiero-hackers/enterprise-core";
      *
      * await tokenService.cancelAirdrop({
      *   pendingAirdropIds: [
@@ -992,7 +992,7 @@ export class TokenService {
      *
      * @example
      * ```typescript
-     * import { NftId, TokenId } from "@hiero-enterprise/core";
+     * import { NftId, TokenId } from "@hiero-hackers/enterprise-core";
      *
      * await tokenService.rejectTokensFlow({
      *   ownerId: myAccountId,

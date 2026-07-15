@@ -1,5 +1,5 @@
 {
-    "name": "@hiero-enterprise/express",
+    "name": "@hiero-hackers/enterprise-express",
     "version": "0.1.0",
     "description": "Express middleware for the Hiero network",
     "license": "Apache-2.0",
@@ -45,8 +45,8 @@
         "test:watch": "vitest test/integration"
     },
     "dependencies": {
-        "@hiero-enterprise/core": "workspace:*",
-        "@hiero-enterprise/mirror": "workspace:*"
+        "@hiero-hackers/enterprise-core": "workspace:*",
+        "@hiero-hackers/enterprise-mirror": "workspace:*"
     },
     "peerDependencies": {
         "express": "^5.1.0"

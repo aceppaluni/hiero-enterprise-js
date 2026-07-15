@@ -1,5 +1,5 @@
 {
-    "name": "@hiero-enterprise/core",
+    "name": "@hiero-hackers/enterprise-core",
     "version": "0.1.0",
     "description": "Core services, repositories, and data models for the Hiero network",
     "license": "Apache-2.0",

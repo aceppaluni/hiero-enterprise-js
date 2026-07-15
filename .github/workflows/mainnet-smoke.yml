@@ -48,7 +48,7 @@ jobs:
                   HIERO_MIRROR_NODE_URL: https://mainnet.mirrornode.hedera.com
               run: |
                   set -o pipefail
-                  pnpm --filter @hiero-enterprise/examples examples mirror 2>&1 | tee /tmp/smoke.log
+                  pnpm --filter @hiero-hackers/examples examples mirror 2>&1 | tee /tmp/smoke.log
 
             - name: Open smoke-failure issue
               if: failure()

@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { assertEnvConfigValid } from "@hiero-enterprise/core";
+import { assertEnvConfigValid } from "@hiero-hackers/enterprise-core";
 import type { HieroAdapterConfig, HieroServices } from "./runtime.js";
 import { createHieroRuntime } from "./runtime.js";
 
@@ -21,12 +21,12 @@ declare global {
 /**
  * Express middleware that initializes the HieroContext and injects all
  * Hiero services into `req.hiero` — write-side services from core plus
- * mirror node repositories from `@hiero-enterprise/mirror`.
+ * mirror node repositories from `@hiero-hackers/enterprise-mirror`.
  *
  * @example
  * ```ts
  * import express from 'express';
- * import { hieroMiddleware } from '@hiero-enterprise/express';
+ * import { hieroMiddleware } from '@hiero-hackers/enterprise-express';
  *
  * const app = express();
  * app.use(hieroMiddleware({ network: 'testnet', operatorId: '0.0.1', operatorKey: '302e...' }));

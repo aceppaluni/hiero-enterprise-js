@@ -1,5 +1,5 @@
 {
-    "name": "@hiero-enterprise/nest",
+    "name": "@hiero-hackers/enterprise-nest",
     "version": "0.1.0",
     "description": "NestJS module for the Hiero network",
     "license": "Apache-2.0",
@@ -45,8 +45,8 @@
         "test:watch": "vitest test/integration"
     },
     "dependencies": {
-        "@hiero-enterprise/core": "workspace:*",
-        "@hiero-enterprise/mirror": "workspace:*"
+        "@hiero-hackers/enterprise-core": "workspace:*",
+        "@hiero-hackers/enterprise-mirror": "workspace:*"
     },
     "peerDependencies": {
         "@nestjs/common": "^11.1.24",

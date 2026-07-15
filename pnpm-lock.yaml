@@ -14,7 +14,7 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.5.0)
-      '@hiero-enterprise/core':
+      '@hiero-hackers/enterprise-core':
         specifier: workspace:*
         version: link:packages/core
       '@nestjs/testing':
@@ -77,10 +77,10 @@ importers:
 
   packages/express:
     dependencies:
-      '@hiero-enterprise/core':
+      '@hiero-hackers/enterprise-core':
         specifier: workspace:*
         version: link:../core
-      '@hiero-enterprise/mirror':
+      '@hiero-hackers/enterprise-mirror':
         specifier: workspace:*
         version: link:../mirror
       express:
@@ -89,10 +89,10 @@ importers:
 
   packages/fastify:
     dependencies:
-      '@hiero-enterprise/core':
+      '@hiero-hackers/enterprise-core':
         specifier: workspace:*
         version: link:../core
-      '@hiero-enterprise/mirror':
+      '@hiero-hackers/enterprise-mirror':
         specifier: workspace:*
         version: link:../mirror
       fastify:
@@ -106,10 +106,10 @@ importers:
 
   packages/nest:
     dependencies:
-      '@hiero-enterprise/core':
+      '@hiero-hackers/enterprise-core':
         specifier: workspace:*
         version: link:../core
-      '@hiero-enterprise/mirror':
+      '@hiero-hackers/enterprise-mirror':
         specifier: workspace:*
         version: link:../mirror
       '@nestjs/common':
@@ -124,10 +124,10 @@ importers:
 
   samples/examples:
     dependencies:
-      '@hiero-enterprise/core':
+      '@hiero-hackers/enterprise-core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@hiero-enterprise/mirror':
+      '@hiero-hackers/enterprise-mirror':
         specifier: workspace:*
         version: link:../../packages/mirror
       dotenv:
@@ -140,7 +140,7 @@ importers:
 
   samples/express-sample:
     dependencies:
-      '@hiero-enterprise/express':
+      '@hiero-hackers/enterprise-express':
         specifier: workspace:*
         version: link:../../packages/express
       dotenv:
@@ -156,7 +156,7 @@ importers:
 
   samples/fastify-sample:
     dependencies:
-      '@hiero-enterprise/fastify':
+      '@hiero-hackers/enterprise-fastify':
         specifier: workspace:*
         version: link:../../packages/fastify
       dotenv:
@@ -168,7 +168,7 @@ importers:
 
   samples/nest-sample:
     dependencies:
-      '@hiero-enterprise/nest':
+      '@hiero-hackers/enterprise-nest':
         specifier: workspace:*
         version: link:../../packages/nest
       '@nestjs/common':

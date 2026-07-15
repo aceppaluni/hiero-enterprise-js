@@ -15,7 +15,7 @@
  * Run: pnpm tsx src/topic/update-topic.ts
  */
 
-import { HieroContext, PrivateKey, TopicService } from "@hiero-enterprise/core";
+import { HieroContext, PrivateKey, TopicService } from "@hiero-hackers/enterprise-core";
 import { getED25519Config } from "../env.js";
 
 /**

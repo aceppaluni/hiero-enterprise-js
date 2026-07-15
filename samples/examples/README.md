@@ -1,13 +1,13 @@
-# @hiero-enterprise/core examples
+# @hiero-hackers/enterprise-core examples
 
-Runnable scripts that exercise `@hiero-enterprise/core` directly (no framework). Each file in [`src/`](./src) is an independent example; the runner discovers them automatically.
+Runnable scripts that exercise `@hiero-hackers/enterprise-core` directly (no framework). Each file in [`src/`](./src) is an independent example; the runner discovers them automatically.
 
 ## Running
 
 ```bash
 # from the repo root
-pnpm --filter @hiero-enterprise/examples examples            # run every example
-pnpm --filter @hiero-enterprise/examples examples mirror     # only files starting with "mirror"
+pnpm --filter @hiero-hackers/examples examples            # run every example
+pnpm --filter @hiero-hackers/examples examples mirror     # only files starting with "mirror"
 ```
 
 The filter matches the start of the file path, so `mirror` runs everything under `src/mirror/`. The runner executes examples sequentially, streams each one's output live under its `[i/N]` header, and exits non-zero if any fail.
@@ -20,7 +20,6 @@ npx tsx src/mirror/queries.ts
 ```
 
 > These examples make **live network calls**. Read-only mirror-node examples work out of the box; examples that submit transactions need operator credentials (below).
-> For a copy-pasteable project whose **only** dependency is `@hiero-enterprise/mirror` (plain `node`, no build step), see [`samples/mirror-standalone`](../mirror-standalone-sample).
 
 Each example is deliberately **self-contained** — client setup, constants, and small formatting helpers are repeated per file rather than shared, so any single file can be copied out as a complete, runnable starting point.
 
@@ -56,4 +55,4 @@ HIERO_ECDSA_OPERATOR_KEY=your_private_key
 
 | File | What it shows | Credentials |
 |------|---------------|-------------|
-| [`mirror/queries.ts`](./src/mirror/queries.ts) | The two non-obvious parts of `@hiero-enterprise/mirror`: composing filter/query properties (`limit`, `order`, `transactionType`, `timestamp: { gte }`) and walking pagination three ways — manual `page.next()`, streaming `paginate(...)`, one-shot `collectAll(...)` | None (mirror read) |
+| [`mirror/queries.ts`](./src/mirror/queries.ts) | The two non-obvious parts of `@hiero-hackers/enterprise-mirror`: composing filter/query properties (`limit`, `order`, `transactionType`, `timestamp: { gte }`) and walking pagination three ways — manual `page.next()`, streaming `paginate(...)`, one-shot `collectAll(...)` | None (mirror read) |

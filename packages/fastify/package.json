@@ -1,5 +1,5 @@
 {
-    "name": "@hiero-enterprise/fastify",
+    "name": "@hiero-hackers/enterprise-fastify",
     "version": "0.1.0",
     "description": "Fastify plugin for the Hiero network",
     "license": "Apache-2.0",
@@ -45,8 +45,8 @@
         "test:watch": "vitest test/integration"
     },
     "dependencies": {
-        "@hiero-enterprise/core": "workspace:*",
-        "@hiero-enterprise/mirror": "workspace:*",
+        "@hiero-hackers/enterprise-core": "workspace:*",
+        "@hiero-hackers/enterprise-mirror": "workspace:*",
         "fastify-plugin": "^5.1.0"
     },
     "peerDependencies": {

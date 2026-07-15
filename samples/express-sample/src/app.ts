@@ -1,6 +1,6 @@
 import "dotenv/config";
 import express from "express";
-import { hieroMiddleware } from "@hiero-enterprise/express";
+import { hieroMiddleware } from "@hiero-hackers/enterprise-express";
 
 const app = express();
 app.use(express.json());

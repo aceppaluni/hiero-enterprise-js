@@ -15,9 +15,9 @@ import {
     AccountService,
     HieroContext,
     PrivateKey,
-} from "@hiero-enterprise/core";
+} from "@hiero-hackers/enterprise-core";
 import { getED25519Config } from "../env.js";
-import type { ScheduleOptions } from "@hiero-enterprise/core";
+import type { ScheduleOptions } from "@hiero-hackers/enterprise-core";
 
 async function main() {
     const context = new HieroContext(getED25519Config());

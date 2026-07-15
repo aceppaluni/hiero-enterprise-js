@@ -3,7 +3,7 @@ import {
     HieroContext,
     TokenService,
     TopicService,
-} from "@hiero-enterprise/core";
+} from "@hiero-hackers/enterprise-core";
 import { MirrorNodeClient } from "../../src/client/MirrorNodeClient.js";
 import { createMirrorRepositories } from "../../src/repositories/factory.js";
 import type { MirrorRepositories } from "../../src/repositories/factory.js";

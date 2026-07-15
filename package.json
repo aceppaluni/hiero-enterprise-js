@@ -14,13 +14,13 @@
         "test:watch": "pnpm -r run test:watch",
         "lint": "eslint . --fix",
         "format": "prettier --write .",
-        "example": "pnpm --filter @hiero-enterprise/examples examples",
+        "example": "pnpm --filter @hiero-hackers/examples examples",
         "conventions": "node scripts/check-conventions.mjs"
     },
     "devDependencies": {
         "@arethetypeswrong/cli": "0.18.4",
         "@eslint/js": "^10.0.1",
-        "@hiero-enterprise/core": "workspace:*",
+        "@hiero-hackers/enterprise-core": "workspace:*",
         "@nestjs/testing": "^11.1.24",
         "@types/express": "^5.0.0",
         "@types/node": "^25.9.3",

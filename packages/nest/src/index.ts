@@ -15,12 +15,12 @@ import {
     TokenService,
     ContractService,
     TopicService,
-} from "@hiero-enterprise/core";
+} from "@hiero-hackers/enterprise-core";
 import {
     MirrorNodeClient,
     mirrorConfigFromEnv,
     MIRROR_REPOSITORY_TOKENS,
-} from "@hiero-enterprise/mirror";
+} from "@hiero-hackers/enterprise-mirror";
 import type { HieroAdapterConfig, HieroRuntime } from "./runtime.js";
 import { createHieroRuntime } from "./runtime.js";
 
@@ -85,7 +85,7 @@ export interface HieroModuleAsyncOptions {
  * @example
  * ```ts
  * // Option 1: Environment-based config
- * import { HieroModule } from '@hiero-enterprise/nest';
+ * import { HieroModule } from '@hiero-hackers/enterprise-nest';
  * @Module({ imports: [HieroModule.forRoot()] })
  * export class AppModule {}
  *
@@ -203,7 +203,7 @@ export {
     TopicService,
     MirrorNodeClient,
 };
-export { AccountType, OperatorKeyType } from "@hiero-enterprise/core";
+export { AccountType, OperatorKeyType } from "@hiero-hackers/enterprise-core";
 export {
     AccountRepository,
     NftRepository,
@@ -214,8 +214,8 @@ export {
     ScheduleRepository,
     BlockRepository,
     ContractRepository,
-} from "@hiero-enterprise/mirror";
-export type { HieroConfig } from "@hiero-enterprise/core";
+} from "@hiero-hackers/enterprise-mirror";
+export type { HieroConfig } from "@hiero-hackers/enterprise-core";
 export type { HieroAdapterConfig };
 export type { HieroServices } from "./runtime.js";
 

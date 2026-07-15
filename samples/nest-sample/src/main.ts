@@ -12,7 +12,7 @@ import {
     NetworkRepository,
     HieroModule,
     AccountType,
-} from "@hiero-enterprise/nest";
+} from "@hiero-hackers/enterprise-nest";
 
 // ─── Controllers ──────────────────────────────────────────────
 

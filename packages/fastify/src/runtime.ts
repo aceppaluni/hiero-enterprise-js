@@ -1,4 +1,4 @@
-import type { HieroConfig } from "@hiero-enterprise/core";
+import type { HieroConfig } from "@hiero-hackers/enterprise-core";
 import {
     HieroContext,
     AccountService,
@@ -7,16 +7,16 @@ import {
     TokenService,
     ContractService,
     TopicService,
-} from "@hiero-enterprise/core";
+} from "@hiero-hackers/enterprise-core";
 import type {
     MirrorConfig,
     MirrorNodeClient,
     MirrorRepositories,
-} from "@hiero-enterprise/mirror";
+} from "@hiero-hackers/enterprise-mirror";
 import {
     createMirrorNodeClient,
     createMirrorRepositories,
-} from "@hiero-enterprise/mirror";
+} from "@hiero-hackers/enterprise-mirror";
 
 /**
  * Combined configuration for a full Hiero integration: the SDK/consensus
@@ -27,8 +27,8 @@ export type HieroAdapterConfig = HieroConfig & MirrorConfig;
 
 /**
  * All services made available through the framework integration —
- * write-side services from `@hiero-enterprise/core`, plus every read-side
- * repository from `@hiero-enterprise/mirror` (one property per
+ * write-side services from `@hiero-hackers/enterprise-core`, plus every read-side
+ * repository from `@hiero-hackers/enterprise-mirror` (one property per
  * {@link MirrorRepositories} entry, so new repositories appear here
  * without adapter changes).
  */

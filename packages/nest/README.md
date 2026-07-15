@@ -1,13 +1,13 @@
-# @hiero-enterprise/nest
+# @hiero-hackers/enterprise-nest
 
 NestJS module for Hiero. **This is the only package you install** — it
-composes `@hiero-enterprise/core` (write-side SDK services) and
-`@hiero-enterprise/mirror` (read-side REST repositories) and registers
+composes `@hiero-hackers/enterprise-core` (write-side SDK services) and
+`@hiero-hackers/enterprise-mirror` (read-side REST repositories) and registers
 everything as injectable providers. You never import core or mirror
 directly; every class you inject is re-exported from this package.
 
 ```bash
-npm install @hiero-enterprise/nest
+npm install @hiero-hackers/enterprise-nest
 ```
 
 > **Note:** not yet published to npm — see [CONTRIBUTING](../../CONTRIBUTING.md) to run from the repo.
@@ -18,7 +18,7 @@ import {
     HieroModule,
     AccountService,
     AccountRepository,
-} from "@hiero-enterprise/nest";
+} from "@hiero-hackers/enterprise-nest";
 
 @Module({ imports: [HieroModule.forRoot()] }) // env config; forRoot(config) / forRootAsync also available
 export class AppModule {}
@@ -88,8 +88,7 @@ shape feeds both the SDK and mirror sides.
 
 Only using reads? The repositories work without operator credentials —
 but if your service never writes, consider depending on
-`@hiero-enterprise/mirror` alone instead
-([smallest possible project](../../samples/mirror-standalone-sample)).
+`@hiero-hackers/enterprise-mirror` alone instead.
 
 A runnable service using this adapter:
 [`samples/nest-sample`](../../samples/nest-sample).

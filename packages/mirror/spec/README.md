@@ -32,7 +32,7 @@ gh api repos/hiero-ledger/hiero-mirror-node/commits/main --jq '.sha[0:7] + " " +
   > packages/mirror/spec/SNAPSHOT
 
 # 2. See exactly what changed for the client
-pnpm --filter @hiero-enterprise/mirror run test:unit
+pnpm --filter @hiero-hackers/enterprise-mirror run test:unit
 ```
 
 If `spec-coverage.test.ts` fails, it prints the precise list of new or

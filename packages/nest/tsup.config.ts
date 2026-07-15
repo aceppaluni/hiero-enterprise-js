@@ -11,6 +11,6 @@ export default defineConfig({
         "@nestjs/common",
         "@nestjs/core",
         "reflect-metadata",
-        "@hiero-enterprise/core",
+        "@hiero-hackers/enterprise-core",
     ],
 });

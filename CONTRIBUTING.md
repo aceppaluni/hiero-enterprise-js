@@ -67,11 +67,11 @@ pnpm format
 | What it proves                             | Command                                                                                                                             | Network needed                              |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
 | All packages' unit tests                   | `pnpm test`                                                                                                                         | none                                        |
-| Mirror unit tests + spec-coverage tripwire | `pnpm --filter @hiero-enterprise/mirror test`                                                                                       | none                                        |
-| Mirror unit tests with coverage gates      | `pnpm --filter @hiero-enterprise/mirror run test:unit:coverage`                                                                     | none                                        |
-| Core SDK end-to-end                        | `pnpm --filter @hiero-enterprise/core run test:integration`                                                                         | local Solo                                  |
-| Mirror write→read round-trips              | `pnpm --filter @hiero-enterprise/mirror run test:integration`                                                                       | local Solo (self-skips without credentials) |
-| Live behavior of every mirror query        | `pnpm --filter @hiero-enterprise/examples examples mirror` (also weekly via [`mainnet-smoke`](.github/workflows/mainnet-smoke.yml)) | public mainnet (read-only, keyless)         |
+| Mirror unit tests + spec-coverage tripwire | `pnpm --filter @hiero-hackers/enterprise-mirror test`                                                                                       | none                                        |
+| Mirror unit tests with coverage gates      | `pnpm --filter @hiero-hackers/enterprise-mirror run test:unit:coverage`                                                                     | none                                        |
+| Core SDK end-to-end                        | `pnpm --filter @hiero-hackers/enterprise-core run test:integration`                                                                         | local Solo                                  |
+| Mirror write→read round-trips              | `pnpm --filter @hiero-hackers/enterprise-mirror run test:integration`                                                                       | local Solo (self-skips without credentials) |
+| Live behavior of every mirror query        | `pnpm --filter @hiero-hackers/examples examples mirror` (also weekly via [`mainnet-smoke`](.github/workflows/mainnet-smoke.yml)) | public mainnet (read-only, keyless)         |
 | Upstream OpenAPI spec drift                | weekly [`spec-drift`](.github/workflows/spec-drift.yml) workflow, or `gh workflow run spec-drift.yml`                               | GitHub                                      |
 | Response-field completeness                | `node spec/diff-response-fields.mjs` from `packages/mirror` (also a CI step)                                                        | none                                        |
 
@@ -126,7 +126,7 @@ mirror node right after the core integration tests, using the same
 environment variables:
 
 ```bash
-pnpm --filter @hiero-enterprise/mirror run test:integration
+pnpm --filter @hiero-hackers/enterprise-mirror run test:integration
 ```
 
 The suite auto-loads the same `packages/core/test/.env` described above, so
@@ -144,12 +144,12 @@ HIERO_OPERATOR_ID=0.0.xxxx \
 HIERO_OPERATOR_KEY=... \
 HIERO_OPERATOR_KEY_TYPE=ECDSA \
 HIERO_MIRROR_NODE_URL=https://testnet.mirrornode.hedera.com \
-pnpm --filter @hiero-enterprise/mirror run test:integration
+pnpm --filter @hiero-hackers/enterprise-mirror run test:integration
 ```
 
 ### Mirror spec coverage & drift
 
-`@hiero-enterprise/mirror` claims **complete** coverage of the mirror node
+`@hiero-hackers/enterprise-mirror` claims **complete** coverage of the mirror node
 REST API, and that claim is enforced rather than aspirational:
 
 - The official OpenAPI spec is vendored at
@@ -190,7 +190,7 @@ Adding an endpoint touches one spot in each layer, in this order:
    case, and — for a new endpoint or parameter — an update to
    [`test/spec/coverage-manifest.ts`](packages/mirror/test/spec/coverage-manifest.ts).
 
-Then `pnpm --filter @hiero-enterprise/mirror test` — the spec-coverage and
+Then `pnpm --filter @hiero-hackers/enterprise-mirror test` — the spec-coverage and
 field-diff checks tell you immediately if a layer was missed. The refresh
 runbook for the vendored spec itself lives in
 [`packages/mirror/spec/README.md`](packages/mirror/spec/README.md).
@@ -211,7 +211,7 @@ if it passes, you follow the conventions.
 | Cross-cutting unit suites | `test/unit/` root, descriptive kebab name | `spec-coverage.test.ts` |
 | Integration test | `*.spec.ts`, grouped by feature domain | `test/integration/account/…` |
 | Cross-domain integration flows | `test/integration/` root | `key-types.spec.ts` |
-| Sample directory / package | `<thing>-sample` / `hiero-<thing>-sample`, version `1.0.0` | `mirror-standalone-sample` |
+| Sample directory / package | `<thing>-sample` / `hiero-<thing>-sample`, version `1.0.0` | `express-sample` |
 | Shared types | in `src/types/`, exported via the `types/index.ts` barrel | `types/page.ts` |
 | Companion types (one class's options) | stay in the class's file; named type re-exports use `export type` | `export type { MirrorNodeClientOptions }` |
 
@@ -224,11 +224,11 @@ check (all from the repo root; CI runs every one of these on push):
 
 | Claim | Check | Pass looks like |
 |---|---|---|
-| Source types compile (strict) | `pnpm --filter @hiero-enterprise/mirror exec tsc --noEmit` | no output |
+| Source types compile (strict) | `pnpm --filter @hiero-hackers/enterprise-mirror exec tsc --noEmit` | no output |
 | Packed `exports` serve matching JS + declarations in every consumer mode | `cd packages/mirror && npx @arethetypeswrong/cli --pack` | all 🟢, "No problems found" |
 | Wire types match the mirror node OpenAPI spec, field by field | `cd packages/mirror && node spec/diff-response-fields.mjs` | exit 0 |
-| Converters behave, not just typecheck | `pnpm --filter @hiero-enterprise/mirror test` | all tests pass |
-| Types survive real mainnet responses | `pnpm --filter mirror-standalone-sample start` | live figures, no `undefined`/`NaN` |
+| Converters behave, not just typecheck | `pnpm --filter @hiero-hackers/enterprise-mirror test` | all tests pass |
+| Types survive real mainnet responses | `HIERO_MIRROR_NODE_URL=https://mainnet.mirrornode.hedera.com pnpm --filter @hiero-hackers/examples examples mirror` | live figures, no `undefined`/`NaN` |
 
 The same applies to every package (`core`, `express`, `fastify`,
 `nest`) — substitute the package name in the first two commands. The

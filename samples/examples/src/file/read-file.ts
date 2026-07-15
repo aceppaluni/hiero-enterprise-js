@@ -21,7 +21,7 @@
  * Run: pnpm tsx src/file/read-file.ts
  */
 
-import { FileService, HieroContext } from "@hiero-enterprise/core";
+import { FileService, HieroContext } from "@hiero-hackers/enterprise-core";
 import { getED25519Config } from "../env.js";
 
 /**

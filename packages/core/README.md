@@ -1,21 +1,21 @@
-# @hiero-enterprise/core
+# @hiero-hackers/enterprise-core
 
 The write side of Hiero for Node.js: typed services over the SDK for
 transactions that go on-chain — signed by your operator account,
 carrying fees. The read side (free mirror node REST queries) lives in
-[`@hiero-enterprise/mirror`](../mirror); if you're building an
+[`@hiero-hackers/enterprise-mirror`](../mirror); if you're building an
 Express/Fastify/NestJS service, install the
 [framework adapter](../../README.md#which-package-do-i-install)
 instead and receive both sides pre-composed.
 
 ```bash
-npm install @hiero-enterprise/core
+npm install @hiero-hackers/enterprise-core
 ```
 
 > **Note:** not yet published to npm — see [CONTRIBUTING](../../CONTRIBUTING.md) to run from the repo.
 
 ```ts
-import { HieroContext, AccountService } from "@hiero-enterprise/core";
+import { HieroContext, AccountService } from "@hiero-hackers/enterprise-core";
 
 const context = new HieroContext({
     network: "testnet",

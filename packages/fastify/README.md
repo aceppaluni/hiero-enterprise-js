@@ -1,20 +1,20 @@
-# @hiero-enterprise/fastify
+# @hiero-hackers/enterprise-fastify
 
 Fastify plugin for Hiero. **This is the only package you install** — it
-composes `@hiero-enterprise/core` (write-side SDK services) and
-`@hiero-enterprise/mirror` (read-side REST repositories) and decorates
+composes `@hiero-hackers/enterprise-core` (write-side SDK services) and
+`@hiero-hackers/enterprise-mirror` (read-side REST repositories) and decorates
 the instance as `fastify.hiero`. You never import core or mirror
 directly.
 
 ```bash
-npm install @hiero-enterprise/fastify
+npm install @hiero-hackers/enterprise-fastify
 ```
 
 > **Note:** not yet published to npm — see [CONTRIBUTING](../../CONTRIBUTING.md) to run from the repo.
 
 ```ts
 import Fastify from "fastify";
-import { hieroPlugin } from "@hiero-enterprise/fastify";
+import { hieroPlugin } from "@hiero-hackers/enterprise-fastify";
 
 const app = Fastify();
 await app.register(hieroPlugin); // config from HIERO_* env vars, or pass options
@@ -78,8 +78,7 @@ shape feeds both the SDK and mirror sides.
 
 Only using reads? The repositories work without operator credentials —
 but if your service never writes, consider depending on
-`@hiero-enterprise/mirror` alone instead
-([smallest possible project](../../samples/mirror-standalone-sample)).
+`@hiero-hackers/enterprise-mirror` alone instead.
 
 A runnable service using this adapter:
 [`samples/fastify-sample`](../../samples/fastify-sample).

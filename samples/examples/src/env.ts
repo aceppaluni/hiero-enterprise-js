@@ -1,4 +1,4 @@
-import type { HieroConfig } from "@hiero-enterprise/core";
+import type { HieroConfig } from "@hiero-hackers/enterprise-core";
 
 /**
  * Parse HIERO_NETWORK_NODES env var.

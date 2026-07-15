@@ -13,7 +13,7 @@ import {
     HieroContext,
     PrivateKey,
     Hbar,
-} from "@hiero-enterprise/core";
+} from "@hiero-hackers/enterprise-core";
 import { getED25519Config } from "../env.js";
 
 async function main() {

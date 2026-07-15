@@ -1,6 +1,6 @@
 # Express Sample
 
-A REST API built with [Express](https://expressjs.com/) and `@hiero-enterprise/express` demonstrating how to query accounts, tokens, NFTs, topics, and network data from a Hiero network.
+A REST API built with [Express](https://expressjs.com/) and `@hiero-hackers/enterprise-express` demonstrating how to query accounts, tokens, NFTs, topics, and network data from a Hiero network.
 
 ## Setup
 
@@ -46,7 +46,7 @@ pnpm --filter hiero-express-sample start
 The key integration point is `hieroMiddleware()`:
 
 ```ts
-import { hieroMiddleware } from '@hiero-enterprise/express';
+import { hieroMiddleware } from '@hiero-hackers/enterprise-express';
 
 app.use(hieroMiddleware());
 ```
