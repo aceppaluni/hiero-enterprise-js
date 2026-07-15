@@ -1,3 +1,4 @@
+import { MirrorError, MirrorErrorCodes } from "../errors/MirrorError.js";
 import type { SortOrder } from "../types/index.js";
 
 /**
@@ -99,7 +100,7 @@ export interface KeysetPaginatorOptions<
     readonly keyOf: (item: T) => K;
     /** Display sort order, fixed for the paginator's life. Default `"desc"`. */
     readonly order?: SortOrder;
-    /** Page size. Default `25`. */
+    /** Page size, an integer >= 1. Default `25`. */
     readonly limit?: number;
 }
 
@@ -136,7 +137,18 @@ export class KeysetPaginator<T, K extends string | number = string | number> {
         this.load = options.load;
         this.keyOf = options.keyOf;
         this.order = options.order ?? "desc";
-        this.limit = options.limit ?? DEFAULT_LIMIT;
+
+        const limit = options.limit ?? DEFAULT_LIMIT;
+        // A short fetch is how `first`/`next`/`previous` detect the end of the
+        // listing, so a limit below 1 would make `rows.length < limit` never
+        // true and strand the paginator's boundary flags.
+        if (!Number.isInteger(limit) || limit < 1) {
+            throw new MirrorError(
+                `limit must be an integer >= 1, got ${limit}.`,
+                { code: MirrorErrorCodes.ConfigInvalid },
+            );
+        }
+        this.limit = limit;
     }
 
     /** The items on the current page, in display order (empty before `first`). */

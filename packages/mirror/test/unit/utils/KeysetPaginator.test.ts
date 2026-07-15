@@ -4,6 +4,7 @@ import {
     type KeysetBound,
     type KeysetLoad,
 } from "../../../src/utils/KeysetPaginator.js";
+import { MirrorError } from "../../../src/errors/MirrorError.js";
 import type { SortOrder } from "../../../src/types/index.js";
 
 interface Row {
@@ -193,6 +194,21 @@ describe("KeysetPaginator — edges", () => {
         expect(keysOf(pager.items)).toEqual([3, 2, 1]);
         expect(calls[0]).toEqual({ bound: null, order: "desc" });
     });
+
+    it.each([0, -1, 1.5, NaN])(
+        "rejects a limit of %s at construction",
+        (limit) => {
+            const { load } = makeStore([1, 2, 3]);
+            expect(
+                () =>
+                    new KeysetPaginator({
+                        load,
+                        keyOf: (r: Row) => r.key,
+                        limit,
+                    }),
+            ).toThrow(MirrorError);
+        },
+    );
 
     it("recognises page one again when stepping back onto the original head", async () => {
         const store = makeStore([1, 2, 3, 4, 5, 6]);
