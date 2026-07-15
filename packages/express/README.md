@@ -78,8 +78,7 @@ same shape feeds both the SDK and mirror sides.
 
 Only using reads? The repositories work without operator credentials —
 but if your service never writes, consider depending on
-`@hiero-hackers/enterprise-mirror` alone instead
-([smallest possible project](../../samples/mirror-standalone-sample)).
+`@hiero-hackers/enterprise-mirror` alone instead.
 
 A runnable service using this adapter:
 [`samples/express-sample`](../../samples/express-sample).

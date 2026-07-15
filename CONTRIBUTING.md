@@ -211,7 +211,7 @@ if it passes, you follow the conventions.
 | Cross-cutting unit suites | `test/unit/` root, descriptive kebab name | `spec-coverage.test.ts` |
 | Integration test | `*.spec.ts`, grouped by feature domain | `test/integration/account/…` |
 | Cross-domain integration flows | `test/integration/` root | `key-types.spec.ts` |
-| Sample directory / package | `<thing>-sample` / `hiero-<thing>-sample`, version `1.0.0` | `mirror-standalone-sample` |
+| Sample directory / package | `<thing>-sample` / `hiero-<thing>-sample`, version `1.0.0` | `express-sample` |
 | Shared types | in `src/types/`, exported via the `types/index.ts` barrel | `types/page.ts` |
 | Companion types (one class's options) | stay in the class's file; named type re-exports use `export type` | `export type { MirrorNodeClientOptions }` |
 
@@ -228,7 +228,7 @@ check (all from the repo root; CI runs every one of these on push):
 | Packed `exports` serve matching JS + declarations in every consumer mode | `cd packages/mirror && npx @arethetypeswrong/cli --pack` | all 🟢, "No problems found" |
 | Wire types match the mirror node OpenAPI spec, field by field | `cd packages/mirror && node spec/diff-response-fields.mjs` | exit 0 |
 | Converters behave, not just typecheck | `pnpm --filter @hiero-hackers/enterprise-mirror test` | all tests pass |
-| Types survive real mainnet responses | `pnpm --filter mirror-standalone-sample start` | live figures, no `undefined`/`NaN` |
+| Types survive real mainnet responses | `HIERO_MIRROR_NODE_URL=https://mainnet.mirrornode.hedera.com pnpm --filter @hiero-hackers/examples examples mirror` | live figures, no `undefined`/`NaN` |
 
 The same applies to every package (`core`, `express`, `fastify`,
 `nest`) — substitute the package name in the first two commands. The

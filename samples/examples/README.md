@@ -20,7 +20,6 @@ npx tsx src/mirror/queries.ts
 ```
 
 > These examples make **live network calls**. Read-only mirror-node examples work out of the box; examples that submit transactions need operator credentials (below).
-> For a copy-pasteable project whose **only** dependency is `@hiero-hackers/enterprise-mirror` (plain `node`, no build step), see [`samples/mirror-standalone`](../mirror-standalone-sample).
 
 Each example is deliberately **self-contained** — client setup, constants, and small formatting helpers are repeated per file rather than shared, so any single file can be copied out as a complete, runnable starting point.
 

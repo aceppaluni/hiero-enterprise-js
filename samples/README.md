@@ -7,13 +7,10 @@ Sample projects demonstrating how to use `@hiero-hackers/*` packages with differ
 | [express-sample](./express-sample) | Express | 3000 | Middleware — `req.hiero.*` |
 | [fastify-sample](./fastify-sample) | Fastify | 3001 | Plugin — `app.hiero.*` |
 | [nest-sample](./nest-sample) | NestJS | 3002 | DI — `@Inject()` constructors |
-| [mirror-standalone](./mirror-standalone-sample) | none | — | Single-dependency project: `@hiero-hackers/enterprise-mirror` only, plain `node`, no `.env` |
 
 Also in this directory: [examples](./examples), a gallery of standalone
 scripts by domain (account, token, topic, …, mirror). The mirror scripts
-there run without credentials too — the gallery just bundles core +
-mirror in one package, so `mirror-standalone-sample` exists to show the
-one-dependency footprint.
+there run without credentials.
 
 ## Quick Start
 
@@ -32,8 +29,8 @@ pnpm --filter hiero-express-sample dev    # port 3000
 pnpm --filter hiero-fastify-sample dev    # port 3001
 pnpm --filter hiero-nest-sample dev       # port 3002
 
-# mirror-standalone-sample needs no .env at all:
-pnpm --filter mirror-standalone-sample start
+# the mirror examples need no .env at all:
+pnpm --filter @hiero-hackers/examples examples mirror
 ```
 
 > **Note:** Each sample has its own `.env.example`. Copy it to `.env` inside that sample's directory (e.g. `samples/fastify-sample/.env`), not in the monorepo root.
