@@ -62,6 +62,35 @@ pnpm lint
 pnpm format
 ```
 
+## Installing the published packages
+
+Releases are published to the **GitHub Packages npm registry**, not
+npmjs.org. GitHub Packages requires authentication even for public
+packages, so consumers need two lines of `.npmrc` and a token with
+`read:packages`:
+
+```ini
+# .npmrc (consumer project root)
+@hiero-hackers:registry=https://npm.pkg.github.com/
+//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
+```
+
+```bash
+npm install @hiero-hackers/enterprise-mirror
+```
+
+- **CI** — use a repo/org secret holding a token with `read:packages`,
+  exported as `NODE_AUTH_TOKEN` in the workflow environment.
+- **Local development** — create a classic personal access token with the
+  `read:packages` scope and export it as `NODE_AUTH_TOKEN` (or put it in
+  your user-level `~/.npmrc`; never commit a token).
+- **This monorepo's own workspaces** are unaffected — `workspace:*`
+  dependencies resolve locally and never hit the registry.
+
+Publishing happens only in CI (`.github/workflows/release.yml`), on a
+version tag, using the workflow's own `GITHUB_TOKEN` — there is no
+publish token to manage.
+
 ### Test quick reference
 
 | What it proves                             | Command                                                                                                                             | Network needed                              |

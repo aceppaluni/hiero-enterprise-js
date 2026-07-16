@@ -48,7 +48,7 @@
         "test:watch": "vitest -c test/vitest.config.ts"
     },
     "publishConfig": {
-        "access": "public",
-        "provenance": true
+        "registry": "https://npm.pkg.github.com",
+        "access": "public"
     }
 }

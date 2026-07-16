@@ -13,7 +13,10 @@ framework adapter.
 npm install @hiero-hackers/enterprise-mirror
 ```
 
-> **Note:** not yet published to npm — see [CONTRIBUTING](../../CONTRIBUTING.md) to run from the repo.
+> **Note:** published to the GitHub Packages registry (not npmjs.org) — add
+> `@hiero-hackers:registry=https://npm.pkg.github.com/` and a `read:packages`
+> token to your `.npmrc` first; see
+> [CONTRIBUTING § Installing the published packages](../../CONTRIBUTING.md#installing-the-published-packages).
 
 ```ts
 import {
