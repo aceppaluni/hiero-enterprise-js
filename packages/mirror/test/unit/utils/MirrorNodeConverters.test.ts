@@ -252,6 +252,9 @@ describe("misc converters", () => {
             staking_period: { from: "1.0", to: "2.0" },
             staking_period_duration: 1440,
             staking_periods_stored: 365,
+            staking_reward_fee_fraction: 0,
+            staking_reward_rate: 100,
+            staking_start_threshold: 25000000000000000,
             unreserved_staking_reward_balance: 0,
         });
         expect(stake.stakeTotal).toBe(9);
@@ -388,5 +391,122 @@ describe("converter default branches", () => {
         const balance = convertBalance("0.0.9", { account: "0.0.9" });
         expect(balance.hbars).toBe("0");
         expect(balance.tokens).toEqual([]);
+    });
+});
+
+describe("convertAccountInfo — balance snapshot fields", () => {
+    // `/accounts/{id}` reports balance as { balance, timestamp, tokens }. Before
+    // this, only the number survived, so a caller wanting the other two had to
+    // re-request the identical URL via getBalance().
+    const raw = {
+        account: "0.0.1234",
+        balance: {
+            balance: 1026735128,
+            timestamp: "1780503998.708125000",
+            tokens: [{ token_id: "0.0.720", balance: 500, decimals: 6 }],
+        },
+    };
+
+    it("carries the balance timestamp", () => {
+        expect(convertAccountInfo(raw).balanceTimestamp).toBe(
+            "1780503998.708125000",
+        );
+    });
+
+    it("carries the token balances", () => {
+        expect(convertAccountInfo(raw).tokenBalances).toEqual([
+            { tokenId: "0.0.720", balance: "500", decimals: 6 },
+        ]);
+    });
+
+    it("agrees with convertBalance, which reads the same response", () => {
+        const account = convertAccountInfo(raw);
+        const balance = convertBalance("0.0.1234", raw);
+        expect(account.tokenBalances).toEqual(balance.tokens);
+        expect(account.balanceTimestamp).toEqual(balance.timestamp);
+        expect(String(account.balance)).toEqual(balance.hbars);
+    });
+
+    it("reports no tokens as an empty array, not undefined", () => {
+        expect(
+            convertAccountInfo({
+                account: "0.0.2",
+                balance: { balance: 1, timestamp: "1.0", tokens: [] },
+            }).tokenBalances,
+        ).toEqual([]);
+    });
+
+    it("tolerates an account with no balance object at all", () => {
+        const none = convertAccountInfo({ account: "0.0.3" });
+        expect(none.balance).toBe(0);
+        expect(none.balanceTimestamp).toBeUndefined();
+        expect(none.tokenBalances).toEqual([]);
+    });
+});
+
+describe("convertTransactionInfo — memo decoding", () => {
+    // `atob` alone yields a latin1 string, so multi-byte UTF-8 came back
+    // mangled: "café ℏ 🎉" → "cafÃ© â ð". ASCII survived, which is why it hid.
+    const b64 = (text: string): string =>
+        btoa(String.fromCharCode(...new TextEncoder().encode(text)));
+
+    const withMemo = (memo: string) =>
+        convertTransactionInfo({
+            transaction_id: "0.0.1-1-0",
+            result: "SUCCESS",
+            consensus_timestamp: "1.0",
+            valid_start_timestamp: "1.0",
+            charged_tx_fee: 1,
+            memo_base64: b64(memo),
+        } as never);
+
+    it.each([
+        ["INV-2026-041", "ASCII — the regression case"],
+        ["café", "latin-1 supplement"],
+        ["café ℏ 🎉", "accent + currency symbol + emoji"],
+        ["日本語のメモ", "CJK"],
+        ["Ω≈ç√∫˜µ≤≥÷", "assorted multi-byte"],
+    ])("round-trips %j (%s)", (memo) => {
+        expect(withMemo(memo).memo).toBe(memo);
+    });
+
+    it("returns undefined when there is no memo", () => {
+        expect(
+            convertTransactionInfo({
+                transaction_id: "0.0.1-1-0",
+                result: "SUCCESS",
+                consensus_timestamp: "1.0",
+                valid_start_timestamp: "1.0",
+                charged_tx_fee: 1,
+            } as never).memo,
+        ).toBeUndefined();
+    });
+
+    it("treats an empty memo as absent, as before", () => {
+        expect(
+            convertTransactionInfo({
+                transaction_id: "0.0.1-1-0",
+                result: "SUCCESS",
+                consensus_timestamp: "1.0",
+                valid_start_timestamp: "1.0",
+                charged_tx_fee: 1,
+                memo_base64: "",
+            } as never).memo,
+        ).toBeUndefined();
+    });
+
+    it("substitutes U+FFFD for a non-UTF-8 memo rather than throwing", () => {
+        // A memo is 100 arbitrary bytes; nothing requires it to be text. 0xFF is
+        // not valid UTF-8. Whether lossy substitution is the right answer is
+        // hiero-hackers/hiero-enterprise-js#135 — this pins today's behaviour.
+        const raw = convertTransactionInfo({
+            transaction_id: "0.0.1-1-0",
+            result: "SUCCESS",
+            consensus_timestamp: "1.0",
+            valid_start_timestamp: "1.0",
+            charged_tx_fee: 1,
+            memo_base64: btoa("\xff\xfe"),
+        } as never);
+        expect(raw.memo).toBe("\uFFFD\uFFFD");
     });
 });

@@ -3,6 +3,7 @@ import { MirrorNodeClient } from "../../../src/client/MirrorNodeClient.js";
 import {
     MirrorError,
     MirrorErrorCodes,
+    orNull,
 } from "../../../src/errors/MirrorError.js";
 
 describe("MirrorNodeClient", () => {
@@ -43,6 +44,35 @@ describe("MirrorNodeClient", () => {
             );
             await expect(client.queryAccount("0.0.1")).rejects.toThrow(
                 MirrorError,
+            );
+        });
+
+        it("throws NotFound with the status on a 404", async () => {
+            vi.spyOn(globalThis, "fetch").mockResolvedValue(
+                new Response(null, { status: 404, statusText: "Not Found" }),
+            );
+            await expect(client.queryAccount("0.0.1")).rejects.toMatchObject({
+                code: MirrorErrorCodes.NotFound,
+                status: 404,
+            });
+        });
+
+        it("throws MirrorNodeHttpError with the status on other HTTP errors", async () => {
+            vi.spyOn(globalThis, "fetch").mockResolvedValue(
+                new Response(null, { status: 400, statusText: "Bad Request" }),
+            );
+            await expect(client.queryAccount("0.0.1")).rejects.toMatchObject({
+                code: MirrorErrorCodes.MirrorNodeHttpError,
+                status: 400,
+            });
+        });
+
+        it("resolves to null through orNull on a 404", async () => {
+            vi.spyOn(globalThis, "fetch").mockResolvedValue(
+                new Response(null, { status: 404, statusText: "Not Found" }),
+            );
+            await expect(orNull(client.queryAccount("0.0.1"))).resolves.toBe(
+                null,
             );
         });
     });

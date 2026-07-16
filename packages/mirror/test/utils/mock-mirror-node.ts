@@ -81,6 +81,7 @@ export function createMockMirrorNodeClient(): MockMirrorNodeClient {
         queryStakingRewards: () => Promise.resolve(emptyPage()),
         queryFeeEstimate: () => Promise.resolve(feeEstimate()),
         fetchNextPage: () => Promise.resolve(emptyPage()),
+        get: () => Promise.reject(new Error("not mocked")),
     };
 }
 
@@ -264,6 +265,7 @@ function contractDetail(): MirrorContractDetail {
         nonce: null,
         obtainerId: null,
         permanentRemoval: null,
+        proxyAccountId: null,
         timestamp: { from: "1.0", to: null },
         bytecode: null,
         runtimeBytecode: null,

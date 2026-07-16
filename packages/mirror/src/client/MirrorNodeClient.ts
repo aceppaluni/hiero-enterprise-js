@@ -438,8 +438,17 @@ export class MirrorNodeClient {
                     `Mirror node returned ${response.status}: ${response.statusText}` +
                         (detail ? ` — ${detail}` : ""),
                     {
-                        code: MirrorErrorCodes.MirrorNodeHttpError,
+                        // 404 is `NotFound`, the same code an empty listing
+                        // raises, so "does it exist?" is answerable one way
+                        // (`orNull`) no matter how the endpoint reports absence.
+                        code:
+                            response.status === 404
+                                ? MirrorErrorCodes.NotFound
+                                : MirrorErrorCodes.MirrorNodeHttpError,
                         context: path,
+                        // Carried so callers can act on it without parsing
+                        // `message` — e.g. distinguishing 400 from 409.
+                        status: response.status,
                     },
                 );
             }
