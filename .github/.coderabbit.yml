@@ -1,9 +1,0 @@
-issue_enrichment:
-  planning:
-    enabled: true
-    auto_planning:
-      enabled: true
-      labels:
-        - "plan-me" # Auto-plan issues with this label
-        - "feature" # Also auto-plan these
-        - "!no-plan" # Never auto-plan issues with this label
