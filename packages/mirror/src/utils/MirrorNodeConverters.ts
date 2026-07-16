@@ -144,6 +144,13 @@ export function convertAccountInfo(
         delegationAddress: raw.delegation_address ?? undefined,
         key: convertKey(raw.key),
         balance: raw.balance?.balance ?? 0,
+        // `/accounts/{id}` reports balance as { balance, timestamp, tokens }.
+        // Carry the other two through rather than dropping them: `timestamp` is
+        // what makes `balance` meaningful (it is a snapshot), and without
+        // `tokenBalances` a caller who wants them has to re-request this exact
+        // same URL via `getBalance`.
+        balanceTimestamp: raw.balance?.timestamp,
+        tokenBalances: convertTokenBalances(raw),
         deleted: raw.deleted ?? false,
         autoRenewPeriod: raw.auto_renew_period,
         memo: raw.memo,
@@ -160,20 +167,26 @@ export function convertAccountInfo(
     };
 }
 
-export function convertBalance(
-    accountId: string,
-    raw: MirrorAccountResponse,
-): Balance {
-    const tokens: TokenBalance[] = (raw.balance?.tokens ?? []).map((t) => ({
+/** The token balances an `/accounts/{id}` response carries alongside the HBAR
+ *  balance. Shared by `convertAccountInfo` and `convertBalance`, which read the
+ *  same response and must not disagree about it. */
+function convertTokenBalances(raw: MirrorAccountResponse): TokenBalance[] {
+    return (raw.balance?.tokens ?? []).map((t) => ({
         tokenId: t.token_id,
         balance: String(t.balance),
         decimals: t.decimals,
     }));
+}
+
+export function convertBalance(
+    accountId: string,
+    raw: MirrorAccountResponse,
+): Balance {
     return {
         accountId,
         hbars: String(raw.balance?.balance ?? 0),
         timestamp: raw.balance?.timestamp,
-        tokens,
+        tokens: convertTokenBalances(raw),
     };
 }
 
@@ -391,6 +404,30 @@ export function convertTopicMessage(
 
 // ─── Transactions ────────────────────────────────────────────────
 
+/**
+ * Decode a base64 memo to text.
+ *
+ * **Not `atob` alone.** `atob` yields a *latin1* string — one character per
+ * byte — so any multi-byte UTF-8 sequence comes back mangled and looking
+ * plausible: `"café ℏ 🎉"` decodes to `"cafÃ© â ð"`. Pure ASCII survives,
+ * which is why the bug hides. The bytes have to be reinterpreted as UTF-8.
+ *
+ * `TextDecoder`, not `Buffer`: this package uses only isomorphic globals
+ * (`fetch`, `atob`) and pulls in no Node built-ins, so it can be bundled for a
+ * browser — which the mirror-node explorer does.
+ *
+ * A memo is 100 arbitrary bytes and nothing requires it to be text. Invalid
+ * sequences become U+FFFD here, which is lossy; exposing the raw bytes, or
+ * decoding with `{ fatal: true }` and letting callers decide, is the open
+ * question in hiero-hackers/hiero-enterprise-js#135 and deliberately not
+ * settled here.
+ */
+function decodeMemo(memoBase64: string): string {
+    const binary = atob(memoBase64);
+    const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+}
+
 export function convertTransactionInfo(
     raw: MirrorTransaction,
 ): TransactionInfo {
@@ -403,7 +440,7 @@ export function convertTransactionInfo(
         validStartTimestamp: raw.valid_start_timestamp,
         successful: raw.result === "SUCCESS",
         chargedTxFee: raw.charged_tx_fee,
-        memo: raw.memo_base64 ? atob(raw.memo_base64) : undefined,
+        memo: raw.memo_base64 ? decodeMemo(raw.memo_base64) : undefined,
         transfers: (raw.transfers ?? []).map(convertTransfer),
         tokenTransfers: (raw.token_transfers ?? []).map(convertTokenTransfer),
         nftTransfers: (raw.nft_transfers ?? []).map(convertNftTransfer),

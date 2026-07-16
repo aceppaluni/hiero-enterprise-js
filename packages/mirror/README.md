@@ -265,7 +265,21 @@ Failures throw `MirrorError` with a machine-readable `code`
 (`MIRROR_NODE_ERROR`, `MIRROR_NODE_HTTP_ERROR`,
 `MIRROR_NODE_SCHEMA_MISMATCH`, `TIMED_OUT`, `NOT_FOUND`,
 `CONFIG_INVALID`) — deliberately distinct from core's `HieroError`, so an
-`instanceof` check tells you which subsystem failed.
+`instanceof` check tells you which subsystem failed. HTTP failures also
+carry the `status`.
+
+Absence is a normal answer, not a failure: every "no such entity"
+rejection — an HTTP 404 or an empty listing — carries `NOT_FOUND`, and
+`orNull` converts exactly those to `null`, re-throwing everything else:
+
+```ts
+import { orNull } from '@hiero-hackers/enterprise-mirror';
+
+const account = await orNull(accounts.findAccount('0.0.98'));
+if (account === null) {
+    // never existed (or not yet imported by this mirror node)
+}
+```
 
 ## Examples
 

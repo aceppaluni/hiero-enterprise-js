@@ -1,4 +1,5 @@
 import type { MirrorKey } from "./common.js";
+import type { TokenBalance } from "./balance.js";
 
 /**
  * Extended account information from the mirror node.
@@ -16,6 +17,21 @@ export interface MirrorAccountInfo {
     key?: MirrorKey;
     /** Account balance in tinybars */
     balance: number;
+    /**
+     * When the mirror node snapshotted `balance` and `tokenBalances`.
+     *
+     * A balance is a snapshot, and this is the moment it describes — without
+     * it, `balance` is a number whose meaning depends on when you asked.
+     */
+    balanceTimestamp?: string | null;
+    /**
+     * Token balances the account holds, as reported alongside the HBAR balance.
+     *
+     * `/api/v1/accounts/{id}` returns these in the same response as the account
+     * itself; they are surfaced here so that reading them does not require a
+     * second request to the identical URL (which is what `getBalance` does).
+     */
+    tokenBalances?: TokenBalance[];
     /** Whether the account has been deleted */
     deleted: boolean;
     /** Auto-renewal period in seconds */

@@ -42,10 +42,14 @@ export class AccountRepository {
      * malformed input, use the form-specific {@link findByAccountId} /
      * {@link findByAlias} / {@link findByEvmAddress} wrappers.
      *
+     * Rejects with a `NotFound` `MirrorError` when no such account exists;
+     * wrap the call in `orNull` to get `null` instead of a throw.
+     *
      * @example
      * repo.findAccount("0.0.98");
      * repo.findAccount("0x1234…abcd");
      * repo.findAccount("HIQQEXWK…"); // base32 alias
+     * await orNull(repo.findAccount("0.0.404")); // null, not a throw
      */
     findAccount(
         idOrAliasOrEvmAddress: string,
