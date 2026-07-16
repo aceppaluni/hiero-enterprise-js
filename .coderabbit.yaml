@@ -12,6 +12,15 @@ knowledge_base:
     web_search:
         enabled: true # Verify HIP / mirror-node spec claims against current sources
 
+issue_enrichment:
+  planning:
+    enabled: true
+    auto_planning:
+      enabled: true
+      labels:
+        - "!no-plan" # the only rule left: an opt-out
+        - "plan-me" # Auto-plan issues with this label
+
 reviews:
     profile: "chill" # Less, higher-signal feedback; not a nitpicker
     high_level_summary: false # The walkthrough covers this
