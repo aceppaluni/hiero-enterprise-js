@@ -47,7 +47,7 @@
     "dependencies": {
         "@hiero-hackers/enterprise-core": "workspace:*",
         "@hiero-hackers/enterprise-mirror": "workspace:*",
-        "fastify-plugin": "^5.1.0"
+        "fastify-plugin": "^6.0.0"
     },
     "peerDependencies": {
         "fastify": "^5.8.5"
@@ -55,5 +55,8 @@
     "publishConfig": {
         "registry": "https://npm.pkg.github.com",
         "access": "public"
+    },
+    "devDependencies": {
+        "fastify": "^5.10.0"
     }
 }
