@@ -7,6 +7,10 @@ import type { Page, CollectAllOptions } from "../types/index.js";
  * `Page` — there is no per-endpoint pagination code. Give them the first
  * page (e.g. `await nftRepository.findByOwner(id)`) and they follow
  * `Page.next()` to the end.
+ *
+ * These are **forward-only** — the natural fit for draining a listing. For
+ * interactive prev/next stepping (an explorer-style table), reach for the
+ * stateful {@link KeysetPaginator} in `./KeysetPaginator.ts` instead.
  */
 
 /**
