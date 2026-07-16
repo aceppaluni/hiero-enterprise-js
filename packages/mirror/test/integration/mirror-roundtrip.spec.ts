@@ -74,7 +74,7 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
     it("round-trips a topic: create + submit → messages", async () => {
         const topicService = new TopicService(context);
         const topicId = await topicService.createTopic({
-            memo: `mirror-roundtrip ${Date.now()}`,
+            topicMemo: `mirror-roundtrip ${Date.now()}`,
         });
         await topicService.submitMessage({
             topicId,
@@ -162,7 +162,7 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
     it("paginates a high-volume topic through the rate limiter", async () => {
         const topicService = new TopicService(context);
         const topicId = await topicService.createTopic({
-            memo: `volume ${Date.now()}`,
+            topicMemo: `volume ${Date.now()}`,
         });
         const MESSAGES = 25;
         // Fire sequentially to keep sequence numbers deterministic.
