@@ -70,26 +70,30 @@ import type {
     MirrorContractAction,
     MirrorOpcodesResponse,
 } from "../../src/types/index.js";
-import { assertNoSilentDrops } from "../utils/field-drift.js";
+import {
+    assertNoSilentDrops,
+    type DeepRequired,
+} from "../utils/field-drift.js";
 
 /**
  * WS5 — field-drift guard. Rationale + the shared helper live in
  * `test/utils/field-drift.ts`. In short: each converter is fed a maximal
- * `Required<Raw>` fixture of unique sentinels, and every sentinel must survive
+ * `DeepRequired<Raw>` fixture of unique sentinels, and every sentinel must survive
  * into the converted output — a dropped wire field is a failing test. Values
  * that are legitimately reshaped or knowingly deferred are allow-listed inline
  * with a reason, so an omission is always documented, never silent.
  *
- * `Required<Raw>` forces **top-level** wire fields to be present (a new one
- * won't compile until the fixture grows); it is shallow, so nested optional
- * fields must be populated by hand — do so fully, and the value-diff checks them.
+ * `DeepRequired<Raw>` forces wire fields to be present at **every depth** — a
+ * newly-added optional field, top-level or nested, won't compile until the
+ * fixture grows. Array elements are the one gap types can't force (an empty
+ * array satisfies the type), so give every array at least one maximal entry.
  *
  * Complements `response-field-completeness.test.ts`, which exercises the
  * null/absent-value branches this all-populated guard does not.
  */
 
 describe("field-drift guard: account", () => {
-    const raw: Required<MirrorAccountResponse> = {
+    const raw: DeepRequired<MirrorAccountResponse> = {
         account: "0.0.1001",
         alias: "HIQQEXWKW6ZC",
         evm_address: "0xacct000000000000000000000000000000000001",
@@ -115,22 +119,13 @@ describe("field-drift guard: account", () => {
         receiver_sig_required: true,
     };
 
-    it("carries every wire field (documenting the WS4 embedded-token gap)", () => {
-        assertNoSilentDrops(raw, convertAccountInfo(raw), {
-            // Embedded balance snapshot — dropped until WS4 surfaces it on
-            // MirrorAccountInfo. Remove these once WS4 lands.
-            "1700000000.111111111":
-                "WS4: embedded balance.timestamp not yet carried",
-            "0.0.7770":
-                "WS4: embedded balance.tokens[].token_id not yet carried",
-            "5501": "WS4: embedded balance.tokens[].balance not yet carried",
-            "3302": "WS4: embedded balance.tokens[].decimals not yet carried",
-        });
+    it("carries every wire field, including the embedded balance snapshot", () => {
+        assertNoSilentDrops(raw, convertAccountInfo(raw));
     });
 });
 
 describe("field-drift guard: token", () => {
-    const raw: Required<MirrorTokenResponse> = {
+    const raw: DeepRequired<MirrorTokenResponse> = {
         token_id: "0.0.5550",
         name: "SentinelToken",
         symbol: "SENT",
@@ -207,7 +202,7 @@ describe("field-drift guard: balance", () => {
 
 describe("field-drift guard: accountTokenBalance", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorAccountTokenBalance> = {
+        const raw: DeepRequired<MirrorAccountTokenBalance> = {
             token_id: "0.0.9100001",
             balance: 4243001,
             decimals: 4243002,
@@ -222,7 +217,7 @@ describe("field-drift guard: accountTokenBalance", () => {
 
 describe("field-drift guard: accountBalanceSnapshot", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorAccountBalanceSnapshot> = {
+        const raw: DeepRequired<MirrorAccountBalanceSnapshot> = {
             account: "0.0.9200001",
             balance: 4244001,
             tokens: [{ token_id: "0.0.9200011", balance: 4244002 }],
@@ -233,7 +228,7 @@ describe("field-drift guard: accountBalanceSnapshot", () => {
 
 describe("field-drift guard: stakingReward", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorStakingReward> = {
+        const raw: DeepRequired<MirrorStakingReward> = {
             account_id: "0.0.9300001",
             amount: 4245001,
             timestamp: "1700000003.300000003",
@@ -244,7 +239,7 @@ describe("field-drift guard: stakingReward", () => {
 
 describe("field-drift guard: airdrop", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorAirdrop> = {
+        const raw: DeepRequired<MirrorAirdrop> = {
             amount: 4246001,
             receiver_id: "0.0.9400001",
             sender_id: "0.0.9400002",
@@ -261,7 +256,7 @@ describe("field-drift guard: airdrop", () => {
 
 describe("field-drift guard: cryptoAllowance", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorCryptoAllowance> = {
+        const raw: DeepRequired<MirrorCryptoAllowance> = {
             amount: 4247001,
             amount_granted: 4247002,
             owner: "0.0.9500001",
@@ -277,7 +272,7 @@ describe("field-drift guard: cryptoAllowance", () => {
 
 describe("field-drift guard: tokenAllowance", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorTokenAllowance> = {
+        const raw: DeepRequired<MirrorTokenAllowance> = {
             amount: 4248001,
             amount_granted: 4248002,
             owner: "0.0.9600001",
@@ -294,7 +289,7 @@ describe("field-drift guard: tokenAllowance", () => {
 
 describe("field-drift guard: nftAllowance", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorNftAllowance> = {
+        const raw: DeepRequired<MirrorNftAllowance> = {
             approved_for_all: true,
             owner: "0.0.9700001",
             spender: "0.0.9700002",
@@ -310,7 +305,7 @@ describe("field-drift guard: nftAllowance", () => {
 
 describe("field-drift guard: hook", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorHook> = {
+        const raw: DeepRequired<MirrorHook> = {
             admin_key: { key: "0xadminkey9800001", _type: "ECDSA_SECP256K1" },
             contract_id: "0.0.9800002",
             created_timestamp: "1700000008.800000008",
@@ -330,7 +325,7 @@ describe("field-drift guard: hook", () => {
 
 describe("field-drift guard: hookStorageSlot", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorHookStorageSlot> = {
+        const raw: DeepRequired<MirrorHookStorageSlot> = {
             key: "0xslotkey9900001",
             value: "0xslotval9900002",
             timestamp: "1700000009.900000009",
@@ -341,7 +336,7 @@ describe("field-drift guard: hookStorageSlot", () => {
 
 describe("field-drift guard: tokenHolder", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorTokenHolderBalance> = {
+        const raw: DeepRequired<MirrorTokenHolderBalance> = {
             account: "0.0.700001",
             balance: 918273645001,
             decimals: 700007,
@@ -352,7 +347,7 @@ describe("field-drift guard: tokenHolder", () => {
 
 describe("field-drift guard: nft", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorNft> = {
+        const raw: DeepRequired<MirrorNft> = {
             token_id: "0.0.800001",
             serial_number: 800002,
             account_id: "0.0.800003",
@@ -369,7 +364,7 @@ describe("field-drift guard: nft", () => {
 
 describe("field-drift guard: nftTransaction", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorNftTransaction> = {
+        const raw: DeepRequired<MirrorNftTransaction> = {
             consensus_timestamp: "900001.000000001",
             is_approval: true,
             nonce: 900002,
@@ -384,7 +379,7 @@ describe("field-drift guard: nftTransaction", () => {
 
 describe("field-drift guard: transactionInfo", () => {
     it("carries every wire field (transfers, custom fees, batch key)", () => {
-        const raw: Required<MirrorTransaction> = {
+        const raw: DeepRequired<MirrorTransaction> = {
             transaction_id: "0.0.100001-100002-100003",
             name: "Crypto Transfer",
             result: "SUCCESS",
@@ -444,14 +439,14 @@ describe("field-drift guard: transactionInfo", () => {
             ],
         };
         assertNoSilentDrops(raw, convertTransactionInfo(raw), {
-            TWF4aW1hbCBtZW1v: "transformed: memo_base64 → atob",
+            TWF4aW1hbCBtZW1v: "transformed: memo_base64 → UTF-8 decode",
         });
     });
 });
 
 describe("field-drift guard: contract", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorContractRaw> = {
+        const raw: DeepRequired<MirrorContractRaw> = {
             admin_key: { key: "0xadminkey_ct01", _type: "ED25519" },
             auto_renew_account: "0.0.1101",
             auto_renew_period: 7776001,
@@ -478,7 +473,7 @@ describe("field-drift guard: contract", () => {
 
 describe("field-drift guard: contractDetail", () => {
     it("carries every wire field (+ bytecode)", () => {
-        const raw: Required<MirrorContractResponse> = {
+        const raw: DeepRequired<MirrorContractResponse> = {
             admin_key: { key: "0xadminkey_cd01", _type: "ECDSA_SECP256K1" },
             auto_renew_account: "0.0.1201",
             auto_renew_period: 7776002,
@@ -507,7 +502,7 @@ describe("field-drift guard: contractDetail", () => {
 
 describe("field-drift guard: contractResult", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorContractResult> = {
+        const raw: DeepRequired<MirrorContractResult> = {
             access_list: [
                 {
                     address: "0xacc_addr_cr01",
@@ -562,7 +557,7 @@ describe("field-drift guard: contractResult", () => {
 
 describe("field-drift guard: contractResultDetails", () => {
     it("carries every wire field (+ logs, state_changes)", () => {
-        const raw: Required<MirrorContractResultDetails> = {
+        const raw: DeepRequired<MirrorContractResultDetails> = {
             access_list: [
                 {
                     address: "0xacc_addr_cx01",
@@ -636,7 +631,7 @@ describe("field-drift guard: contractResultDetails", () => {
 
 describe("field-drift guard: contractLogEntry", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorContractResultLog> = {
+        const raw: DeepRequired<MirrorContractResultLog> = {
             address: "0xlogentry_addr_le01",
             bloom: "0xlogentry_bloom_le02",
             contract_id: "0.0.1501",
@@ -650,7 +645,7 @@ describe("field-drift guard: contractLogEntry", () => {
 
 describe("field-drift guard: contractLog", () => {
     it("carries every wire field (+ block context)", () => {
-        const raw: Required<MirrorContractLog> = {
+        const raw: DeepRequired<MirrorContractLog> = {
             address: "0xlog_addr_cl01",
             bloom: "0xlog_bloom_cl02",
             contract_id: "0.0.1601",
@@ -670,7 +665,7 @@ describe("field-drift guard: contractLog", () => {
 
 describe("field-drift guard: contractState", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorContractState> = {
+        const raw: DeepRequired<MirrorContractState> = {
             address: "0xstate_addr_cs01",
             contract_id: "0.0.1701",
             timestamp: "1700000701.000000701",
@@ -683,7 +678,7 @@ describe("field-drift guard: contractState", () => {
 
 describe("field-drift guard: contractAction", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorContractAction> = {
+        const raw: DeepRequired<MirrorContractAction> = {
             call_depth: 180001,
             call_operation_type: "CALL_ca01",
             call_type: "CALL_ca02",
@@ -708,7 +703,7 @@ describe("field-drift guard: contractAction", () => {
 
 describe("field-drift guard: opcodeTrace", () => {
     it("carries every wire field (nested opcodes[])", () => {
-        const raw: Required<MirrorOpcodesResponse> = {
+        const raw: DeepRequired<MirrorOpcodesResponse> = {
             address: "0xopcode_addr_op01",
             contract_id: "0.0.1901",
             failed: false,
@@ -736,7 +731,7 @@ describe("field-drift guard: opcodeTrace", () => {
 
 describe("field-drift guard: topicInfo", () => {
     it("carries every wire field (keys w/ algorithm, custom-fee timestamp)", () => {
-        const raw: Required<MirrorTopicResponse> = {
+        const raw: DeepRequired<MirrorTopicResponse> = {
             admin_key: { key: "TOPIC_ADMIN_HEX", _type: "ED25519" },
             auto_renew_account: "0.0.8801",
             auto_renew_period: 7776010,
@@ -770,7 +765,7 @@ describe("field-drift guard: topicInfo", () => {
 
 describe("field-drift guard: topicMessage", () => {
     it("carries every wire field (nested chunk_info)", () => {
-        const raw: Required<MirrorTopicMessageRaw> = {
+        const raw: DeepRequired<MirrorTopicMessageRaw> = {
             topic_id: "0.0.9900",
             sequence_number: 990012,
             message: "topic-message-b64-sentinel",
@@ -795,7 +790,7 @@ describe("field-drift guard: topicMessage", () => {
 
 describe("field-drift guard: block", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorBlock> = {
+        const raw: DeepRequired<MirrorBlock> = {
             count: 330011,
             gas_used: 330012,
             hapi_version: "0.330.13",
@@ -816,7 +811,7 @@ describe("field-drift guard: block", () => {
 
 describe("field-drift guard: schedule", () => {
     it("carries every wire field (admin key, signatures[])", () => {
-        const raw: Required<MirrorScheduleResponse> = {
+        const raw: DeepRequired<MirrorScheduleResponse> = {
             admin_key: { key: "SCHED_ADMIN_HEX", _type: "ED25519" },
             consensus_timestamp: "1640000001.400000001",
             creator_account_id: "0.0.4401",
@@ -843,7 +838,7 @@ describe("field-drift guard: schedule", () => {
 
 describe("field-drift guard: networkNode", () => {
     it("carries every wire field (endpoints, timestamp ranges)", () => {
-        const raw: Required<MirrorNetworkNode> = {
+        const raw: DeepRequired<MirrorNetworkNode> = {
             node_id: 550011,
             node_account_id: "0.0.5501",
             description: "node-desc-sentinel",
@@ -887,7 +882,7 @@ describe("field-drift guard: networkNode", () => {
 
 describe("field-drift guard: registeredNode", () => {
     it("carries every wire field (flat endpoint role flags + siblings)", () => {
-        const raw: Required<MirrorRegisteredNode> = {
+        const raw: DeepRequired<MirrorRegisteredNode> = {
             admin_key: { key: "REGNODE_ADMIN_HEX", _type: "ED25519" },
             created_timestamp: "1660000001.600000001",
             description: "regnode-desc-sentinel",
@@ -918,7 +913,7 @@ describe("field-drift guard: registeredNode", () => {
 
 describe("field-drift guard: networkStake", () => {
     it("carries every wire field", () => {
-        const raw: Required<MirrorNetworkStakeResponse> = {
+        const raw: DeepRequired<MirrorNetworkStakeResponse> = {
             max_stake_rewarded: 770011000000,
             max_staking_reward_rate_per_hbar: 770012,
             max_total_reward: 770013000000,
@@ -943,7 +938,7 @@ describe("field-drift guard: networkStake", () => {
 
 describe("field-drift guard: networkFees", () => {
     it("carries every wire field (fees[])", () => {
-        const raw: Required<MirrorNetworkFeesResponse> = {
+        const raw: DeepRequired<MirrorNetworkFeesResponse> = {
             fees: [
                 { gas: 880011, transaction_type: "ContractCall" },
                 { gas: 880012, transaction_type: "ContractCreate" },
@@ -956,7 +951,7 @@ describe("field-drift guard: networkFees", () => {
 
 describe("field-drift guard: feeEstimate", () => {
     it("carries every wire field (network/node/service + extras[])", () => {
-        const raw: Required<MirrorFeeEstimateResponse> = {
+        const raw: DeepRequired<MirrorFeeEstimateResponse> = {
             high_volume_multiplier: 990011,
             network: { multiplier: 990012, subtotal: 990013 },
             node: {

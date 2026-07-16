@@ -252,6 +252,9 @@ describe("misc converters", () => {
             staking_period: { from: "1.0", to: "2.0" },
             staking_period_duration: 1440,
             staking_periods_stored: 365,
+            staking_reward_fee_fraction: 0,
+            staking_reward_rate: 100,
+            staking_start_threshold: 25000000000000000,
             unreserved_staking_reward_balance: 0,
         });
         expect(stake.stakeTotal).toBe(9);

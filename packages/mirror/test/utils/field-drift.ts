@@ -10,10 +10,22 @@ import { expect } from "vitest";
  * unique sentinel, then asserts every sentinel survives into the converted
  * output. A dropped field = a missing sentinel = a failing test.
  *
- * Caveat: `Required<T>` is shallow, so a newly-added *nested* optional field is
- * not auto-forced — nested completeness relies on the fixture author populating
- * nested objects/arrays, which the value-diff then checks. Populate them fully.
+ * Fixtures are typed {@link DeepRequired}, so nested optional wire fields are
+ * compiler-forced too, not just top-level ones. The one hole types cannot
+ * close: an empty array satisfies `DeepRequired<T[]>`, so array *elements*
+ * still rely on the fixture author providing at least one maximal entry.
  */
+
+/**
+ * `Required<T>`, recursively: strips `?` at every depth (and inside array
+ * elements), so a fixture typed `DeepRequired<RawType>` fails to compile the
+ * moment upstream grows a nested optional field the fixture doesn't populate.
+ */
+export type DeepRequired<T> = T extends (infer U)[]
+    ? DeepRequired<U>[]
+    : T extends object
+      ? { [K in keyof T]-?: DeepRequired<T[K]> }
+      : T;
 
 /** Every primitive leaf in an object graph, stringified, collected into a set. */
 export function leafValues(v: unknown, out = new Set<string>()): Set<string> {
@@ -46,7 +58,8 @@ export function assertNoSilentDrops(
 ): void {
     const out = leafValues(converted);
     const dropped = [...leafValues(raw)].filter(
-        (val) => !out.has(val) && !Object.prototype.hasOwnProperty.call(known, val),
+        (val) =>
+            !out.has(val) && !Object.prototype.hasOwnProperty.call(known, val),
     );
     expect(dropped, "wire fields dropped without a documented reason").toEqual(
         [],
