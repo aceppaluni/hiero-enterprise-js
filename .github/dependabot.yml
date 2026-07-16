@@ -21,3 +21,11 @@ updates:
       directory: "/"
       schedule:
           interval: "weekly"
+      groups:
+          # codeql-action's init/analyze/upload-sarif steps must move in
+          # lockstep — a workflow mixing versions fails, so split PRs
+          # (one per pinned usage) can never each go green. One grouped
+          # PR bumps every usage together.
+          codeql-action:
+              patterns:
+                  - "github/codeql-action*"
