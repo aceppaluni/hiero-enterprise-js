@@ -50,7 +50,10 @@ describe("ContractUpdateOperation (via ContractService)", () => {
                 contractId: "0.0.12345",
             });
 
-            expect(result).toBeUndefined();
+            expect(result).toEqual({
+                transactionId: expect.any(String),
+                status: "SUCCESS",
+            });
 
             const tx = vi.mocked(ContractUpdateTransaction).mock.results[0]
                 .value;

@@ -36,7 +36,10 @@ describe("TopicDeleteOperation (via TopicService)", () => {
         it("submits a TopicDeleteTransaction with the provided topicId", async () => {
             const result = await service.deleteTopic({ topicId: "0.0.12345" });
 
-            expect(result).toBeUndefined();
+            expect(result).toEqual({
+                transactionId: expect.any(String),
+                status: "SUCCESS",
+            });
 
             const tx = vi.mocked(TopicDeleteTransaction).mock.results[0].value;
             expect(tx.setTopicId).toHaveBeenCalledWith("0.0.12345");

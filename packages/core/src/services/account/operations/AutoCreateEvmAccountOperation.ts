@@ -5,6 +5,7 @@ import type {
     TransactionOptions,
     ScheduleOptions,
     ScheduledResult,
+    AutoCreateResult,
 } from "../../transaction/index.js";
 
 /**
@@ -28,8 +29,18 @@ export class AutoCreateEvmAccountOperation {
         this.executor = new TransactionExecutor(context);
     }
 
-    /** Auto-create EVM account execute handler. */
-    async execute(options: AutoCreateEvmAccountOptions): Promise<void> {
+    /**
+     * Auto-create EVM account execute handler.
+     *
+     * @returns The transaction id/status and, when the address was cold,
+     *   the created hollow account's id from the transfer's *child*
+     *   receipt (why this operation asks the executor for child receipts).
+     *   A warm address leaves `accountId` undefined — the transfer landed,
+     *   nothing was created.
+     */
+    async execute(
+        options: AutoCreateEvmAccountOptions,
+    ): Promise<AutoCreateResult> {
         return await this.executor.run(
             this.build(options),
             options,
@@ -39,7 +50,21 @@ export class AutoCreateEvmAccountOperation {
                 methodName: "autoCreateEvmAccount",
                 timestamp: new Date(),
             },
-            () => undefined,
+            (outcome) => {
+                // A transfer to a *cold* 0x address yields a child create
+                // receipt carrying the new account id. A warm address means
+                // the transfer still landed but created nothing — that MUST
+                // NOT throw: the HBAR has moved, and an exception here would
+                // invite a retry (a double transfer). `accountId` stays
+                // undefined and the caller checks it.
+                const accountId =
+                    outcome.receipt.children[0]?.accountId?.toString();
+                return {
+                    ...outcome.toResult(),
+                    ...(accountId !== undefined && { accountId }),
+                };
+            },
+            { includeChildReceipts: true },
         );
     }
 

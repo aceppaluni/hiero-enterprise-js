@@ -3,6 +3,7 @@ import type { TokenId, Long } from "@hiero-ledger/sdk";
 import { TokenBurnTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
 import { TransactionExecutor } from "../../transaction/index.js";
+import type { SupplyChangeResult } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
@@ -34,9 +35,12 @@ export class TokenBurnOperation {
     /**
      * Submit a `TokenBurnTransaction`.
      *
-     * @returns The token's new total supply after the burn.
+     * @returns The transaction id/status and the token's new total supply
+     *   after the burn (a decimal string — supplies can exceed 2^53).
      */
-    async execute(options: TokenBurnOperationOptions): Promise<Long> {
+    async execute(
+        options: TokenBurnOperationOptions,
+    ): Promise<SupplyChangeResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
@@ -50,13 +54,16 @@ export class TokenBurnOperation {
                 methodName: "burnToken",
                 timestamp: new Date(),
             },
-            (receipt) => {
-                if (receipt.totalSupply == null) {
+            (outcome) => {
+                if (outcome.receipt.totalSupply == null) {
                     throw new Error(
                         "TokenBurn receipt did not include totalSupply.",
                     );
                 }
-                return receipt.totalSupply;
+                return {
+                    ...outcome.toResult(),
+                    totalSupply: outcome.receipt.totalSupply.toString(),
+                };
             },
         );
     }

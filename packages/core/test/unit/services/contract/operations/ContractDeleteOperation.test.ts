@@ -43,7 +43,10 @@ describe("ContractDeleteOperation (via ContractService)", () => {
                 transferAccountId: "0.0.2",
             });
 
-            expect(result).toBeUndefined();
+            expect(result).toEqual({
+                transactionId: expect.any(String),
+                status: "SUCCESS",
+            });
 
             const tx = vi.mocked(ContractDeleteTransaction).mock.results[0]
                 .value;

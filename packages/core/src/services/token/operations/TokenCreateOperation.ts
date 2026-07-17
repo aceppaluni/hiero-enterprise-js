@@ -79,7 +79,7 @@ export class TokenCreateOperation {
                 methodName: "createToken",
                 timestamp: new Date(),
             },
-            (receipt) => receipt.tokenId!.toString(),
+            (outcome) => outcome.receipt.tokenId!.toString(),
         );
     }
 

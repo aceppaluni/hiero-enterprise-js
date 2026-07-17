@@ -48,7 +48,7 @@ describe("ApproveAllowanceOperation (via AccountService)", () => {
 
     describe("approveHbarAllowance", () => {
         it("approves an HBAR allowance with correct SDK arguments", async () => {
-            await service.approveHbarAllowance({
+            const result = await service.approveHbarAllowance({
                 hbarAllowances: [
                     {
                         ownerAccountId: "0.0.100",
@@ -56,6 +56,12 @@ describe("ApproveAllowanceOperation (via AccountService)", () => {
                         amount: 10,
                     },
                 ],
+            });
+
+            // No SDK receipt leaks to consumers — just the floor result.
+            expect(result).toEqual({
+                transactionId: "0.0.123@1234567890.000000000",
+                status: "SUCCESS",
             });
 
             const tx = vi.mocked(AccountAllowanceApproveTransaction).mock

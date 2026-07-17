@@ -1,10 +1,4 @@
-import type {
-    AccountId,
-    TokenId,
-    Transaction,
-    TransactionReceipt,
-    Hbar,
-} from "@hiero-ledger/sdk";
+import type { AccountId, TokenId, Transaction, Hbar } from "@hiero-ledger/sdk";
 import type { Account, Balance } from "../../types/index.js";
 import type { IHieroContext } from "../../context/index.js";
 import { normalizeError } from "../../errors/index.js";
@@ -45,6 +39,8 @@ import type {
     ScheduleOptions,
     ScheduledResult,
     TransactionOptions,
+    TransactionResult,
+    AutoCreateResult,
 } from "../transaction/index.js";
 
 /**
@@ -132,10 +128,16 @@ export class AccountService {
      *
      * @param options.evmAddress - The EVM address (e.g., 0x...)
      * @param options.amount - The amount of HBAR to transfer
+     * @returns The transaction id/status, plus `accountId` of the created
+     *   account. `accountId` is **absent when the address was already
+     *   backed by an account** — the HBAR still moved; nothing was
+     *   created. That is a normal outcome, not an error: do not retry
+     *   (retrying re-sends the transfer). Check
+     *   `result.accountId === undefined` to detect it.
      */
     async autoCreateEvmAccount(
         options: AutoCreateEvmAccountOptions,
-    ): Promise<void> {
+    ): Promise<AutoCreateResult> {
         return await this.autoCreateOperation.execute(options);
     }
 
@@ -164,7 +166,9 @@ export class AccountService {
      * @param options.accountKey - Private key of the account being deleted
      * @param options.transferAccountId - Account to receive remaining balance (defaults to operator)
      */
-    async deleteAccount(options: DeleteAccountOptions): Promise<void> {
+    async deleteAccount(
+        options: DeleteAccountOptions,
+    ): Promise<TransactionResult> {
         return await this.deleteOperation.execute(options);
     }
 
@@ -202,7 +206,9 @@ export class AccountService {
      * @param options.declineStakingReward - Whether to decline staking rewards
      * @param options.autoRenewPeriod - Auto-renew period in seconds (30–90 days)
      */
-    async updateAccount(options: UpdateAccountOptions): Promise<void> {
+    async updateAccount(
+        options: UpdateAccountOptions,
+    ): Promise<TransactionResult> {
         return await this.updateOperation.execute(options);
     }
 
@@ -304,7 +310,7 @@ export class AccountService {
      */
     async approveHbarAllowance(
         options: ApproveHbarAllowanceOptions,
-    ): Promise<TransactionReceipt> {
+    ): Promise<TransactionResult> {
         if (!options.hbarAllowances?.length) {
             throw normalizeError(
                 new Error(
@@ -330,7 +336,7 @@ export class AccountService {
      */
     async approveTokenAllowance(
         options: ApproveTokenAllowanceOptions,
-    ): Promise<TransactionReceipt> {
+    ): Promise<TransactionResult> {
         if (!options.tokenAllowances?.length) {
             throw normalizeError(
                 new Error(
@@ -356,7 +362,7 @@ export class AccountService {
      */
     async approveNftAllowance(
         options: ApproveNftAllowanceOptions,
-    ): Promise<TransactionReceipt> {
+    ): Promise<TransactionResult> {
         if (!options.nftAllowances?.length) {
             throw normalizeError(
                 new Error(
@@ -389,7 +395,7 @@ export class AccountService {
     async deleteNftAllowance(
         allowances: NftAllowanceDeletion[],
         options: DeleteAllowanceOptions = {},
-    ): Promise<TransactionReceipt> {
+    ): Promise<TransactionResult> {
         if (!allowances?.length) {
             throw normalizeError(
                 new Error(
@@ -421,7 +427,7 @@ export class AccountService {
     async deleteAllNftAllowances(
         allowances: NftAllSerialsAllowanceDeletion[],
         options: DeleteAllNftAllowancesOptions = {},
-    ): Promise<TransactionReceipt> {
+    ): Promise<TransactionResult> {
         if (!allowances?.length) {
             throw normalizeError(
                 new Error(
@@ -450,7 +456,7 @@ export class AccountService {
     async deleteHbarAllowance(
         allowances: HbarAllowanceDeletion[],
         options: TransactionOptions = {},
-    ): Promise<TransactionReceipt> {
+    ): Promise<TransactionResult> {
         if (!allowances?.length) {
             throw normalizeError(
                 new Error(
@@ -485,7 +491,7 @@ export class AccountService {
     async deleteTokenAllowance(
         allowances: TokenAllowanceDeletion[],
         options: TransactionOptions = {},
-    ): Promise<TransactionReceipt> {
+    ): Promise<TransactionResult> {
         if (!allowances?.length) {
             throw normalizeError(
                 new Error(
@@ -514,19 +520,23 @@ export class AccountService {
      * Transfer HBAR to another account.
      *
      * @param receiverAccountId - Recipient account (string `"0.0.123"` or `AccountId`)
-     * @param amount - Amount in HBAR or an `Hbar` instance for tinybar precision
+     * @param amount - Amount in HBAR or an `Hbar` instance for tinybar
+     *   precision. The `number` path goes through a float — for exact amounts
+     *   (payments, accounting) prefer `Hbar.fromTinybars(...)`.
      * @param senderAccountId - Sender account. Pass the operator account when the
      *   operator is the sender; otherwise pass the sender's account **and** its
      *   private key via `options.additionalSigners` — otherwise the transaction
      *   will be rejected with `INVALID_SIGNATURE`.
      * @param options - Transaction options (fees, validity, signers, memo, etc.)
+     * @returns The transaction id and consensus status, for correlating the
+     *   transfer downstream (explorer links, mirror node lookups, receipts).
      */
     async transferHbar(
         receiverAccountId: string | AccountId,
         amount: number | Hbar,
         senderAccountId: string | AccountId,
         options?: TransferHbarOptions,
-    ): Promise<void> {
+    ): Promise<TransactionResult> {
         return await this.transferOperation.transferHbar(
             receiverAccountId,
             amount,
@@ -577,7 +587,7 @@ export class AccountService {
         amount: number,
         senderAccountId: string | AccountId,
         options?: TransferTokenOptions,
-    ): Promise<void> {
+    ): Promise<TransactionResult> {
         return await this.transferOperation.transferToken(
             tokenId,
             receiverAccountId,
@@ -628,7 +638,7 @@ export class AccountService {
         receiverAccountId: string | AccountId,
         senderAccountId: string | AccountId,
         options?: TransferNftOptions,
-    ): Promise<void> {
+    ): Promise<TransactionResult> {
         return await this.transferOperation.transferNft(
             tokenId,
             serial,

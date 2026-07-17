@@ -214,21 +214,175 @@ describe("TransactionExecutor", () => {
             expect(bundle.tx.freezeWith).toHaveBeenCalledWith(context.client);
         });
 
-        it("calls processReceipt with the receipt and transaction ID", async () => {
-            const processReceipt = vi.fn(() => "processed-result");
+        it("calls processOutcome with the receipt, transaction ID, and floor", async () => {
+            const processOutcome = vi.fn(() => "processed-result");
 
             const result = await executor.run(
                 bundle.tx as never,
                 {},
                 SAMPLE_EVENT,
-                processReceipt,
+                processOutcome,
             );
 
-            expect(processReceipt).toHaveBeenCalledWith(
-                bundle.receipt,
-                "0.0.123@1234567890.000000000",
+            expect(processOutcome).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    receipt: bundle.receipt,
+                    transactionId: "0.0.123@1234567890.000000000",
+                }),
             );
+            const outcome = processOutcome.mock.calls[0][0] as {
+                toResult(): { transactionId: string; status: string };
+            };
+            expect(outcome.toResult()).toEqual({
+                transactionId: "0.0.123@1234567890.000000000",
+                status: "SUCCESS",
+            });
             expect(result).toBe("processed-result");
+        });
+
+        it("supports async mappers (awaits the outcome processor)", async () => {
+            const result = await executor.run(
+                bundle.tx as never,
+                {},
+                SAMPLE_EVENT,
+                async (outcome) => {
+                    await Promise.resolve();
+                    return outcome.toResult().status;
+                },
+            );
+            expect(result).toBe("SUCCESS");
+        });
+
+        it("hands the mapper the raw SDK response, untouched", async () => {
+            let seen: unknown;
+            await executor.run(
+                bundle.tx as never,
+                {},
+                SAMPLE_EVENT,
+                (outcome) => {
+                    seen = outcome.response;
+                    return "ok";
+                },
+            );
+            expect(seen).toBe(bundle.response);
+        });
+
+        it("memoizes getRecord — two awaits, one paid record query", async () => {
+            await executor.run(
+                bundle.tx as never,
+                {},
+                SAMPLE_EVENT,
+                async (outcome) => {
+                    const [first, second] = await Promise.all([
+                        outcome.getRecord(),
+                        outcome.getRecord(),
+                    ]);
+                    await outcome.getRecord();
+                    expect(first).toBe(second);
+                    return "ok";
+                },
+            );
+            expect(bundle.response.recordExecute).toHaveBeenCalledTimes(1);
+            expect(bundle.response.getRecordQuery).toHaveBeenCalledWith(
+                context.client,
+            );
+        });
+
+        it("does not fetch the record when the mapper never asks", async () => {
+            await executor.run(
+                bundle.tx as never,
+                {},
+                SAMPLE_EVENT,
+                (outcome) => outcome.toResult(),
+            );
+            expect(bundle.response.recordExecute).not.toHaveBeenCalled();
+        });
+
+        it("emits the chain-truth after-event BEFORE the mapper runs", async () => {
+            const order: string[] = [];
+            (
+                context.emitAfterTransaction as ReturnType<typeof vi.fn>
+            ).mockImplementation(() => {
+                order.push("after-event");
+                return Promise.resolve();
+            });
+
+            await executor.run(bundle.tx as never, {}, SAMPLE_EVENT, () => {
+                order.push("mapper");
+                return "ok";
+            });
+
+            expect(order).toEqual(["after-event", "mapper"]);
+        });
+
+        it("a mapper failure never masquerades as a failed transaction", async () => {
+            await expect(
+                executor.run(bundle.tx as never, {}, SAMPLE_EVENT, () => {
+                    throw new Error("business rule violated");
+                }),
+            ).rejects.toMatchObject({
+                // The thrown error says the transaction itself succeeded and
+                // carries the id so the caller can recover, not retry.
+                // Distinguishable programmatically by its dedicated code.
+                code: "RESULT_MAPPING_FAILED",
+                transactionId: "0.0.123@1234567890.000000000",
+                message: expect.stringContaining(
+                    "reached consensus with status SUCCESS",
+                ) as string,
+            });
+
+            // The after-event reflects the chain: SUCCESS, no error field.
+            expect(context.emitAfterTransaction).toHaveBeenCalledWith(
+                expect.objectContaining({ status: "SUCCESS" }),
+            );
+            expect(context.emitAfterTransaction).not.toHaveBeenCalledWith(
+                expect.objectContaining({ error: expect.any(Error) }),
+            );
+        });
+
+        it("fetches the receipt exactly once, shared with the mapper", async () => {
+            await executor.run(
+                bundle.tx as never,
+                {},
+                SAMPLE_EVENT,
+                (outcome) => {
+                    // Read the receipt every way an operation can — none of
+                    // these may trigger a re-fetch.
+                    outcome.toResult();
+                    outcome.toResult();
+                    return outcome.receipt.status.toString();
+                },
+            );
+            expect(bundle.response.getReceipt).toHaveBeenCalledTimes(1);
+            expect(bundle.response.getReceiptQuery).not.toHaveBeenCalled();
+        });
+
+        it("fetches child receipts only when the operation opts in", async () => {
+            await executor.run(bundle.tx as never, {}, SAMPLE_EVENT, (o) =>
+                o.toResult(),
+            );
+            expect(bundle.response.getReceiptQuery).not.toHaveBeenCalled();
+
+            // Isolate the opt-in run: the plain path above used getReceipt.
+            bundle.response.getReceipt.mockClear();
+            await executor.run(
+                bundle.tx as never,
+                {},
+                SAMPLE_EVENT,
+                (o) => o.toResult(),
+                { includeChildReceipts: true },
+            );
+            // getReceipt runs first (status validation + the SDK's
+            // ThrottledAtConsensus resubmission), then exactly one
+            // child-including query on top — both free.
+            expect(bundle.response.getReceipt).toHaveBeenCalledTimes(1);
+            expect(bundle.response.getReceiptQuery).toHaveBeenCalledTimes(1);
+            expect(bundle.response.setIncludeChildren).toHaveBeenCalledWith(
+                true,
+            );
+            expect(bundle.response.receiptQueryExecute).toHaveBeenCalledTimes(
+                1,
+            );
         });
 
         it("emits before, then after with status and transactionId", async () => {

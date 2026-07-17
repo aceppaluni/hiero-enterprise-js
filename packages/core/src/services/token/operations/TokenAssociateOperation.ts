@@ -1,11 +1,15 @@
 import type { AccountId, TokenId } from "@hiero-ledger/sdk";
 import { TokenAssociateTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
     ScheduledResult,
+    TransactionResult,
 } from "../../transaction/index.js";
 import { TokenAssociateValidator } from "../validation/index.js";
 
@@ -29,7 +33,9 @@ export class TokenAssociateOperation {
     }
 
     /** Submit a `TokenAssociateTransaction`. */
-    async execute(options: TokenAssociateOperationOptions): Promise<void> {
+    async execute(
+        options: TokenAssociateOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
@@ -43,7 +49,7 @@ export class TokenAssociateOperation {
                 methodName: "associateToken",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

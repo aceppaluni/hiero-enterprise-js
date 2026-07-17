@@ -1,8 +1,14 @@
 import type { TokenId } from "@hiero-ledger/sdk";
 import { TokenDeleteTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
-import type { TransactionOptions } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
+import type {
+    TransactionOptions,
+    TransactionResult,
+} from "../../transaction/index.js";
 import { TokenDeleteValidator } from "../validation/index.js";
 
 /**
@@ -30,7 +36,9 @@ export class TokenDeleteOperation {
     }
 
     /** Submit a `TokenDeleteTransaction`. */
-    async execute(options: TokenDeleteOperationOptions): Promise<void> {
+    async execute(
+        options: TokenDeleteOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
@@ -44,7 +52,7 @@ export class TokenDeleteOperation {
                 methodName: "deleteToken",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

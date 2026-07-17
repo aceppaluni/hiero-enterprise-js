@@ -8,8 +8,14 @@ import type {
 } from "@hiero-ledger/sdk";
 import { TopicUpdateTransaction, KeyList } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
-import type { TransactionOptions } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
+import type {
+    TransactionOptions,
+    TransactionResult,
+} from "../../transaction/index.js";
 import { TopicUpdateValidator } from "../validation/index.js";
 
 /**
@@ -104,12 +110,14 @@ export class TopicUpdateOperation {
     }
 
     /** Submit a `TopicUpdateTransaction`. */
-    async execute(options: TopicUpdateOperationOptions): Promise<void> {
+    async execute(
+        options: TopicUpdateOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        await this.executor.run(
+        return await this.executor.run(
             tx,
             options,
             {
@@ -118,7 +126,7 @@ export class TopicUpdateOperation {
                 methodName: "updateTopic",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

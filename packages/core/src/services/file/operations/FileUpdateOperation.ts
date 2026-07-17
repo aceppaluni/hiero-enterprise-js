@@ -1,11 +1,15 @@
 import type { Key, KeyList, FileId, Timestamp } from "@hiero-ledger/sdk";
 import { FileUpdateTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
     ScheduledResult,
+    TransactionResult,
 } from "../../transaction/index.js";
 import { FileUpdateValidator } from "../validation/index.js";
 
@@ -74,12 +78,14 @@ export class FileUpdateOperation {
     }
 
     /** Submit a `FileUpdateTransaction`. */
-    async execute(options: FileUpdateOperationOptions): Promise<void> {
+    async execute(
+        options: FileUpdateOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        await this.executor.run(
+        return await this.executor.run(
             tx,
             options,
             {
@@ -88,7 +94,7 @@ export class FileUpdateOperation {
                 methodName: "updateFile",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

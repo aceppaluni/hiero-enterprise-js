@@ -2,7 +2,10 @@ import type { ScheduleId } from "@hiero-ledger/sdk";
 import { ScheduleSignTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
 import { TransactionExecutor } from "../../transaction/index.js";
-import type { TransactionOptions } from "../../transaction/index.js";
+import type {
+    TransactionOptions,
+    ScheduleSignResult,
+} from "../../transaction/index.js";
 import { ScheduleSignValidator } from "../validation/index.js";
 
 /**
@@ -26,8 +29,14 @@ export class ScheduleSignOperation {
         this.validator = new ScheduleSignValidator();
     }
 
-    /** Schedule sign execute handler. */
-    async execute(options: ScheduleSignOptions): Promise<void> {
+    /**
+     * Schedule sign execute handler.
+     *
+     * @returns The transaction id/status, plus `scheduledTransactionId` —
+     *   the id for querying the *scheduled* (inner) transaction's own
+     *   receipt or record when the network reports it.
+     */
+    async execute(options: ScheduleSignOptions): Promise<ScheduleSignResult> {
         // Validate options before any SDK construction
         this.validator.validate(options);
         const tx = new ScheduleSignTransaction().setScheduleId(
@@ -42,9 +51,19 @@ export class ScheduleSignOperation {
                 methodName: "sign",
                 timestamp: new Date(),
             },
-
-            // TODO: return a more meaningful result here.
-            () => undefined,
+            (outcome) => {
+                const scheduledTransactionId =
+                    outcome.receipt.scheduledTransactionId?.toString();
+                return {
+                    ...outcome.toResult(),
+                    // HAPI populates this on any SUCCESS sign receipt — it
+                    // identifies the inner transaction for follow-up queries
+                    // and does NOT signal that the schedule executed.
+                    ...(scheduledTransactionId !== undefined && {
+                        scheduledTransactionId,
+                    }),
+                };
+            },
         );
     }
 }

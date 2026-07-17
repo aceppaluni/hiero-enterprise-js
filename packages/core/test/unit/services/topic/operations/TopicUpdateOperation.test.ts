@@ -57,7 +57,10 @@ describe("TopicUpdateOperation (via TopicService)", () => {
                 topicMemo: "renamed feed",
             });
 
-            expect(result).toBeUndefined();
+            expect(result).toEqual({
+                transactionId: expect.any(String),
+                status: "SUCCESS",
+            });
 
             const tx = vi.mocked(TopicUpdateTransaction).mock.results[0].value;
             expect(tx.setTopicId).toHaveBeenCalledWith("0.0.12345");

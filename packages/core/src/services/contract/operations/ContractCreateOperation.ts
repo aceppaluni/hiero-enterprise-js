@@ -97,7 +97,7 @@ export class ContractCreateOperation {
                 methodName: "createContract",
                 timestamp: new Date(),
             },
-            (receipt) => receipt.contractId!.toString(),
+            (outcome) => outcome.receipt.contractId!.toString(),
         );
     }
 

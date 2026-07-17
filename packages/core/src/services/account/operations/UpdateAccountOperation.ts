@@ -1,11 +1,15 @@
 import { AccountUpdateTransaction } from "@hiero-ledger/sdk";
 import type { Key } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
     ScheduledResult,
+    TransactionResult,
 } from "../../transaction/index.js";
 import { UpdateAccountValidator } from "../validation/UpdateAccountValidator.js";
 
@@ -75,7 +79,7 @@ export class UpdateAccountOperation {
     }
 
     /** Update account execute handler. */
-    async execute(options: UpdateAccountOptions): Promise<void> {
+    async execute(options: UpdateAccountOptions): Promise<TransactionResult> {
         this.validator.validate(options);
         const tx = this.build(options);
 
@@ -88,11 +92,7 @@ export class UpdateAccountOperation {
                 methodName: "updateAccount",
                 timestamp: new Date(),
             },
-
-            // TODO: Return something meaningful here
-            // can return a full receipt like
-            // (receipt) => (receipt)
-            () => undefined,
+            toTransactionResult,
         );
     }
 

@@ -1,8 +1,14 @@
 import type { CustomFee, TokenId } from "@hiero-ledger/sdk";
 import { TokenFeeScheduleUpdateTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
-import type { TransactionOptions } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
+import type {
+    TransactionOptions,
+    TransactionResult,
+} from "../../transaction/index.js";
 import { TokenFeeScheduleUpdateValidator } from "../validation/index.js";
 
 /**
@@ -35,7 +41,7 @@ export class TokenFeeScheduleUpdateOperation {
     /** Submit a `TokenFeeScheduleUpdateTransaction`. */
     async execute(
         options: TokenFeeScheduleUpdateOperationOptions,
-    ): Promise<void> {
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
@@ -49,7 +55,7 @@ export class TokenFeeScheduleUpdateOperation {
                 methodName: "updateTokenFeeSchedule",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

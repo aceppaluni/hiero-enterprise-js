@@ -1,11 +1,15 @@
 import type { PrivateKey, AccountId } from "@hiero-ledger/sdk";
 import { AccountDeleteTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
     ScheduledResult,
+    TransactionResult,
 } from "../../transaction/index.js";
 
 /**
@@ -47,7 +51,7 @@ export class DeleteAccountOperation {
     }
 
     /** Delete account execute handler. */
-    async execute(options: DeleteAccountOptions): Promise<void> {
+    async execute(options: DeleteAccountOptions): Promise<TransactionResult> {
         // Prepend accountKey so it signs the tx before the operator auto-sign
         const opts: DeleteAccountOptions = {
             ...options,
@@ -65,7 +69,7 @@ export class DeleteAccountOperation {
                 methodName: "deleteAccount",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

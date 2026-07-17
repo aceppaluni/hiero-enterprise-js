@@ -1,11 +1,15 @@
 import { Hbar, NftId, TokenId, TransferTransaction } from "@hiero-ledger/sdk";
 import type { AccountId } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
     ScheduledResult,
+    TransactionResult,
 } from "../../transaction/index.js";
 import { TransferValidator } from "../validation/index.js";
 
@@ -81,20 +85,24 @@ export class TransferOperation {
      * Transfer HBAR.
      *
      * @param receiverAccountId - Recipient account (string `"0.0.123"` or `AccountId`)
-     * @param amount - Amount in HBAR (number) or `Hbar` instance for tinybar precision
+     * @param amount - Amount in HBAR (number) or `Hbar` instance for tinybar
+     *   precision. The `number` path goes through a float — for exact amounts
+     *   (payments, accounting) prefer `Hbar.fromTinybars(...)`.
      * @param senderAccountId - Sender account. Pass the operator account when the
      *   operator is the sender; otherwise pass the sender's account **and** its
      *   private key via `options.additionalSigners` (or `options.externalSigners`
      *   for HSM/KMS keys) — otherwise the transaction will be rejected with
      *   `INVALID_SIGNATURE`.
      * @param options - Transaction options (fees, validity, signers, memo, etc.)
+     * @returns The transaction id and consensus status, for correlating the
+     *   transfer downstream (explorer links, mirror node lookups, receipts).
      */
     async transferHbar(
         receiverAccountId: string | AccountId,
         amount: number | Hbar,
         senderAccountId: string | AccountId,
         options: TransferHbarOptions = {},
-    ): Promise<void> {
+    ): Promise<TransactionResult> {
         this.validator.validateHbarTransfer({
             receiverAccountId,
             senderAccountId,
@@ -114,7 +122,7 @@ export class TransferOperation {
                 methodName: "transferHbar",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 
@@ -177,7 +185,7 @@ export class TransferOperation {
         amount: number,
         senderAccountId: string | AccountId,
         options: TransferTokenOptions = {},
-    ): Promise<void> {
+    ): Promise<TransactionResult> {
         this.validator.validateTokenTransfer({
             tokenId,
             receiverAccountId,
@@ -201,7 +209,7 @@ export class TransferOperation {
                 methodName: "transferToken",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 
@@ -265,7 +273,7 @@ export class TransferOperation {
         receiverAccountId: string | AccountId,
         senderAccountId: string | AccountId,
         options: TransferNftOptions = {},
-    ): Promise<void> {
+    ): Promise<TransactionResult> {
         this.validator.validateNftTransfer({
             tokenId,
             serial,
@@ -287,7 +295,7 @@ export class TransferOperation {
                 methodName: "transferNft",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

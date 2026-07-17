@@ -7,6 +7,14 @@ export const HieroErrorCodes = {
     NotFound: "NOT_FOUND",
     TimedOut: "TIMED_OUT",
     SdkError: "SDK_ERROR",
+    /**
+     * The transaction reached consensus successfully, but mapping its
+     * result failed (an operation's business rule, or a record fetch).
+     * The error's `transactionId` identifies the transaction that DID
+     * land — recover its outcome (e.g. from the mirror node); do not
+     * retry, the retry would re-submit.
+     */
+    ResultMappingFailed: "RESULT_MAPPING_FAILED",
     Unknown: "UNKNOWN",
 } as const;
 

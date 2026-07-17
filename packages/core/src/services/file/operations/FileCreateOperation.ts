@@ -80,7 +80,7 @@ export class FileCreateOperation {
                 methodName: "createFile",
                 timestamp: new Date(),
             },
-            (receipt) => receipt.fileId!.toString(),
+            (outcome) => outcome.receipt.fileId!.toString(),
         );
     }
 

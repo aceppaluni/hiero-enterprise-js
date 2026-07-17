@@ -1,8 +1,14 @@
 import type { TokenId } from "@hiero-ledger/sdk";
 import { TokenUpdateNftsTransaction, Long } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
-import type { TransactionOptions } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
+import type {
+    TransactionOptions,
+    TransactionResult,
+} from "../../transaction/index.js";
 import { TokenUpdateNftsValidator } from "../validation/index.js";
 
 /**
@@ -52,7 +58,9 @@ export class TokenUpdateNftsOperation {
     }
 
     /** Submit a `TokenUpdateNftsTransaction`. */
-    async execute(options: TokenUpdateNftsOperationOptions): Promise<void> {
+    async execute(
+        options: TokenUpdateNftsOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
@@ -66,7 +74,7 @@ export class TokenUpdateNftsOperation {
                 methodName: "updateNfts",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

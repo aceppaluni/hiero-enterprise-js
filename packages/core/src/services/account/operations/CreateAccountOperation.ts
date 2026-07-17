@@ -124,7 +124,7 @@ export class CreateAccountOperation {
                 methodName: "createAccount",
                 timestamp: new Date(),
             },
-            (receipt) => this.toAccount(receipt, options),
+            (outcome) => this.toAccount(outcome.receipt, options),
         );
     }
 

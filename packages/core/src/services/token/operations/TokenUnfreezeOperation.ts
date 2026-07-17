@@ -1,8 +1,14 @@
 import type { AccountId, TokenId } from "@hiero-ledger/sdk";
 import { TokenUnfreezeTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
-import type { TransactionOptions } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
+import type {
+    TransactionOptions,
+    TransactionResult,
+} from "../../transaction/index.js";
 import { TokenUnfreezeValidator } from "../validation/index.js";
 
 /**
@@ -27,7 +33,9 @@ export class TokenUnfreezeOperation {
     }
 
     /** Submit a `TokenUnfreezeTransaction`. */
-    async execute(options: TokenUnfreezeOperationOptions): Promise<void> {
+    async execute(
+        options: TokenUnfreezeOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
@@ -41,7 +49,7 @@ export class TokenUnfreezeOperation {
                 methodName: "unfreezeToken",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

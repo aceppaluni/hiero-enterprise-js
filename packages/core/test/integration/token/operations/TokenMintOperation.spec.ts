@@ -32,11 +32,17 @@ describe("TokenService mint operations [Integration]", () => {
             additionalSigners: [owner.key],
         });
 
-        await tokenService.mintToken({
+        const mint = await tokenService.mintToken({
             tokenId,
             metadata: [Buffer.from("meta-1"), Buffer.from("meta-2")],
             additionalSigners: [owner.key],
         });
+
+        // Live proof of MintResult: the network assigns serials 1 and 2 to
+        // a fresh collection, and the floor fields ride along.
+        expect(mint.serials).toEqual([1, 2]);
+        expect(mint.totalSupply).toBe("2");
+        expect(mint.status).toBe("SUCCESS");
 
         await waitForMirrorNodeRecord();
 

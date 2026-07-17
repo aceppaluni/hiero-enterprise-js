@@ -1,8 +1,14 @@
 import type { PendingAirdropId } from "@hiero-ledger/sdk";
 import { TokenClaimAirdropTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
-import type { TransactionOptions } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
+import type {
+    TransactionOptions,
+    TransactionResult,
+} from "../../transaction/index.js";
 import { TokenClaimAirdropValidator } from "../validation/index.js";
 
 /**
@@ -47,7 +53,9 @@ export class TokenClaimAirdropOperation {
     }
 
     /** Submit a `TokenClaimAirdropTransaction`. */
-    async execute(options: TokenClaimAirdropOperationOptions): Promise<void> {
+    async execute(
+        options: TokenClaimAirdropOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
@@ -61,7 +69,7 @@ export class TokenClaimAirdropOperation {
                 methodName: "claimAirdrop",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

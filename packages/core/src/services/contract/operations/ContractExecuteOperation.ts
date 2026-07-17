@@ -12,6 +12,7 @@ import type {
     TransactionOptions,
     ScheduleOptions,
     ScheduledResult,
+    ContractExecuteResult,
 } from "../../transaction/index.js";
 import { ContractExecuteValidator } from "../validation/index.js";
 
@@ -58,6 +59,13 @@ export interface ContractExecuteOperationOptions extends TransactionOptions {
      * functions). Defaults to `0` when omitted.
      */
     payableAmount?: number | string | Long | BigNumber | Hbar | bigint;
+    /**
+     * Also return the function's EVM outcome (return data, gas used,
+     * error message) on `result.functionResult`. **Costs one extra paid
+     * query**: the outcome lives on the transaction *record*, not the
+     * receipt, so it is only fetched when this is set.
+     */
+    withFunctionResult?: boolean;
 }
 
 export class ContractExecuteOperation {
@@ -71,13 +79,18 @@ export class ContractExecuteOperation {
 
     /**
      * Submit a `ContractExecuteTransaction`.
+     *
+     * @returns The transaction id/status; with `withFunctionResult: true`,
+     *   also the EVM outcome (return data, gas used) from the record.
      */
-    async execute(options: ContractExecuteOperationOptions): Promise<void> {
+    async execute(
+        options: ContractExecuteOperationOptions,
+    ): Promise<ContractExecuteResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        await this.executor.run(
+        return await this.executor.run(
             tx,
             options,
             {
@@ -86,7 +99,26 @@ export class ContractExecuteOperation {
                 methodName: "executeContract",
                 timestamp: new Date(),
             },
-            () => undefined,
+            async (outcome) => {
+                if (!options.withFunctionResult) {
+                    return outcome.toResult();
+                }
+                const record = await outcome.getRecord();
+                const fn = record.contractFunctionResult;
+                return {
+                    ...outcome.toResult(),
+                    ...(fn && {
+                        functionResult: {
+                            returnDataHex: `0x${Buffer.from(fn.bytes).toString("hex")}`,
+                            gasUsed: fn.gasUsed.toNumber(),
+                            ...(fn.errorMessage != null &&
+                                fn.errorMessage !== "" && {
+                                    errorMessage: fn.errorMessage,
+                                }),
+                        },
+                    }),
+                };
+            },
         );
     }
 

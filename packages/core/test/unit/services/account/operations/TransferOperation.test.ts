@@ -45,6 +45,15 @@ describe("TransferOperation (via AccountService)", () => {
 
     // HBAR transfers
     describe("transferHbar", () => {
+        it("returns the transaction id and status (#134)", async () => {
+            const result = await service.transferHbar("0.0.200", 5, "0.0.100");
+
+            expect(result).toEqual({
+                transactionId: expect.any(String),
+                status: "SUCCESS",
+            });
+        });
+
         it("emits two addHbarTransfer calls: negated sender, positive receiver", async () => {
             await service.transferHbar("0.0.200", 5, "0.0.100");
 

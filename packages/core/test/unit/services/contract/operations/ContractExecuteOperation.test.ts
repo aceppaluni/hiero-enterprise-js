@@ -52,7 +52,10 @@ describe("ContractExecuteOperation (via ContractService)", () => {
                 functionName: "increment",
             });
 
-            expect(result).toBeUndefined();
+            expect(result).toEqual({
+                transactionId: expect.any(String),
+                status: "SUCCESS",
+            });
 
             const tx = vi.mocked(ContractExecuteTransaction).mock.results[0]
                 .value;
@@ -64,6 +67,98 @@ describe("ContractExecuteOperation (via ContractService)", () => {
             expect(mocks.response.getReceipt).toHaveBeenCalledWith(
                 context.client,
             );
+        });
+
+        it("does not fetch the record unless withFunctionResult is set", async () => {
+            await service.executeContract({
+                contractId: "0.0.12345",
+                gas: 100_000,
+                functionName: "increment",
+            });
+
+            expect(mocks.response.recordExecute).not.toHaveBeenCalled();
+        });
+
+        it("returns the EVM outcome from the record with withFunctionResult", async () => {
+            mocks.response.recordExecute.mockResolvedValue({
+                contractFunctionResult: {
+                    bytes: new Uint8Array([0xca, 0xfe]),
+                    gasUsed: { toNumber: () => 42_000 },
+                    errorMessage: null,
+                },
+            });
+
+            const result = await service.executeContract({
+                contractId: "0.0.12345",
+                gas: 100_000,
+                functionName: "increment",
+                withFunctionResult: true,
+            });
+
+            expect(mocks.response.recordExecute).toHaveBeenCalledTimes(1);
+            expect(result.functionResult).toEqual({
+                returnDataHex: "0xcafe",
+                gasUsed: 42_000,
+            });
+            expect(result.functionResult).not.toHaveProperty("errorMessage");
+        });
+
+        it("surfaces the EVM error message when the call reverted", async () => {
+            mocks.response.recordExecute.mockResolvedValue({
+                contractFunctionResult: {
+                    bytes: new Uint8Array([]),
+                    gasUsed: { toNumber: () => 21_000 },
+                    errorMessage: "revert: not owner",
+                },
+            });
+
+            const result = await service.executeContract({
+                contractId: "0.0.12345",
+                gas: 100_000,
+                functionName: "increment",
+                withFunctionResult: true,
+            });
+
+            expect(result.functionResult?.errorMessage).toBe(
+                "revert: not owner",
+            );
+        });
+
+        it("omits functionResult when the record carries none, even with the opt-in", async () => {
+            mocks.response.recordExecute.mockResolvedValue({
+                contractFunctionResult: null,
+            });
+
+            const result = await service.executeContract({
+                contractId: "0.0.12345",
+                gas: 100_000,
+                functionName: "increment",
+                withFunctionResult: true,
+            });
+
+            expect(mocks.response.recordExecute).toHaveBeenCalledTimes(1);
+            expect(result).not.toHaveProperty("functionResult");
+            expect(result.status).toBe("SUCCESS");
+        });
+
+        it("treats an empty-string errorMessage as no error", async () => {
+            mocks.response.recordExecute.mockResolvedValue({
+                contractFunctionResult: {
+                    bytes: new Uint8Array([0x01]),
+                    gasUsed: { toNumber: () => 30_000 },
+                    errorMessage: "",
+                },
+            });
+
+            const result = await service.executeContract({
+                contractId: "0.0.12345",
+                gas: 100_000,
+                functionName: "increment",
+                withFunctionResult: true,
+            });
+
+            expect(result.functionResult).not.toHaveProperty("errorMessage");
+            expect(result.functionResult?.returnDataHex).toBe("0x01");
         });
 
         it("forwards ABI-typed function parameters", async () => {

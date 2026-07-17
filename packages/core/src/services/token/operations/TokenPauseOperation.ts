@@ -1,8 +1,14 @@
 import type { TokenId } from "@hiero-ledger/sdk";
 import { TokenPauseTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
-import type { TransactionOptions } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
+import type {
+    TransactionOptions,
+    TransactionResult,
+} from "../../transaction/index.js";
 import { TokenPauseValidator } from "../validation/index.js";
 
 /**
@@ -32,7 +38,9 @@ export class TokenPauseOperation {
     }
 
     /** Submit a `TokenPauseTransaction`. */
-    async execute(options: TokenPauseOperationOptions): Promise<void> {
+    async execute(
+        options: TokenPauseOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
@@ -46,7 +54,7 @@ export class TokenPauseOperation {
                 methodName: "pauseToken",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

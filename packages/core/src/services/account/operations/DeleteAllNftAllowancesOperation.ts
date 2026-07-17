@@ -1,11 +1,13 @@
-import {
-    AccountAllowanceApproveTransaction,
-    TokenId,
-    type TransactionReceipt,
-} from "@hiero-ledger/sdk";
+import { AccountAllowanceApproveTransaction, TokenId } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
-import type { TransactionOptions } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
+import type {
+    TransactionOptions,
+    TransactionResult,
+} from "../../transaction/index.js";
 import { DeleteAllNftAllowancesValidator } from "../validation/index.js";
 
 /**
@@ -49,7 +51,7 @@ export class DeleteAllNftAllowancesOperation {
         allowances: NftAllSerialsAllowanceDeletion[],
         options: DeleteAllNftAllowancesOptions = {},
         methodName = "deleteAllNftAllowances",
-    ): Promise<TransactionReceipt> {
+    ): Promise<TransactionResult> {
         this.validator.validate(allowances);
         const tx = this.build(allowances);
 
@@ -62,7 +64,7 @@ export class DeleteAllNftAllowancesOperation {
                 methodName,
                 timestamp: new Date(),
             },
-            (receipt) => receipt,
+            toTransactionResult,
         );
     }
 

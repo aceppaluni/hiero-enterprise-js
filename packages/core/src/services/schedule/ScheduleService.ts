@@ -5,6 +5,10 @@ import {
     ScheduleCancelOperation,
 } from "./operations/index.js";
 import type {
+    ScheduleSignResult,
+    TransactionResult,
+} from "../transaction/index.js";
+import type {
     ScheduleSignOptions,
     ScheduleCancelOptions,
 } from "./operations/index.js";
@@ -41,8 +45,13 @@ export class ScheduleService {
      * @param options.additionalSigners - Local private keys to sign with
      * @param options.externalSigners - HSM / KMS / wallet signing functions
      * @param options.legacySignatures - Pre-computed offline signatures
+     * @returns The transaction id/status; `scheduledTransactionId`, when
+     *   present, is the id for querying the *scheduled* (inner)
+     *   transaction's own receipt or record. Its presence does not mean
+     *   the schedule executed — check `getInfo(...)`'s `executedAt` (or
+     *   the scheduled transaction's receipt) for that
      */
-    sign(options: ScheduleSignOptions): Promise<void> {
+    sign(options: ScheduleSignOptions): Promise<ScheduleSignResult> {
         return this.signOperation.execute(options);
     }
 
@@ -56,7 +65,7 @@ export class ScheduleService {
      * @param options.scheduleId - The schedule entity to cancel
      * @param options.adminKey - Private key matching the schedule's adminKey
      */
-    cancel(options: ScheduleCancelOptions): Promise<void> {
+    cancel(options: ScheduleCancelOptions): Promise<TransactionResult> {
         return this.cancelOperation.execute(options);
     }
 

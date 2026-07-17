@@ -43,7 +43,9 @@ describe("TokenService burn operations [Integration]", () => {
             additionalSigners: [owner.key],
         });
 
-        expect(newTotalSupply.toNumber()).toBe(initialSupply - burnAmount);
+        expect(newTotalSupply.totalSupply).toBe(
+            String(initialSupply - burnAmount),
+        );
 
         await waitForMirrorNodeRecord();
 
@@ -77,7 +79,7 @@ describe("TokenService burn operations [Integration]", () => {
         });
 
         // 3 minted - 2 burned = 1 remaining
-        expect(newTotalSupply.toNumber()).toBe(1);
+        expect(newTotalSupply.totalSupply).toBe("1");
 
         await waitForMirrorNodeRecord();
 

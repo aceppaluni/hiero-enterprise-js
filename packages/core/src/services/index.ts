@@ -12,4 +12,13 @@ export type {
     QueryOptions,
     ScheduleOptions,
     ScheduledResult,
+    TransactionResult,
+    TransactionOutcome,
+    MintResult,
+    SupplyChangeResult,
+    ScheduleSignResult,
+    AutoCreateResult,
+    ContractFunctionOutcome,
+    ContractExecuteResult,
 } from "./transaction/index.js";
+export { toTransactionResult } from "./transaction/index.js";

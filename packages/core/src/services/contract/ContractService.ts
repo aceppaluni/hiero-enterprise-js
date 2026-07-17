@@ -1,5 +1,10 @@
 import type { IHieroContext } from "../../context/index.js";
-import type { ScheduleOptions, ScheduledResult } from "../transaction/index.js";
+import type {
+    ScheduleOptions,
+    ScheduledResult,
+    TransactionResult,
+    ContractExecuteResult,
+} from "../transaction/index.js";
 import {
     ContractCreateOperation,
     ContractCreateFlowOperation,
@@ -242,13 +247,11 @@ export class ContractService {
      * Invoke a state-mutating function on a deployed smart contract.
      *
      * Resolves once the consensus node returns a successful receipt for
-     * the call. Returns nothing — the contract ID is already known to the
-     * caller, and per-call status / timing is delivered through the
-     * `before` / `after` listener events on the surrounding `HieroContext`.
-     *
-     * The call's return bytes, gas used, and logs live on the transaction
-     * record (a separate paid query). Fetch the record directly via the
-     * SDK if your caller needs them.
+     * the call, with the transaction id and status. Pass
+     * `withFunctionResult: true` to also get the EVM-level outcome —
+     * return data, gas used, and any revert message — distilled from the
+     * transaction record. The record is a separate **paid** query, so it
+     * is fetched only under that opt-in.
      *
      * For read-only state queries that don't mutate the ledger, prefer a
      * `ContractCallQuery` — no consensus round-trip, no gas charged on
@@ -260,19 +263,27 @@ export class ContractService {
      * @param options.functionParameters - ABI-typed parameters (paired with `functionName`)
      * @param options.rawFunctionParameters - Pre-encoded ABI bytes (mutex with `functionName`)
      * @param options.payableAmount - HBAR forwarded with the call (for `payable` functions)
+     * @param options.withFunctionResult - Also fetch the EVM outcome from
+     *   the transaction record (an additional paid query)
+     * @returns The transaction id/status; `functionResult` (return data
+     *   hex, gas used, revert message) only with `withFunctionResult: true`
      *
      * @example
      * ```typescript
-     * await contractService.executeContract({
+     * const result = await contractService.executeContract({
      *     contractId: "0.0.12345",
      *     gas: 100_000,
      *     functionName: "set",
      *     functionParameters: new ContractFunctionParameters().addUint256(42),
+     *     withFunctionResult: true,
      * });
+     * console.log(result.functionResult?.returnDataHex);
      * ```
      */
-    async executeContract(options: ExecuteContractOptions): Promise<void> {
-        await this.executeOperation.execute(options);
+    async executeContract(
+        options: ExecuteContractOptions,
+    ): Promise<ContractExecuteResult> {
+        return await this.executeOperation.execute(options);
     }
 
     /**
@@ -325,8 +336,10 @@ export class ContractService {
      * });
      * ```
      */
-    async updateContract(options: UpdateContractOptions): Promise<void> {
-        await this.updateOperation.execute(options);
+    async updateContract(
+        options: UpdateContractOptions,
+    ): Promise<TransactionResult> {
+        return await this.updateOperation.execute(options);
     }
 
     /**
@@ -380,8 +393,10 @@ export class ContractService {
      * });
      * ```
      */
-    async deleteContract(options: DeleteContractOptions): Promise<void> {
-        await this.deleteOperation.execute(options);
+    async deleteContract(
+        options: DeleteContractOptions,
+    ): Promise<TransactionResult> {
+        return await this.deleteOperation.execute(options);
     }
 
     /**

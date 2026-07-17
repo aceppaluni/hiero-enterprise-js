@@ -1,8 +1,14 @@
 import type { FileId } from "@hiero-ledger/sdk";
 import { FileAppendTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
-import type { TransactionOptions } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
+import type {
+    TransactionOptions,
+    TransactionResult,
+} from "../../transaction/index.js";
 import { FileAppendValidator } from "../validation/index.js";
 
 /**
@@ -56,12 +62,14 @@ export class FileAppendOperation {
     }
 
     /** Submit a `FileAppendTransaction`. */
-    async execute(options: FileAppendOperationOptions): Promise<void> {
+    async execute(
+        options: FileAppendOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        await this.executor.run(
+        return await this.executor.run(
             tx,
             options,
             {
@@ -70,7 +78,7 @@ export class FileAppendOperation {
                 methodName: "appendToFile",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

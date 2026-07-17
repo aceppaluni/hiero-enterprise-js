@@ -32,14 +32,43 @@ describe("AutoCreateEvmAccountOperation (via AccountService)", () => {
     });
 
     describe("autoCreateEvmAccount", () => {
-        it("transfers HBAR to seed the EVM address", async () => {
-            await service.autoCreateEvmAccount({
+        it("transfers HBAR to seed the EVM address and returns the child account", async () => {
+            // The new account id arrives on the transfer's child receipt —
+            // the operation asks the executor for child receipts.
+            mocks.receipt.children = [
+                { accountId: { toString: () => "0.0.4321" } },
+            ];
+
+            const result = await service.autoCreateEvmAccount({
                 evmAddress: "0x" + "a".repeat(40),
                 amount: 5,
             });
 
             expect(mocks.tx.addHbarTransfer).toHaveBeenCalledTimes(2);
             expect(mocks.tx.execute).toHaveBeenCalledWith(context.client);
+            expect(mocks.response.getReceiptQuery).toHaveBeenCalled();
+            expect(result).toEqual({
+                transactionId: "0.0.123@1234567890.000000000",
+                status: "SUCCESS",
+                accountId: "0.0.4321",
+            });
+        });
+
+        it("resolves without accountId for a warm address — never throws after funds moved", async () => {
+            mocks.receipt.children = [];
+
+            const result = await service.autoCreateEvmAccount({
+                evmAddress: "0x" + "a".repeat(40),
+                amount: 5,
+            });
+
+            // The transfer landed (the caller must not retry); it just
+            // created nothing.
+            expect(result).toEqual({
+                transactionId: "0.0.123@1234567890.000000000",
+                status: "SUCCESS",
+            });
+            expect(result).not.toHaveProperty("accountId");
         });
     });
 

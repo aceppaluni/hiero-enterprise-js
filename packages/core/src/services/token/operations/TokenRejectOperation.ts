@@ -1,6 +1,7 @@
 import type { NftId, PrivateKey } from "@hiero-ledger/sdk";
 import { AccountId, TokenId, TokenRejectFlow } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
+import type { TransactionResult } from "../../transaction/index.js";
 import { normalizeError } from "../../../errors/index.js";
 import { TokenRejectValidator } from "../validation/index.js";
 
@@ -44,10 +45,14 @@ export class TokenRejectOperation {
     /**
      * Execute the reject-and-dissociate flow.
      *
-     * Failures from either inner transaction (reject or dissociate)
-     * throw a normalized `HieroError`.
+     * The returned `transactionId` is the *reject* transaction's — the
+     * SDK flow does not expose the follow-up dissociate's id. Failures
+     * from either inner transaction (reject or dissociate) throw a
+     * normalized `HieroError`.
      */
-    async execute(options: TokenRejectOperationOptions): Promise<void> {
+    async execute(
+        options: TokenRejectOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const flow = this.buildFlow(options);
@@ -74,6 +79,7 @@ export class TokenRejectOperation {
                 status: "SUCCESS",
                 durationMs: Date.now() - start,
             });
+            return { transactionId, status: "SUCCESS" };
         } catch (error) {
             await this.context.emitAfterTransaction({
                 ...event,

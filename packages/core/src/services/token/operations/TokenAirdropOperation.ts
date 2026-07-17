@@ -2,8 +2,14 @@ import type BigNumber from "bignumber.js";
 import type { AccountId, TokenId } from "@hiero-ledger/sdk";
 import { Long, TokenAirdropTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
-import type { TransactionOptions } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
+import type {
+    TransactionOptions,
+    TransactionResult,
+} from "../../transaction/index.js";
 import { TokenAirdropValidator } from "../validation/index.js";
 
 /**
@@ -60,7 +66,9 @@ export class TokenAirdropOperation {
     }
 
     /** Submit a `TokenAirdropTransaction`. */
-    async execute(options: TokenAirdropOperationOptions): Promise<void> {
+    async execute(
+        options: TokenAirdropOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
@@ -74,7 +82,7 @@ export class TokenAirdropOperation {
                 methodName: "airdropFungibleToken",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

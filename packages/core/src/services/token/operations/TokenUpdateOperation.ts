@@ -8,11 +8,15 @@ import type {
 } from "@hiero-ledger/sdk";
 import { TokenUpdateTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
     ScheduledResult,
+    TransactionResult,
 } from "../../transaction/index.js";
 import { TokenUpdateValidator } from "../validation/index.js";
 
@@ -57,7 +61,9 @@ export class TokenUpdateOperation {
     }
 
     /** Submit a `TokenUpdateTransaction`. */
-    async execute(options: TokenUpdateOperationOptions): Promise<void> {
+    async execute(
+        options: TokenUpdateOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
@@ -71,7 +77,7 @@ export class TokenUpdateOperation {
                 methodName: "updateToken",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

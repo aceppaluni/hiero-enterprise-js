@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { Status } from "@hiero-ledger/sdk";
 import { setupIntegrationTestEnv } from "../../../utils/env.js";
 import { waitForMirrorNodeRecord } from "../../../utils/mirror-node.js";
 import {
@@ -27,7 +26,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
         const { owner, spender } = await createOwnerSpenderPair(client);
 
         // First grant the allowance so there's something to revoke
-        const approveReceipt = await client.approveHbarAllowance({
+        const approveResult = await client.approveHbarAllowance({
             hbarAllowances: [
                 {
                     ownerAccountId: owner.accountId,
@@ -37,7 +36,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
             ],
             additionalSigners: [owner.key],
         });
-        expect(approveReceipt.status).toBe(Status.Success);
+        expect(approveResult.status).toBe("SUCCESS");
         await waitForMirrorNodeRecord();
 
         const granted = await queryHbarAllowances(owner.accountId);
@@ -46,7 +45,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
         ).toBeDefined();
 
         // Now revoke it
-        const deleteReceipt = await client.deleteHbarAllowance(
+        const deleteResult = await client.deleteHbarAllowance(
             [
                 {
                     ownerAccountId: owner.accountId,
@@ -55,7 +54,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
             ],
             { additionalSigners: [owner.key] },
         );
-        expect(deleteReceipt.status).toBe(Status.Success);
+        expect(deleteResult.status).toBe("SUCCESS");
         await waitForMirrorNodeRecord();
 
         const after = await queryHbarAllowances(owner.accountId);
@@ -77,7 +76,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
             additionalSigners: [owner.key],
         });
 
-        const approveReceipt = await client.approveTokenAllowance({
+        const approveResult = await client.approveTokenAllowance({
             tokenAllowances: [
                 {
                     tokenId,
@@ -88,7 +87,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
             ],
             additionalSigners: [owner.key],
         });
-        expect(approveReceipt.status).toBe(Status.Success);
+        expect(approveResult.status).toBe("SUCCESS");
         await waitForMirrorNodeRecord();
 
         const granted = await queryTokenAllowances(owner.accountId);
@@ -100,7 +99,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
         ).toBeDefined();
 
         // Revoke it
-        const deleteReceipt = await client.deleteTokenAllowance(
+        const deleteResult = await client.deleteTokenAllowance(
             [
                 {
                     tokenId,
@@ -110,7 +109,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
             ],
             { additionalSigners: [owner.key] },
         );
-        expect(deleteReceipt.status).toBe(Status.Success);
+        expect(deleteResult.status).toBe("SUCCESS");
         await waitForMirrorNodeRecord();
 
         const after = await queryTokenAllowances(owner.accountId);
@@ -138,7 +137,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
         });
 
         // Grant per-serial allowance
-        const approveReceipt = await client.approveNftAllowance({
+        const approveResult = await client.approveNftAllowance({
             nftAllowances: [
                 {
                     tokenId,
@@ -149,7 +148,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
             ],
             additionalSigners: [owner.key],
         });
-        expect(approveReceipt.status).toBe(Status.Success);
+        expect(approveResult.status).toBe("SUCCESS");
         await waitForMirrorNodeRecord();
 
         // Verify spender was set on both serials
@@ -159,7 +158,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
         }
 
         // Revoke per-serial allowance
-        const deleteReceipt = await client.deleteNftAllowance(
+        const deleteResult = await client.deleteNftAllowance(
             [
                 {
                     tokenId,
@@ -169,7 +168,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
             ],
             { additionalSigners: [owner.key] },
         );
-        expect(deleteReceipt.status).toBe(Status.Success);
+        expect(deleteResult.status).toBe("SUCCESS");
         await waitForMirrorNodeRecord();
 
         // Verify spender was cleared on both serials

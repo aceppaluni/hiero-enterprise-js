@@ -55,12 +55,18 @@ describe("DeleteAllowanceOperation (via AccountService)", () => {
 
     describe("deleteHbarAllowance", () => {
         it("revokes HBAR allowance by approving with amount=0", async () => {
-            await service.deleteHbarAllowance([
+            const result = await service.deleteHbarAllowance([
                 {
                     ownerAccountId: "0.0.100",
                     spenderAccountId: "0.0.200",
                 },
             ]);
+
+            // No SDK receipt leaks to consumers — just the floor result.
+            expect(result).toEqual({
+                transactionId: "0.0.123@1234567890.000000000",
+                status: "SUCCESS",
+            });
 
             const tx = vi.mocked(AccountAllowanceApproveTransaction).mock
                 .results[0].value;

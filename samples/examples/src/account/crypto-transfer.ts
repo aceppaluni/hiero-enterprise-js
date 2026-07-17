@@ -61,12 +61,15 @@ async function transferHbar(accountService: AccountService) {
     // Move 1 HBAR from the sender to the receiver.
     // `amount` can be a number (interpreted as whole HBAR) or an Hbar value.
 
-    await accountService.transferHbar(
+    const result = await accountService.transferHbar(
         receiver.accountId,
         new Hbar(1),
         sender.accountId,
         { additionalSigners: [senderKey] },
     );
+    // The result carries the transaction id — the caller's reference for
+    // explorer links, mirror node lookups, or payment correlation.
+    console.log("Transferred:", result.transactionId, result.status);
 
     const balance = await accountService.getAccountBalance(receiver.accountId);
     console.log("Receiver balance:", balance.hbars, "tinybars");

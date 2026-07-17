@@ -1,11 +1,15 @@
 import type { AccountId, ContractId } from "@hiero-ledger/sdk";
 import { ContractDeleteTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
     ScheduledResult,
+    TransactionResult,
 } from "../../transaction/index.js";
 import { ContractDeleteValidator } from "../validation/index.js";
 
@@ -59,12 +63,14 @@ export class ContractDeleteOperation {
     /**
      * Submit a `ContractDeleteTransaction`.
      */
-    async execute(options: ContractDeleteOperationOptions): Promise<void> {
+    async execute(
+        options: ContractDeleteOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        await this.executor.run(
+        return await this.executor.run(
             tx,
             options,
             {
@@ -73,7 +79,7 @@ export class ContractDeleteOperation {
                 methodName: "deleteContract",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

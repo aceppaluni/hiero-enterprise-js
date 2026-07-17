@@ -16,7 +16,11 @@ export interface TransactionEvent {
     status?: string;
     /** Error if the transaction failed (available in afterTransaction) */
     error?: Error;
-    /** Duration in milliseconds (available in afterTransaction) */
+    /**
+     * Milliseconds from submission to the receipt (available in
+     * afterTransaction) — the transaction's network round-trip, not the
+     * SDK's result mapping, which runs after this event is emitted.
+     */
     durationMs?: number;
 }
 

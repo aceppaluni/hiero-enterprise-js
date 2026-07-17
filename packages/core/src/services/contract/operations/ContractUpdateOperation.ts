@@ -8,11 +8,15 @@ import type {
 } from "@hiero-ledger/sdk";
 import { ContractUpdateTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
     ScheduledResult,
+    TransactionResult,
 } from "../../transaction/index.js";
 import { ContractUpdateValidator } from "../validation/index.js";
 
@@ -72,12 +76,14 @@ export class ContractUpdateOperation {
     /**
      * Submit a `ContractUpdateTransaction`.
      */
-    async execute(options: ContractUpdateOperationOptions): Promise<void> {
+    async execute(
+        options: ContractUpdateOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        await this.executor.run(
+        return await this.executor.run(
             tx,
             options,
             {
@@ -86,7 +92,7 @@ export class ContractUpdateOperation {
                 methodName: "updateContract",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

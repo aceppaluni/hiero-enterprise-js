@@ -47,7 +47,7 @@ async function burnFungibleToken(
         additionalSigners: [ownerKey],
     });
 
-    const newTotalSupply = await tokenService.burnToken({
+    const burnResult = await tokenService.burnToken({
         tokenId,
         amount: 250,
         additionalSigners: [ownerKey],
@@ -56,7 +56,7 @@ async function burnFungibleToken(
     console.log("Owner account:", owner.accountId);
     console.log("Token ID:", tokenId);
     console.log("Burned amount: 250");
-    console.log("New total supply:", newTotalSupply.toString());
+    console.log("New total supply:", burnResult.totalSupply);
     console.log();
 }
 
@@ -92,7 +92,7 @@ async function burnNftSerials(
         additionalSigners: [ownerKey],
     });
 
-    const newTotalSupply = await tokenService.burnToken({
+    const burnResult = await tokenService.burnToken({
         tokenId,
         serials: [1, 2],
         additionalSigners: [ownerKey],
@@ -101,7 +101,7 @@ async function burnNftSerials(
     console.log("Owner account:", owner.accountId);
     console.log("Token ID:", tokenId);
     console.log("Burned serials: 1, 2");
-    console.log("New total supply:", newTotalSupply.toString());
+    console.log("New total supply:", burnResult.totalSupply);
     console.log();
 }
 

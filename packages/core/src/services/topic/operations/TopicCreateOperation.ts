@@ -99,7 +99,7 @@ export class TopicCreateOperation {
                 methodName: "createTopic",
                 timestamp: new Date(),
             },
-            (receipt) => receipt.topicId!.toString(),
+            (outcome) => outcome.receipt.topicId!.toString(),
         );
     }
 

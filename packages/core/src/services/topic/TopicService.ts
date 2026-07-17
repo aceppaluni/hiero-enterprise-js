@@ -1,6 +1,10 @@
 import type { SubscriptionHandle, TopicId } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../context/index.js";
-import type { ScheduleOptions, ScheduledResult } from "../transaction/index.js";
+import type {
+    ScheduleOptions,
+    ScheduledResult,
+    TransactionResult,
+} from "../transaction/index.js";
 import {
     TopicCreateOperation,
     TopicUpdateOperation,
@@ -199,7 +203,7 @@ export class TopicService {
      * @param options.customFees - Replace custom fees (HIP-991), or `null`
      * @param options.expirationTime - Extend the topic's expiration (not clearable)
      */
-    async updateTopic(options: UpdateTopicOptions): Promise<void> {
+    async updateTopic(options: UpdateTopicOptions): Promise<TransactionResult> {
         return await this.updateOperation.execute(options);
     }
 
@@ -217,7 +221,7 @@ export class TopicService {
      *
      * @param options.topicId - Topic to delete (required)
      */
-    async deleteTopic(options: DeleteTopicOptions): Promise<void> {
+    async deleteTopic(options: DeleteTopicOptions): Promise<TransactionResult> {
         return await this.deleteOperation.execute(options);
     }
 

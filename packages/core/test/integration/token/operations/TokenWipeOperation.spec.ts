@@ -61,7 +61,9 @@ describe("TokenService wipe operations [Integration]", () => {
             additionalSigners: [owner.key],
         });
 
-        expect(newTotalSupply.toNumber()).toBe(initialSupply - wipeAmount);
+        expect(newTotalSupply.totalSupply).toBe(
+            String(initialSupply - wipeAmount),
+        );
 
         await waitForMirrorNodeRecord();
 
@@ -121,7 +123,7 @@ describe("TokenService wipe operations [Integration]", () => {
         });
 
         // 3 minted - 2 wiped = 1 remaining (still owned by treasury)
-        expect(newTotalSupply.toNumber()).toBe(1);
+        expect(newTotalSupply.totalSupply).toBe("1");
 
         await waitForMirrorNodeRecord();
 

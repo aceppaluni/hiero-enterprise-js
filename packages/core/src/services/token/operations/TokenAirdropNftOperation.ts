@@ -1,8 +1,14 @@
 import type { AccountId, Long, TokenId } from "@hiero-ledger/sdk";
 import { TokenAirdropTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
-import type { TransactionOptions } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
+import type {
+    TransactionOptions,
+    TransactionResult,
+} from "../../transaction/index.js";
 import { TokenAirdropNftValidator } from "../validation/index.js";
 
 /**
@@ -53,7 +59,9 @@ export class TokenAirdropNftOperation {
     }
 
     /** Submit an NFT `TokenAirdropTransaction`. */
-    async execute(options: TokenAirdropNftOperationOptions): Promise<void> {
+    async execute(
+        options: TokenAirdropNftOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
@@ -67,7 +75,7 @@ export class TokenAirdropNftOperation {
                 methodName: "airdropNft",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

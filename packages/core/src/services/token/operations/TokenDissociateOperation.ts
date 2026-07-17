@@ -1,11 +1,15 @@
 import type { AccountId, TokenId } from "@hiero-ledger/sdk";
 import { TokenDissociateTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
     ScheduledResult,
+    TransactionResult,
 } from "../../transaction/index.js";
 import { TokenDissociateValidator } from "../validation/index.js";
 
@@ -31,7 +35,9 @@ export class TokenDissociateOperation {
     }
 
     /** Submit a `TokenDissociateTransaction`. */
-    async execute(options: TokenDissociateOperationOptions): Promise<void> {
+    async execute(
+        options: TokenDissociateOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
@@ -45,7 +51,7 @@ export class TokenDissociateOperation {
                 methodName: "dissociateToken",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

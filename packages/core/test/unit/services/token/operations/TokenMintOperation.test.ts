@@ -59,6 +59,43 @@ describe("TokenMintOperation (via TokenService)", () => {
         expect(tx.setAmount).not.toHaveBeenCalled();
     });
 
+    it("refuses to fabricate totalSupply when the receipt lacks it", async () => {
+        mocks.receipt.totalSupply = null;
+
+        try {
+            await expect(
+                service.mintToken({
+                    tokenId: "0.0.500",
+                    metadata: [new Uint8Array([1])],
+                }),
+            ).rejects.toThrow(/did not include totalSupply/);
+        } finally {
+            // The hoisted mock receipt is shared across tests — restore it.
+            mocks.receipt.totalSupply = { toString: () => "1000" };
+        }
+    });
+
+    it("returns the floor, plain-number serials, and total supply", async () => {
+        mocks.receipt.serials = [{ toNumber: () => 7 }, { toNumber: () => 8 }];
+        try {
+            const result = await service.mintToken({
+                tokenId: "0.0.500",
+                metadata: [new Uint8Array([1])],
+            });
+
+            expect(result).toEqual({
+                transactionId: "0.0.123@1234567890.000000000",
+                status: "SUCCESS",
+                serials: [7, 8],
+                totalSupply: "1000",
+            });
+        } finally {
+            // The bundle is shared across this file — don't leak serials
+            // into later tests.
+            mocks.receipt.serials = [];
+        }
+    });
+
     it("applies base TransactionOptions and additionalSigners", async () => {
         const signer = PrivateKey.generateED25519();
 

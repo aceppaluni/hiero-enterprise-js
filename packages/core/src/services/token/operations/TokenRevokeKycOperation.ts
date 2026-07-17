@@ -1,8 +1,14 @@
 import type { AccountId, TokenId } from "@hiero-ledger/sdk";
 import { TokenRevokeKycTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
-import type { TransactionOptions } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
+import type {
+    TransactionOptions,
+    TransactionResult,
+} from "../../transaction/index.js";
 import { TokenRevokeKycValidator } from "../validation/index.js";
 
 /**
@@ -33,7 +39,9 @@ export class TokenRevokeKycOperation {
     }
 
     /** Submit a `TokenRevokeKycTransaction`. */
-    async execute(options: TokenRevokeKycOperationOptions): Promise<void> {
+    async execute(
+        options: TokenRevokeKycOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
@@ -47,7 +55,7 @@ export class TokenRevokeKycOperation {
                 methodName: "revokeKycToken",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 

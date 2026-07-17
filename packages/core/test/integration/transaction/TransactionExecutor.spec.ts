@@ -42,7 +42,7 @@ describe("TransactionExecutor [Integration]", () => {
                     methodName: "createTopic",
                     timestamp: new Date(),
                 },
-                (receipt) => receipt.topicId!.toString(),
+                (outcome) => outcome.receipt.topicId!.toString(),
             );
 
             expect(topicId).toMatch(/^0\.0\.\d+$/);
@@ -69,7 +69,7 @@ describe("TransactionExecutor [Integration]", () => {
                     methodName: "createTopic",
                     timestamp: new Date(),
                 },
-                (receipt) => receipt.topicId!.toString(),
+                (outcome) => outcome.receipt.topicId!.toString(),
             );
 
             expect(before).toHaveBeenCalledWith(

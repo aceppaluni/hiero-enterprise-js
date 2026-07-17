@@ -23,7 +23,7 @@ describe("TopicMessageSubmitOperation", () => {
             message: "hello from integration test",
         });
 
-        expect(result.sequenceNumber.toNumber()).toBe(1);
+        expect(result.sequenceNumber).toBe(1);
         expect(result.runningHash.byteLength).toBeGreaterThan(0);
         expect(result.transactionId).toMatch(/^0\.0\.\d+@\d+\.\d+$/);
     });
@@ -39,7 +39,7 @@ describe("TopicMessageSubmitOperation", () => {
             message: payload,
         });
 
-        expect(result.sequenceNumber.toNumber()).toBe(1);
+        expect(result.sequenceNumber).toBe(1);
         expect(result.runningHash.byteLength).toBeGreaterThan(0);
     });
 
@@ -66,7 +66,7 @@ describe("TopicMessageSubmitOperation", () => {
             additionalSigners: [submitKey],
         });
 
-        expect(result.sequenceNumber.toNumber()).toBe(1);
+        expect(result.sequenceNumber).toBe(1);
     });
 
     it("auto-chunks a large multi-chunk message and returns the first chunk's metadata", async () => {
@@ -84,7 +84,7 @@ describe("TopicMessageSubmitOperation", () => {
         });
 
         // The receipt corresponds to the first chunk, so sequenceNumber === 1.
-        expect(result.sequenceNumber.toNumber()).toBe(1);
+        expect(result.sequenceNumber).toBe(1);
         expect(result.runningHash.byteLength).toBeGreaterThan(0);
     });
 

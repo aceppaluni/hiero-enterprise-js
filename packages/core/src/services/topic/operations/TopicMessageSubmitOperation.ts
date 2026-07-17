@@ -1,8 +1,11 @@
-import type { CustomFeeLimit, Long, TopicId } from "@hiero-ledger/sdk";
+import type { CustomFeeLimit, TopicId } from "@hiero-ledger/sdk";
 import { TopicMessageSubmitTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
 import { TransactionExecutor } from "../../transaction/index.js";
-import type { TransactionOptions } from "../../transaction/index.js";
+import type {
+    TransactionOptions,
+    TransactionResult,
+} from "../../transaction/index.js";
 import { TopicMessageSubmitValidator } from "../validation/index.js";
 
 /**
@@ -61,13 +64,14 @@ export interface TopicMessageSubmitOperationOptions extends TransactionOptions {
  * For multi-chunk submissions the values correspond to the **first**
  * chunk's receipt; subsequent chunks increment the sequence number.
  */
-export interface TopicMessageSubmitResult {
-    /** Topic-scoped sequence number assigned by the consensus node. */
-    sequenceNumber: Long;
+export interface TopicMessageSubmitResult extends TransactionResult {
+    /**
+     * Topic-scoped sequence number assigned by the consensus node — a
+     * plain number (sequence counters sit far below 2^53).
+     */
+    sequenceNumber: number;
     /** Updated running hash of all messages on the topic. */
     runningHash: Uint8Array;
-    /** Network transaction ID for the submission. */
-    transactionId: string;
 }
 
 export class TopicMessageSubmitOperation {
@@ -99,10 +103,10 @@ export class TopicMessageSubmitOperation {
                 methodName: "submitMessage",
                 timestamp: new Date(),
             },
-            (receipt, transactionId) => ({
-                sequenceNumber: receipt.topicSequenceNumber!,
-                runningHash: receipt.topicRunningHash!,
-                transactionId,
+            (outcome) => ({
+                ...outcome.toResult(),
+                sequenceNumber: outcome.receipt.topicSequenceNumber!.toNumber(),
+                runningHash: outcome.receipt.topicRunningHash!,
             }),
         );
     }

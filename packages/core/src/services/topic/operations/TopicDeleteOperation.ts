@@ -1,8 +1,14 @@
 import type { TopicId } from "@hiero-ledger/sdk";
 import { TopicDeleteTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { TransactionExecutor } from "../../transaction/index.js";
-import type { TransactionOptions } from "../../transaction/index.js";
+import {
+    TransactionExecutor,
+    toTransactionResult,
+} from "../../transaction/index.js";
+import type {
+    TransactionOptions,
+    TransactionResult,
+} from "../../transaction/index.js";
 import { TopicDeleteValidator } from "../validation/index.js";
 
 /**
@@ -34,7 +40,9 @@ export class TopicDeleteOperation {
     }
 
     /** Submit a `TopicDeleteTransaction`. */
-    async execute(options: TopicDeleteOperationOptions): Promise<void> {
+    async execute(
+        options: TopicDeleteOperationOptions,
+    ): Promise<TransactionResult> {
         this.validator.validate(options);
 
         const tx = this.build(options);
@@ -48,7 +56,7 @@ export class TopicDeleteOperation {
                 methodName: "deleteTopic",
                 timestamp: new Date(),
             },
-            () => undefined,
+            toTransactionResult,
         );
     }
 
