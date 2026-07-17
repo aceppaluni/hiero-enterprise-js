@@ -73,6 +73,11 @@ jobs:
               with:
                   languages: ${{ matrix.language }}
                   build-mode: ${{ matrix.build-mode }}
+                  # Upload code *quality* results in addition to security
+                  # scanning — required by the Code Quality rule in the
+                  # protect-branch ruleset, which otherwise blocks merges
+                  # with "code quality results are pending".
+                  analysis-kinds: code-scanning,code-quality
                   # Excludes samples/ (demo scripts logging public account
                   # IDs — see the config for rationale). packages/** stays
                   # fully scanned.
