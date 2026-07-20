@@ -131,7 +131,7 @@ describe("createMirrorNodeClient", () => {
         });
 
         const promise = client.queryAccount("0.0.1");
-        await vi.advanceTimersByTimeAsync(10_000);
+        await vi.advanceTimersByTimeAsync(1_000);
 
         expect((await promise).accountId).toBe("0.0.1");
         expect(spy).toHaveBeenCalledTimes(2);

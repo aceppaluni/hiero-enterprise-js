@@ -439,6 +439,10 @@ export class MirrorNodeClient {
             (this.retryOn404 && response.status === 404);
         if (retryableStatus && attempt < this.maxRetries) {
             clearTimeout(timer);
+            // Release the unread body so undici can reuse the connection
+            // instead of holding it open across the backoff (no-op when the
+            // response has no body).
+            await response.body?.cancel();
             // A 404 carries no `Retry-After`, so parseRetryAfter returns
             // undefined and the eventual-consistency case just backs off.
             const retryAfter = parseRetryAfter(

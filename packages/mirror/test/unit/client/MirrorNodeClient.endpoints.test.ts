@@ -303,7 +303,7 @@ describe("MirrorNodeClient retry-on-404", () => {
         const client = new MirrorNodeClient("https://x", { retryOn404: true });
 
         const promise = client.queryAccount("0.0.1");
-        await vi.advanceTimersByTimeAsync(10_000);
+        await vi.advanceTimersByTimeAsync(1_000);
 
         expect((await promise).accountId).toBe("0.0.1");
         expect(spy).toHaveBeenCalledTimes(2);
@@ -327,7 +327,7 @@ describe("MirrorNodeClient retry-on-404", () => {
             code: MirrorErrorCodes.NotFound,
             status: 404,
         });
-        await vi.advanceTimersByTimeAsync(10_000);
+        await vi.advanceTimersByTimeAsync(1_000);
         await assertion;
         // Initial attempt + 2 retries.
         expect(spy).toHaveBeenCalledTimes(3);
@@ -344,7 +344,7 @@ describe("MirrorNodeClient retry-on-404", () => {
         });
 
         const promise = orNull(client.queryAccount("0.0.1"));
-        await vi.advanceTimersByTimeAsync(10_000);
+        await vi.advanceTimersByTimeAsync(1_000);
         await expect(promise).resolves.toBeNull();
     });
 });
