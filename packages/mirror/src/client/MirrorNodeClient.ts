@@ -250,6 +250,18 @@ export interface MirrorNodeClientOptions {
     /** Max retries for 429/5xx/timeout responses (default: 3). */
     maxRetries?: number;
     /**
+     * Treat an HTTP 404 as a transient "not yet indexed" signal and retry
+     * it, reusing the same {@link maxRetries} budget and backoff as 429/5xx
+     * (default: `false`).
+     *
+     * Mirror nodes briefly 404 on freshly-created entities before the write
+     * propagates, so enable this only when you query an entity right after
+     * creating it. When the entity never appears the retries are exhausted
+     * and the outcome is still a `NotFound` MirrorError — so `orNull` keeps
+     * treating genuine absence as `null`.
+     */
+    retryOn404?: boolean;
+    /**
      * Maximum number of requests allowed in flight at once. Additional
      * requests queue and start as slots free up. This is *pro-active*
      * back-pressure: it bounds parallelism before the mirror node ever
@@ -298,6 +310,7 @@ export class MirrorNodeClient {
     private readonly baseUrl: string;
     private readonly timeoutMs: number;
     private readonly maxRetries: number;
+    private readonly retryOn404: boolean;
 
     /** Pro-active concurrency + rate limiter shared by every request. */
     private readonly gate: RequestGate;
@@ -311,6 +324,7 @@ export class MirrorNodeClient {
         this.baseUrl = url;
         this.timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
         this.maxRetries = options?.maxRetries ?? DEFAULT_MAX_RETRIES;
+        this.retryOn404 = options?.retryOn404 ?? false;
         this.gate = new RequestGate({
             maxConcurrent: options?.maxConcurrent,
             maxRequestsPerSecond: options?.maxRequestsPerSecond,
@@ -354,6 +368,10 @@ export class MirrorNodeClient {
      *   honouring the `Retry-After` header when present. The only POST
      *   endpoint (`/contracts/call`) is a transient simulation, so it is
      *   as safe to retry as a GET.
+     * - HTTP 404 is retried on the same budget only when `retryOn404` is
+     *   enabled (for mirror-node eventual consistency on freshly-created
+     *   entities); otherwise, and once retries are exhausted, it surfaces
+     *   as a terminal `NotFound`.
      * - Timeouts (AbortError / TimeoutError) are retried with exponential
      *   backoff, then surfaced as a TimedOut MirrorError. Other network
      *   errors (DNS, ECONNREFUSED, …) are surfaced immediately — they
@@ -415,11 +433,14 @@ export class MirrorNodeClient {
                 },
             );
         }
-        if (
-            (response.status === 429 || response.status >= 500) &&
-            attempt < this.maxRetries
-        ) {
+        const retryableStatus =
+            response.status === 429 ||
+            response.status >= 500 ||
+            (this.retryOn404 && response.status === 404);
+        if (retryableStatus && attempt < this.maxRetries) {
             clearTimeout(timer);
+            // A 404 carries no `Retry-After`, so parseRetryAfter returns
+            // undefined and the eventual-consistency case just backs off.
             const retryAfter = parseRetryAfter(
                 response.headers.get("retry-after"),
             );

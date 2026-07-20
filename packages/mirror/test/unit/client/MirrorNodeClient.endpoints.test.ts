@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { MirrorNodeClient } from "../../../src/client/MirrorNodeClient.js";
+import { MirrorErrorCodes, orNull } from "../../../src/errors/MirrorError.js";
 import { convertNft } from "../../../src/utils/MirrorNodeConverters.js";
 import { jsonResponse } from "../../utils/http.js";
 
@@ -263,5 +264,87 @@ describe("MirrorNodeClient edge branches", () => {
         await expect(client.queryTransaction("0.0.1-1-1")).rejects.toThrow(
             /Transaction not found/,
         );
+    });
+});
+
+describe("MirrorNodeClient retry-on-404", () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.useRealTimers();
+    });
+
+    it("does not retry a 404 by default — fails fast with NotFound", async () => {
+        const client = new MirrorNodeClient("https://x");
+        const spy = vi
+            .spyOn(globalThis, "fetch")
+            .mockResolvedValue(
+                new Response(null, { status: 404, statusText: "Not Found" }),
+            );
+        await expect(client.queryAccount("0.0.1")).rejects.toMatchObject({
+            code: MirrorErrorCodes.NotFound,
+            status: 404,
+        });
+        expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it("retries a 404 when opted in, then resolves once the entity appears", async () => {
+        vi.useFakeTimers();
+        const spy = vi
+            .spyOn(globalThis, "fetch")
+            .mockResolvedValueOnce(
+                new Response(null, { status: 404, statusText: "Not Found" }),
+            )
+            .mockResolvedValueOnce(
+                jsonResponse({
+                    account: "0.0.1",
+                    balance: { balance: 1, tokens: [] },
+                }),
+            );
+        const client = new MirrorNodeClient("https://x", { retryOn404: true });
+
+        const promise = client.queryAccount("0.0.1");
+        await vi.advanceTimersByTimeAsync(10_000);
+
+        expect((await promise).accountId).toBe("0.0.1");
+        expect(spy).toHaveBeenCalledTimes(2);
+    });
+
+    it("still surfaces NotFound once the 404 retries are exhausted", async () => {
+        vi.useFakeTimers();
+        const spy = vi
+            .spyOn(globalThis, "fetch")
+            .mockResolvedValue(
+                new Response(null, { status: 404, statusText: "Not Found" }),
+            );
+        const client = new MirrorNodeClient("https://x", {
+            retryOn404: true,
+            maxRetries: 2,
+        });
+
+        const assertion = expect(
+            client.queryAccount("0.0.1"),
+        ).rejects.toMatchObject({
+            code: MirrorErrorCodes.NotFound,
+            status: 404,
+        });
+        await vi.advanceTimersByTimeAsync(10_000);
+        await assertion;
+        // Initial attempt + 2 retries.
+        expect(spy).toHaveBeenCalledTimes(3);
+    });
+
+    it("resolves to null via orNull after the 404 retries are exhausted", async () => {
+        vi.useFakeTimers();
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response(null, { status: 404, statusText: "Not Found" }),
+        );
+        const client = new MirrorNodeClient("https://x", {
+            retryOn404: true,
+            maxRetries: 1,
+        });
+
+        const promise = orNull(client.queryAccount("0.0.1"));
+        await vi.advanceTimersByTimeAsync(10_000);
+        await expect(promise).resolves.toBeNull();
     });
 });

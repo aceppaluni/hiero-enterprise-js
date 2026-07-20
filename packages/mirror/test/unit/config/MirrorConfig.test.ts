@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import {
     resolveMirrorNodeUrl,
     mirrorConfigFromEnv,
@@ -40,6 +40,7 @@ describe("mirrorConfigFromEnv", () => {
             HIERO_MIRROR_NODE_URL: "http://custom:8080",
             HIERO_MIRROR_NODE_TIMEOUT_MS: "5000",
             HIERO_MIRROR_NODE_MAX_RETRIES: "5",
+            HIERO_MIRROR_NODE_RETRY_ON_404: "true",
             HIERO_MIRROR_NODE_MAX_CONCURRENT: "Infinity",
             HIERO_MIRROR_NODE_MAX_REQUESTS_PER_SECOND: "50",
         };
@@ -48,9 +49,16 @@ describe("mirrorConfigFromEnv", () => {
             mirrorNodeUrl: "http://custom:8080",
             mirrorNodeTimeoutMs: 5000,
             mirrorNodeMaxRetries: 5,
+            mirrorNodeRetryOn404: true,
             mirrorNodeMaxConcurrent: Infinity,
             mirrorNodeMaxRequestsPerSecond: 50,
         });
+        process.env = env;
+    });
+
+    it("treats an unset retry-on-404 var as undefined (default off)", () => {
+        process.env = { HIERO_NETWORK: "testnet" };
+        expect(mirrorConfigFromEnv().mirrorNodeRetryOn404).toBeUndefined();
         process.env = env;
     });
 
@@ -64,6 +72,11 @@ describe("mirrorConfigFromEnv", () => {
 });
 
 describe("createMirrorNodeClient", () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.useRealTimers();
+    });
+
     it("builds a client from an explicit config", () => {
         const client = createMirrorNodeClient({
             network: "testnet",
@@ -91,6 +104,37 @@ describe("createMirrorNodeClient", () => {
                 mirrorNodeMaxConcurrent: 0,
             }),
         ).toThrow(MirrorError);
+    });
+
+    it("forwards mirrorNodeRetryOn404 to the client", async () => {
+        vi.useFakeTimers();
+        const spy = vi
+            .spyOn(globalThis, "fetch")
+            .mockResolvedValueOnce(
+                new Response(null, { status: 404, statusText: "Not Found" }),
+            )
+            .mockResolvedValueOnce(
+                new Response(
+                    JSON.stringify({
+                        account: "0.0.1",
+                        balance: { balance: 1, tokens: [] },
+                    }),
+                    {
+                        status: 200,
+                        headers: { "Content-Type": "application/json" },
+                    },
+                ),
+            );
+        const client = createMirrorNodeClient({
+            network: "testnet",
+            mirrorNodeRetryOn404: true,
+        });
+
+        const promise = client.queryAccount("0.0.1");
+        await vi.advanceTimersByTimeAsync(10_000);
+
+        expect((await promise).accountId).toBe("0.0.1");
+        expect(spy).toHaveBeenCalledTimes(2);
     });
 });
 
