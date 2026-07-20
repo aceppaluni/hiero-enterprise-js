@@ -280,6 +280,17 @@ export interface MirrorNodeClientOptions {
      * for safe large-volume fetching.
      */
     maxRequestsPerSecond?: number;
+    /**
+     * An existing {@link RequestGate} to share instead of creating a new one.
+     *
+     * Advanced/internal: {@link MirrorNodeClient.withRetryOn404} uses this so
+     * a derived view counts against the *same* concurrency + rate budget as
+     * its parent, rather than opening a second independent one against the
+     * same mirror node. When set, {@link maxConcurrent} and
+     * {@link maxRequestsPerSecond} are ignored — the shared gate already
+     * carries them.
+     */
+    gate?: RequestGate;
 }
 
 /**
@@ -315,6 +326,9 @@ export class MirrorNodeClient {
     /** Pro-active concurrency + rate limiter shared by every request. */
     private readonly gate: RequestGate;
 
+    /** Memoized {@link withRetryOn404} view, sharing this client's gate. */
+    private retryOn404View?: MirrorNodeClient;
+
     constructor(baseUrl: string, options?: MirrorNodeClientOptions) {
         // Remove trailing slashes
         let url = baseUrl;
@@ -325,10 +339,43 @@ export class MirrorNodeClient {
         this.timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
         this.maxRetries = options?.maxRetries ?? DEFAULT_MAX_RETRIES;
         this.retryOn404 = options?.retryOn404 ?? false;
-        this.gate = new RequestGate({
-            maxConcurrent: options?.maxConcurrent,
-            maxRequestsPerSecond: options?.maxRequestsPerSecond,
+        // A shared gate (from withRetryOn404) already carries the concurrency
+        // + rate settings, so the per-option knobs are only read when we
+        // create our own.
+        this.gate =
+            options?.gate ??
+            new RequestGate({
+                maxConcurrent: options?.maxConcurrent,
+                maxRequestsPerSecond: options?.maxRequestsPerSecond,
+            });
+    }
+
+    /**
+     * A view of this client that treats an HTTP 404 as a transient "not yet
+     * indexed" signal and retries it (see
+     * {@link MirrorNodeClientOptions.retryOn404}). Use it for the narrow case
+     * of reading an entity right after creating it, without paying the extra
+     * retries on every other query:
+     *
+     * ```ts
+     * const account = await client.withRetryOn404().queryAccount(id);
+     * ```
+     *
+     * The returned view shares this client's {@link RequestGate}, so the pair
+     * counts against a single concurrency + rate budget rather than opening a
+     * second, independent one against the same mirror node. The view is
+     * memoized — repeated calls return the same instance — and calling it on a
+     * client that already retries 404s returns the client itself.
+     */
+    withRetryOn404(): MirrorNodeClient {
+        if (this.retryOn404) return this;
+        this.retryOn404View ??= new MirrorNodeClient(this.baseUrl, {
+            timeoutMs: this.timeoutMs,
+            maxRetries: this.maxRetries,
+            retryOn404: true,
+            gate: this.gate,
         });
+        return this.retryOn404View;
     }
 
     /**

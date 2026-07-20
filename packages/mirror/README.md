@@ -286,13 +286,30 @@ HIERO_MIRROR_NODE_RETRY_ON_404=false
 
 Mirror nodes are eventually consistent: an entity can briefly return
 **HTTP 404** in the short window between its creating transaction reaching
-consensus and the mirror node importing it. If you query an entity right
-after creating it, set `retryOn404: true` (or `HIERO_MIRROR_NODE_RETRY_ON_404=true`)
-so a 404 is retried on the same `maxRetries` budget and backoff as 429/5xx,
-instead of failing immediately.
+consensus and the mirror node importing it. When you query an entity right
+after creating it, retry the 404 on the same `maxRetries` budget and backoff
+as 429/5xx instead of failing immediately.
 
-It defaults to **off** because a 404 is normally a legitimate "no such
-entity". Even with it on, a persistent 404 exhausts the retries and still
+Prefer the per-call `withRetryOn404()` view, so only the just-created lookup
+pays the extra retries — every other query on the client keeps failing fast
+on a genuine 404:
+
+```ts
+const account = await client.withRetryOn404().queryAccount(newAccountId);
+```
+
+The view shares the base client's concurrency + rate gate, so the pair
+counts against a single budget rather than doubling your effective request
+rate against the node.
+
+A client-wide `retryOn404: true` option (or `HIERO_MIRROR_NODE_RETRY_ON_404=true`)
+also exists, but it applies to **every** query — including genuine
+"no such entity" lookups, which then cost `maxRetries + 1` requests each
+before resolving. Reach for it only when a client exclusively reads
+freshly-created entities; otherwise use the view.
+
+Retry-on-404 defaults to **off** because a 404 is normally a legitimate "no
+such entity". Either way, a persistent 404 exhausts the retries and still
 surfaces as `NOT_FOUND` — so `orNull` keeps treating genuine absence as
 `null` (see [Errors](#errors)).
 
@@ -339,7 +356,7 @@ if (account === null) {
 ```
 
 If the `null` is because the entity was *just* created and hasn't been
-imported yet, enable [`retryOn404`](#retrying-freshly-created-entities-retryon404)
+imported yet, use [`withRetryOn404()`](#retrying-freshly-created-entities-retryon404)
 so the client waits it out before giving up.
 
 ## Examples

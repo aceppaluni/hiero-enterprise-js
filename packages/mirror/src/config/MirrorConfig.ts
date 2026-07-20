@@ -79,13 +79,24 @@ function numberFromEnv(raw: string | undefined): number | undefined {
 
 /**
  * Parse a boolean environment-variable value. Returns `undefined` when
- * unset or empty so the corresponding default applies. `"true"`/`"1"`
- * (case-insensitive) are true; every other value is false.
+ * unset or empty so the corresponding default applies. Accepts
+ * `"true"`/`"1"` and `"false"`/`"0"` (case-insensitive); anything else
+ * throws `ConfigInvalid` so a typo (`"yes"`, `"ture"`) surfaces instead of
+ * silently meaning `false` — the boolean counterpart of `numberFromEnv`
+ * passing `NaN` through to downstream validation.
  */
-function booleanFromEnv(raw: string | undefined): boolean | undefined {
+function booleanFromEnv(
+    name: string,
+    raw: string | undefined,
+): boolean | undefined {
     if (raw === undefined || raw.trim() === "") return undefined;
     const normalized = raw.trim().toLowerCase();
-    return normalized === "true" || normalized === "1";
+    if (normalized === "true" || normalized === "1") return true;
+    if (normalized === "false" || normalized === "0") return false;
+    throw new MirrorError(
+        `${name} must be "true", "false", "1", or "0", got "${raw}".`,
+        { code: MirrorErrorCodes.ConfigInvalid },
+    );
 }
 
 /**
@@ -111,6 +122,7 @@ export function mirrorConfigFromEnv(): MirrorConfig {
             process.env["HIERO_MIRROR_NODE_MAX_RETRIES"],
         ),
         mirrorNodeRetryOn404: booleanFromEnv(
+            "HIERO_MIRROR_NODE_RETRY_ON_404",
             process.env["HIERO_MIRROR_NODE_RETRY_ON_404"],
         ),
         mirrorNodeMaxConcurrent: numberFromEnv(

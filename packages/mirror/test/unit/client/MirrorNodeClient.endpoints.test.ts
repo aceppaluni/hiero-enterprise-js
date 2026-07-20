@@ -347,4 +347,36 @@ describe("MirrorNodeClient retry-on-404", () => {
         await vi.advanceTimersByTimeAsync(1_000);
         await expect(promise).resolves.toBeNull();
     });
+
+    it("withRetryOn404() retries a 404 without turning it on for the base client", async () => {
+        vi.useFakeTimers();
+        const spy = vi
+            .spyOn(globalThis, "fetch")
+            .mockResolvedValueOnce(
+                new Response(null, { status: 404, statusText: "Not Found" }),
+            )
+            .mockResolvedValueOnce(
+                jsonResponse({
+                    account: "0.0.1",
+                    balance: { balance: 1, tokens: [] },
+                }),
+            );
+        const base = new MirrorNodeClient("https://x");
+
+        const promise = base.withRetryOn404().queryAccount("0.0.1");
+        await vi.advanceTimersByTimeAsync(1_000);
+
+        expect((await promise).accountId).toBe("0.0.1");
+        expect(spy).toHaveBeenCalledTimes(2);
+    });
+
+    it("withRetryOn404() is memoized and returns itself when already retrying", () => {
+        const base = new MirrorNodeClient("https://x");
+        const view = base.withRetryOn404();
+        // Same instance on repeat calls (one shared gate, not a new one each time).
+        expect(base.withRetryOn404()).toBe(view);
+        expect(view).not.toBe(base);
+        // A view already retries 404s, so it hands back itself.
+        expect(view.withRetryOn404()).toBe(view);
+    });
 });

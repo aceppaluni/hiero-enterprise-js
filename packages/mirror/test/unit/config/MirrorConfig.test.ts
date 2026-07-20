@@ -62,6 +62,22 @@ describe("mirrorConfigFromEnv", () => {
         process.env = env;
     });
 
+    it('reads "false"/"0" as an explicit false, not just true', () => {
+        process.env = { HIERO_MIRROR_NODE_RETRY_ON_404: "false" };
+        expect(mirrorConfigFromEnv().mirrorNodeRetryOn404).toBe(false);
+        process.env = { HIERO_MIRROR_NODE_RETRY_ON_404: "0" };
+        expect(mirrorConfigFromEnv().mirrorNodeRetryOn404).toBe(false);
+        process.env = env;
+    });
+
+    it("throws on an unrecognized retry-on-404 value instead of silently defaulting to false", () => {
+        process.env = { HIERO_MIRROR_NODE_RETRY_ON_404: "ture" };
+        expect(() => mirrorConfigFromEnv()).toThrow(
+            /HIERO_MIRROR_NODE_RETRY_ON_404 must be/,
+        );
+        process.env = env;
+    });
+
     it("leaves unset vars undefined", () => {
         process.env = {};
         const config = mirrorConfigFromEnv();
