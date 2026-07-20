@@ -444,7 +444,7 @@ export class MirrorNodeClient {
             // response has no body).
             await response.body?.cancel();
             // A 404 carries no `Retry-After`, so parseRetryAfter returns
-            // undefined and the eventual-consistency case just backs off.
+            // null and the eventual-consistency case just backs off.
             const retryAfter = parseRetryAfter(
                 response.headers.get("retry-after"),
             );
