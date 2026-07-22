@@ -121,16 +121,14 @@ export class AccountService {
 
     /**
      * Auto-creates a "Hollow Account" by transferring HBAR to an EVM address.
-     * Useful for onboarding MetaMask users who don't have a Hedera ID yet.
+     * Useful for onboarding MetaMask users who don't have a Hiero ID yet.
      *
      * @param options.evmAddress - The EVM address (e.g., 0x...)
      * @param options.amount - The amount of HBAR to transfer
      * @returns The transaction id/status, plus `accountId` of the created
      *   account. `accountId` is **absent when the address was already
      *   backed by an account** — the HBAR still moved; nothing was
-     *   created. That is a normal outcome, not an error: do not retry
-     *   (retrying re-sends the transfer). Check
-     *   `result.accountId === undefined` to detect it.
+     *   created.
      */
     async autoCreateEvmAccount(options: AutoCreateEvmAccountOptions) {
         return await this.autoCreateOperation.execute(options);

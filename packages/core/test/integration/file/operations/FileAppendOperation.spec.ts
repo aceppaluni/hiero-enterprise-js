@@ -29,7 +29,9 @@ describe("FileAppendOperation", () => {
     });
 
     it("auto-chunks a large payload across many appends", async () => {
-        const { fileId } = await fileService.createFile({ contents: "header:" });
+        const { fileId } = await fileService.createFile({
+            contents: "header:",
+        });
 
         // 20 KiB — the SDK will sub-chunk this internally against
         // maxChunks * chunkSize.

@@ -34,12 +34,3 @@ export interface ScheduleOptions {
 /**
  * Returned when a transaction is successfully scheduled instead of executed.
  */
-export interface ScheduledResult {
-    /** The ID of the newly created schedule entity (e.g., `"0.0.12345"`). */
-    scheduleId: string;
-    /**
-     * The transaction ID of the `ScheduleCreateTransaction` that created
-     * this schedule entry.
-     */
-    transactionId: string;
-}

@@ -11,5 +11,4 @@ export type {
     LegacySignature,
     QueryOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "./transaction/index.js";

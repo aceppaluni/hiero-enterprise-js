@@ -20,7 +20,7 @@ describe("FileInfoQuery", () => {
 
         const info = await fileService.getFileInfo(fileId);
 
-        expect(info.fileId).toBe(fileId);
+        expect(info.fileId).toBe(fileId.toString());
         expect(info.fileMemo).toBe("integration: info plain");
         // Size is plain number (not SDK's Long).
         expect(typeof info.size).toBe("number");

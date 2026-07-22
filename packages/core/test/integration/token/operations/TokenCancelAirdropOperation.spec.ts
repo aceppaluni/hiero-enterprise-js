@@ -157,15 +157,16 @@ describe("TokenService cancel airdrop operations [Integration]", () => {
     it("cancels a mixed batch of pending fungible and NFT airdrops in one transaction", async () => {
         const receiver = await createTestAccount(accountService, 2);
 
-        const { tokenId: fungibleTokenId } = await tokenService.createFungibleToken({
-            tokenName: "Cancel Batch Fungible Integration",
-            tokenSymbol: "CBFI",
-            decimals: 0,
-            initialSupply: 100,
-            treasuryAccountId: owner.accountId,
-            supplyKey: owner.key.publicKey,
-            additionalSigners: [owner.key],
-        });
+        const { tokenId: fungibleTokenId } =
+            await tokenService.createFungibleToken({
+                tokenName: "Cancel Batch Fungible Integration",
+                tokenSymbol: "CBFI",
+                decimals: 0,
+                initialSupply: 100,
+                treasuryAccountId: owner.accountId,
+                supplyKey: owner.key.publicKey,
+                additionalSigners: [owner.key],
+            });
 
         const { tokenId: nftTokenId } = await tokenService.createNft({
             tokenName: "Cancel Batch NFT Integration",

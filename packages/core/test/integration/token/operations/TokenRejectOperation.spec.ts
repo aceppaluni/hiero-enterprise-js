@@ -203,15 +203,16 @@ describe("TokenService reject operations [Integration]", () => {
         const fungibleSupply = 500;
         const fungibleTransfer = 100;
 
-        const { tokenId: fungibleTokenId } = await tokenService.createFungibleToken({
-            tokenName: "Reject Mixed Fungible",
-            tokenSymbol: "RMF",
-            decimals: 0,
-            initialSupply: fungibleSupply,
-            treasuryAccountId: owner.accountId,
-            supplyKey: owner.key.publicKey,
-            additionalSigners: [owner.key],
-        });
+        const { tokenId: fungibleTokenId } =
+            await tokenService.createFungibleToken({
+                tokenName: "Reject Mixed Fungible",
+                tokenSymbol: "RMF",
+                decimals: 0,
+                initialSupply: fungibleSupply,
+                treasuryAccountId: owner.accountId,
+                supplyKey: owner.key.publicKey,
+                additionalSigners: [owner.key],
+            });
 
         const { tokenId: nftTokenId } = await tokenService.createNft({
             tokenName: "Reject Mixed NFT",

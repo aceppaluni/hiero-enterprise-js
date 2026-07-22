@@ -22,13 +22,13 @@ describe("FileCreateOperation", () => {
         const contents = "hello from integration test";
         const { fileId } = await fileService.createFile({ contents });
 
-        expect(fileId).toMatch(/^0\.0\.\d+$/);
+        expect(fileId.toString()).toMatch(/^0\.0\.\d+$/);
 
         const info = await new FileInfoQuery()
             .setFileId(fileId)
             .execute(client);
 
-        expect(info.fileId.toString()).toBe(fileId);
+        expect(info.fileId.toString()).toBe(fileId.toString());
         expect(info.size.toNumber()).toBe(
             Buffer.from(contents, "utf8").byteLength,
         );
@@ -72,7 +72,7 @@ describe("FileCreateOperation", () => {
         // The SDK reports null (or an empty KeyList) for such files.
         // We just assert the file is not modifiable via a standard delete.
         await expect(fileService.deleteFile({ fileId })).rejects.toThrow();
-        expect(info.fileId.toString()).toBe(fileId);
+        expect(info.fileId.toString()).toBe(fileId.toString());
     });
 
     it("creates a file with a custom key that must sign for later modifications", async () => {
@@ -130,12 +130,12 @@ describe("FileCreateOperation", () => {
     it("creates an empty file when contents is omitted (SDK parity)", async () => {
         const { fileId } = await fileService.createFile();
 
-        expect(fileId).toMatch(/^0\.0\.\d+$/);
+        expect(fileId.toString()).toMatch(/^0\.0\.\d+$/);
 
         const info = await new FileInfoQuery()
             .setFileId(fileId)
             .execute(client);
-        expect(info.fileId.toString()).toBe(fileId);
+        expect(info.fileId.toString()).toBe(fileId.toString());
         expect(info.size.toNumber()).toBe(0);
         expect(info.isDeleted).toBe(false);
 

@@ -43,22 +43,26 @@ export class AutoCreateEvmAccountOperation {
             timestamp: new Date(),
         });
 
-        // The new hollow account id lives on the
-        // transfer's child receipt — not populated on the base receipt
-        // the executor already fetched.
-        const withChildren = await results.response
-            .getReceiptQuery(this.context.client)
-            .setIncludeChildren(true)
-            .execute(this.context.client);
-        return {
-            ...results,
-            // A transfer to a *cold* 0x address yields a child create
-            // receipt carrying the new account id. A warm address leaves
-            // this null — the transfer still landed but created nothing.
-            accountId: withChildren.children[0]?.accountId
-                ? withChildren.children[0].accountId.toString()
-                : null,
-        };
+        // The new hollow account id lives on the transfer's child receipt — not
+        // populated on the base receipt the executor already fetched.
+        try {
+            const withChildren = await results.response
+                .getReceiptQuery(this.context.client)
+                .setIncludeChildren(true)
+                .execute(this.context.client);
+
+            const child = withChildren.children.find(
+                (c) => c.accountId != null,
+            );
+
+            return {
+                ...results,
+                accountId: child?.accountId?.toString() ?? null,
+            };
+        } catch {
+            // The transfer reached consensus; avoid throwing after funds moved.
+            return { ...results, accountId: null };
+        }
     }
 
     /** Schedule the hollow-account transfer. */
