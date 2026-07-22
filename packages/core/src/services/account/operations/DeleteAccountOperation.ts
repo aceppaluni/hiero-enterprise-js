@@ -1,15 +1,10 @@
 import type { PrivateKey, AccountId } from "@hiero-ledger/sdk";
 import { AccountDeleteTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import {
-    TransactionExecutor,
-    toTransactionResult,
-} from "../../transaction/index.js";
+import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
-    TransactionResult,
 } from "../../transaction/index.js";
 
 /**
@@ -51,7 +46,7 @@ export class DeleteAccountOperation {
     }
 
     /** Delete account execute handler. */
-    async execute(options: DeleteAccountOptions): Promise<TransactionResult> {
+    async execute(options: DeleteAccountOptions) {
         // Prepend accountKey so it signs the tx before the operator auto-sign
         const opts: DeleteAccountOptions = {
             ...options,
@@ -60,17 +55,12 @@ export class DeleteAccountOperation {
                 ...(options.additionalSigners ?? []),
             ],
         };
-        return await this.executor.run(
-            this.build(options),
-            opts,
-            {
-                type: "AccountDelete",
-                serviceName: "AccountService",
-                methodName: "deleteAccount",
-                timestamp: new Date(),
-            },
-            toTransactionResult,
-        );
+        return await this.executor.run(this.build(options), opts, {
+            type: "AccountDelete",
+            serviceName: "AccountService",
+            methodName: "deleteAccount",
+            timestamp: new Date(),
+        });
     }
 
     /**
@@ -82,8 +72,8 @@ export class DeleteAccountOperation {
     async schedule(
         options: ScheduleDeleteAccountOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
-        return await this.executor.scheduleRun(
+    ) {
+        const results = await this.executor.scheduleRun(
             this.build(options),
             options,
             {
@@ -94,6 +84,11 @@ export class DeleteAccountOperation {
             },
             scheduleOptions,
         );
+        return {
+            scheduleId: results.receipt.scheduleId
+                ? results.receipt.scheduleId.toString()
+                : null,
+        };
     }
 
     /**

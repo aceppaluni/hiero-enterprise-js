@@ -8,14 +8,3 @@ export type {
 } from "./TransactionOptions.js";
 export type { QueryOptions } from "./QueryOptions.js";
 export type { ScheduleOptions, ScheduledResult } from "./ScheduleOptions.js";
-export { toTransactionResult } from "./TransactionResult.js";
-export type {
-    TransactionResult,
-    TransactionOutcome,
-    MintResult,
-    SupplyChangeResult,
-    ScheduleSignResult,
-    AutoCreateResult,
-    ContractFunctionOutcome,
-    ContractExecuteResult,
-} from "./TransactionResult.js";

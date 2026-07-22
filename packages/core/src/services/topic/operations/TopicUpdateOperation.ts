@@ -8,14 +8,8 @@ import type {
 } from "@hiero-ledger/sdk";
 import { TopicUpdateTransaction, KeyList } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import {
-    TransactionExecutor,
-    toTransactionResult,
-} from "../../transaction/index.js";
-import type {
-    TransactionOptions,
-    TransactionResult,
-} from "../../transaction/index.js";
+import { TransactionExecutor } from "../../transaction/index.js";
+import type { TransactionOptions } from "../../transaction/index.js";
 import { TopicUpdateValidator } from "../validation/index.js";
 
 /**
@@ -104,30 +98,23 @@ export class TopicUpdateOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TopicUpdateValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TopicUpdateValidator();
     }
 
     /** Submit a `TopicUpdateTransaction`. */
-    async execute(
-        options: TopicUpdateOperationOptions,
-    ): Promise<TransactionResult> {
+    async execute(options: TopicUpdateOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TopicUpdate",
-                serviceName: "TopicService",
-                methodName: "updateTopic",
-                timestamp: new Date(),
-            },
-            toTransactionResult,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TopicUpdate",
+            serviceName: "TopicService",
+            methodName: "updateTopic",
+            timestamp: new Date(),
+        });
     }
 
     private build(

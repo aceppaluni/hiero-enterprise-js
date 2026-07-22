@@ -2,10 +2,7 @@ import type { CustomFeeLimit, TopicId } from "@hiero-ledger/sdk";
 import { TopicMessageSubmitTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
 import { TransactionExecutor } from "../../transaction/index.js";
-import type {
-    TransactionOptions,
-    TransactionResult,
-} from "../../transaction/index.js";
+import type { TransactionOptions } from "../../transaction/index.js";
 import { TopicMessageSubmitValidator } from "../validation/index.js";
 
 /**
@@ -64,21 +61,11 @@ export interface TopicMessageSubmitOperationOptions extends TransactionOptions {
  * For multi-chunk submissions the values correspond to the **first**
  * chunk's receipt; subsequent chunks increment the sequence number.
  */
-export interface TopicMessageSubmitResult extends TransactionResult {
-    /**
-     * Topic-scoped sequence number assigned by the consensus node — a
-     * plain number (sequence counters sit far below 2^53).
-     */
-    sequenceNumber: number;
-    /** Updated running hash of all messages on the topic. */
-    runningHash: Uint8Array;
-}
-
 export class TopicMessageSubmitOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TopicMessageSubmitValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TopicMessageSubmitValidator();
     }
@@ -87,28 +74,17 @@ export class TopicMessageSubmitOperation {
      * Submit a message to a topic. Returns the sequence number,
      * running hash, and transaction ID from the receipt.
      */
-    async execute(
-        options: TopicMessageSubmitOperationOptions,
-    ): Promise<TopicMessageSubmitResult> {
+    async execute(options: TopicMessageSubmitOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TopicMessageSubmit",
-                serviceName: "TopicService",
-                methodName: "submitMessage",
-                timestamp: new Date(),
-            },
-            (outcome) => ({
-                ...outcome.toResult(),
-                sequenceNumber: outcome.receipt.topicSequenceNumber!.toNumber(),
-                runningHash: outcome.receipt.topicRunningHash!,
-            }),
-        );
+        return await this.executor.run(tx, options, {
+            type: "TopicMessageSubmit",
+            serviceName: "TopicService",
+            methodName: "submitMessage",
+            timestamp: new Date(),
+        });
     }
 
     private build(

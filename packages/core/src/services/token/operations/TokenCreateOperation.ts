@@ -59,40 +59,41 @@ export class TokenCreateOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenCreateValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenCreateValidator();
     }
 
     /** Submit a `TokenCreateTransaction` and return the new token ID. */
-    async execute(options: TokenCreateOperationOptions): Promise<string> {
+    async execute(options: TokenCreateOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenCreate",
-                serviceName: "TokenService",
-                methodName: "createToken",
-                timestamp: new Date(),
-            },
-            (outcome) => outcome.receipt.tokenId!.toString(),
-        );
+        const results = await this.executor.run(tx, options, {
+            type: "TokenCreate",
+            serviceName: "TokenService",
+            methodName: "createToken",
+            timestamp: new Date(),
+        });
+        return {
+            ...results,
+            tokenId: results.receipt.tokenId
+                ? results.receipt.tokenId.toString()
+                : null,
+        };
     }
 
     /** Schedule a `TokenCreateTransaction` for deferred multi-sig execution. */
     async schedule(
         options: TokenCreateOperationOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.scheduleRun(
+        const results = await this.executor.scheduleRun(
             tx,
             options,
             {
@@ -103,6 +104,11 @@ export class TokenCreateOperation {
             },
             scheduleOptions,
         );
+        return {
+            scheduleId: results.receipt.scheduleId
+                ? results.receipt.scheduleId.toString()
+                : null,
+        };
     }
 
     /**

@@ -95,9 +95,7 @@ export class ContractCreateFlowOperation {
      * the lifecycle (signers, execute, receipt, events) is owned by the
      * operation directly rather than by the shared `TransactionExecutor`.
      */
-    async execute(
-        options: ContractCreateFlowOperationOptions,
-    ): Promise<string> {
+    async execute(options: ContractCreateFlowOperationOptions) {
         this.validator.validate(options);
 
         const flow = this.build(options);
@@ -124,7 +122,9 @@ export class ContractCreateFlowOperation {
             const response = await flow.execute(this.context.client);
             const receipt = await response.getReceipt(this.context.client);
             const transactionId = response.transactionId.toString();
-            const contractId = receipt.contractId!.toString();
+            const contractId = receipt.contractId
+                ? receipt.contractId.toString()
+                : null;
 
             await this.context.emitAfterTransaction({
                 ...event,
@@ -133,7 +133,13 @@ export class ContractCreateFlowOperation {
                 durationMs: Date.now() - start,
             });
 
-            return contractId;
+            return {
+                response,
+                receipt,
+                transactionId,
+                status: receipt.status.toString(),
+                contractId,
+            };
         } catch (error) {
             await this.context.emitAfterTransaction({
                 ...event,

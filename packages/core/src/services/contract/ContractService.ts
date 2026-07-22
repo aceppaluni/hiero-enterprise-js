@@ -1,10 +1,5 @@
 import type { IHieroContext } from "../../context/index.js";
-import type {
-    ScheduleOptions,
-    ScheduledResult,
-    TransactionResult,
-    ContractExecuteResult,
-} from "../transaction/index.js";
+import type { ScheduleOptions } from "../transaction/index.js";
 import {
     ContractCreateOperation,
     ContractCreateFlowOperation,
@@ -174,7 +169,7 @@ export class ContractService {
      * });
      * ```
      */
-    async createContract(options: CreateContractOptions): Promise<string> {
+    async createContract(options: CreateContractOptions) {
         return await this.createOperation.execute(options);
     }
 
@@ -191,7 +186,7 @@ export class ContractService {
     async scheduleCreateContract(
         options: CreateContractOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.createOperation.schedule(options, scheduleOptions);
     }
 
@@ -237,9 +232,7 @@ export class ContractService {
      * });
      * ```
      */
-    async createContractFlow(
-        options: CreateContractFlowOptions,
-    ): Promise<string> {
+    async createContractFlow(options: CreateContractFlowOptions) {
         return await this.createFlowOperation.execute(options);
     }
 
@@ -280,9 +273,7 @@ export class ContractService {
      * console.log(result.functionResult?.returnDataHex);
      * ```
      */
-    async executeContract(
-        options: ExecuteContractOptions,
-    ): Promise<ContractExecuteResult> {
+    async executeContract(options: ExecuteContractOptions) {
         return await this.executeOperation.execute(options);
     }
 
@@ -299,7 +290,7 @@ export class ContractService {
     async scheduleExecuteContract(
         options: ExecuteContractOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.executeOperation.schedule(options, scheduleOptions);
     }
 
@@ -336,9 +327,7 @@ export class ContractService {
      * });
      * ```
      */
-    async updateContract(
-        options: UpdateContractOptions,
-    ): Promise<TransactionResult> {
+    async updateContract(options: UpdateContractOptions) {
         return await this.updateOperation.execute(options);
     }
 
@@ -355,7 +344,7 @@ export class ContractService {
     async scheduleUpdateContract(
         options: UpdateContractOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.updateOperation.schedule(options, scheduleOptions);
     }
 
@@ -393,9 +382,7 @@ export class ContractService {
      * });
      * ```
      */
-    async deleteContract(
-        options: DeleteContractOptions,
-    ): Promise<TransactionResult> {
+    async deleteContract(options: DeleteContractOptions) {
         return await this.deleteOperation.execute(options);
     }
 
@@ -412,7 +399,7 @@ export class ContractService {
     async scheduleDeleteContract(
         options: DeleteContractOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.deleteOperation.schedule(options, scheduleOptions);
     }
 

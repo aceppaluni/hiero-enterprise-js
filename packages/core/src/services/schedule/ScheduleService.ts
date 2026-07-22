@@ -5,10 +5,6 @@ import {
     ScheduleCancelOperation,
 } from "./operations/index.js";
 import type {
-    ScheduleSignResult,
-    TransactionResult,
-} from "../transaction/index.js";
-import type {
     ScheduleSignOptions,
     ScheduleCancelOptions,
 } from "./operations/index.js";
@@ -51,7 +47,7 @@ export class ScheduleService {
      *   the schedule executed — check `getInfo(...)`'s `executedAt` (or
      *   the scheduled transaction's receipt) for that
      */
-    sign(options: ScheduleSignOptions): Promise<ScheduleSignResult> {
+    sign(options: ScheduleSignOptions) {
         return this.signOperation.execute(options);
     }
 
@@ -65,7 +61,7 @@ export class ScheduleService {
      * @param options.scheduleId - The schedule entity to cancel
      * @param options.adminKey - Private key matching the schedule's adminKey
      */
-    cancel(options: ScheduleCancelOptions): Promise<TransactionResult> {
+    cancel(options: ScheduleCancelOptions) {
         return this.cancelOperation.execute(options);
     }
 

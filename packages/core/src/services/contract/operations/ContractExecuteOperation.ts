@@ -11,8 +11,6 @@ import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
-    ContractExecuteResult,
 } from "../../transaction/index.js";
 import { ContractExecuteValidator } from "../validation/index.js";
 
@@ -59,20 +57,13 @@ export interface ContractExecuteOperationOptions extends TransactionOptions {
      * functions). Defaults to `0` when omitted.
      */
     payableAmount?: number | string | Long | BigNumber | Hbar | bigint;
-    /**
-     * Also return the function's EVM outcome (return data, gas used,
-     * error message) on `result.functionResult`. **Costs one extra paid
-     * query**: the outcome lives on the transaction *record*, not the
-     * receipt, so it is only fetched when this is set.
-     */
-    withFunctionResult?: boolean;
 }
 
 export class ContractExecuteOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: ContractExecuteValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new ContractExecuteValidator();
     }
@@ -83,55 +74,29 @@ export class ContractExecuteOperation {
      * @returns The transaction id/status; with `withFunctionResult: true`,
      *   also the EVM outcome (return data, gas used) from the record.
      */
-    async execute(
-        options: ContractExecuteOperationOptions,
-    ): Promise<ContractExecuteResult> {
+    async execute(options: ContractExecuteOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "ContractExecute",
-                serviceName: "ContractService",
-                methodName: "executeContract",
-                timestamp: new Date(),
-            },
-            async (outcome) => {
-                if (!options.withFunctionResult) {
-                    return outcome.toResult();
-                }
-                const record = await outcome.getRecord();
-                const fn = record.contractFunctionResult;
-                return {
-                    ...outcome.toResult(),
-                    ...(fn && {
-                        functionResult: {
-                            returnDataHex: `0x${Buffer.from(fn.bytes).toString("hex")}`,
-                            gasUsed: fn.gasUsed.toNumber(),
-                            ...(fn.errorMessage != null &&
-                                fn.errorMessage !== "" && {
-                                    errorMessage: fn.errorMessage,
-                                }),
-                        },
-                    }),
-                };
-            },
-        );
+        return await this.executor.run(tx, options, {
+            type: "ContractExecute",
+            serviceName: "ContractService",
+            methodName: "executeContract",
+            timestamp: new Date(),
+        });
     }
 
     /** Schedule a `ContractExecuteTransaction` for deferred multi-sig execution. */
     async schedule(
         options: ContractExecuteOperationOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.scheduleRun(
+        const results = await this.executor.scheduleRun(
             tx,
             options,
             {
@@ -142,6 +107,11 @@ export class ContractExecuteOperation {
             },
             scheduleOptions,
         );
+        return {
+            scheduleId: results.receipt.scheduleId
+                ? results.receipt.scheduleId.toString()
+                : null,
+        };
     }
 
     /**

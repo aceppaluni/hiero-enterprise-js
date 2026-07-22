@@ -4,7 +4,6 @@ export type {
     UpdateTopicOptions,
     DeleteTopicOptions,
     SubmitMessageOptions,
-    SubmitMessageResult,
     GetTopicInfoResult,
     SubscribeToMessagesOptions,
     SubscribedMessage,

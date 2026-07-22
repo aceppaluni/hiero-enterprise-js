@@ -8,15 +8,10 @@ import type {
 } from "@hiero-ledger/sdk";
 import { ContractUpdateTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import {
-    TransactionExecutor,
-    toTransactionResult,
-} from "../../transaction/index.js";
+import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
-    TransactionResult,
 } from "../../transaction/index.js";
 import { ContractUpdateValidator } from "../validation/index.js";
 
@@ -68,7 +63,7 @@ export class ContractUpdateOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: ContractUpdateValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new ContractUpdateValidator();
     }
@@ -76,36 +71,29 @@ export class ContractUpdateOperation {
     /**
      * Submit a `ContractUpdateTransaction`.
      */
-    async execute(
-        options: ContractUpdateOperationOptions,
-    ): Promise<TransactionResult> {
+    async execute(options: ContractUpdateOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "ContractUpdate",
-                serviceName: "ContractService",
-                methodName: "updateContract",
-                timestamp: new Date(),
-            },
-            toTransactionResult,
-        );
+        return await this.executor.run(tx, options, {
+            type: "ContractUpdate",
+            serviceName: "ContractService",
+            methodName: "updateContract",
+            timestamp: new Date(),
+        });
     }
 
     /** Schedule a `ContractUpdateTransaction` for deferred multi-sig execution. */
     async schedule(
         options: ContractUpdateOperationOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.scheduleRun(
+        const results = await this.executor.scheduleRun(
             tx,
             options,
             {
@@ -116,6 +104,12 @@ export class ContractUpdateOperation {
             },
             scheduleOptions,
         );
+
+        return {
+            scheduleId: results.receipt.scheduleId
+                ? results.receipt.scheduleId.toString()
+                : null,
+        };
     }
 
     /**

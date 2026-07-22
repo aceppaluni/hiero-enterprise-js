@@ -1,15 +1,10 @@
 import { Hbar, NftId, TokenId, TransferTransaction } from "@hiero-ledger/sdk";
 import type { AccountId } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import {
-    TransactionExecutor,
-    toTransactionResult,
-} from "../../transaction/index.js";
+import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
-    TransactionResult,
 } from "../../transaction/index.js";
 import { TransferValidator } from "../validation/index.js";
 
@@ -76,7 +71,7 @@ export class TransferOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TransferValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TransferValidator();
     }
@@ -102,7 +97,7 @@ export class TransferOperation {
         amount: number | Hbar,
         senderAccountId: string | AccountId,
         options: TransferHbarOptions = {},
-    ): Promise<TransactionResult> {
+    ) {
         this.validator.validateHbarTransfer({
             receiverAccountId,
             senderAccountId,
@@ -113,17 +108,12 @@ export class TransferOperation {
             amount,
             senderAccountId,
         );
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "CryptoTransfer",
-                serviceName: "AccountService",
-                methodName: "transferHbar",
-                timestamp: new Date(),
-            },
-            toTransactionResult,
-        );
+        return await this.executor.run(tx, options, {
+            type: "CryptoTransfer",
+            serviceName: "AccountService",
+            methodName: "transferHbar",
+            timestamp: new Date(),
+        });
     }
 
     /**
@@ -142,7 +132,7 @@ export class TransferOperation {
         amount: number | Hbar,
         senderAccountId: string | AccountId,
         options: ScheduleTransferHbarOptions = {},
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validateHbarTransfer({
             receiverAccountId,
             senderAccountId,
@@ -155,7 +145,7 @@ export class TransferOperation {
         );
         const { transactionOptions, scheduleOptions } =
             splitScheduleOptions(options);
-        return await this.executor.scheduleRun(
+        const results = await this.executor.scheduleRun(
             tx,
             transactionOptions,
             {
@@ -166,6 +156,11 @@ export class TransferOperation {
             },
             scheduleOptions,
         );
+        return {
+            scheduleId: results.receipt.scheduleId
+                ? results.receipt.scheduleId.toString()
+                : null,
+        };
     }
 
     /**
@@ -185,7 +180,7 @@ export class TransferOperation {
         amount: number,
         senderAccountId: string | AccountId,
         options: TransferTokenOptions = {},
-    ): Promise<TransactionResult> {
+    ) {
         this.validator.validateTokenTransfer({
             tokenId,
             receiverAccountId,
@@ -200,17 +195,12 @@ export class TransferOperation {
             senderAccountId,
             options.expectedDecimals,
         );
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "CryptoTransfer",
-                serviceName: "AccountService",
-                methodName: "transferToken",
-                timestamp: new Date(),
-            },
-            toTransactionResult,
-        );
+        return await this.executor.run(tx, options, {
+            type: "CryptoTransfer",
+            serviceName: "AccountService",
+            methodName: "transferToken",
+            timestamp: new Date(),
+        });
     }
 
     /**
@@ -226,7 +216,7 @@ export class TransferOperation {
         amount: number,
         senderAccountId: string | AccountId,
         options: ScheduleTransferTokenOptions = {},
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validateTokenTransfer({
             tokenId,
             receiverAccountId,
@@ -243,7 +233,7 @@ export class TransferOperation {
         );
         const { transactionOptions, scheduleOptions } =
             splitScheduleOptions(options);
-        return await this.executor.scheduleRun(
+        const results = await this.executor.scheduleRun(
             tx,
             transactionOptions,
             {
@@ -254,6 +244,11 @@ export class TransferOperation {
             },
             scheduleOptions,
         );
+        return {
+            scheduleId: results.receipt.scheduleId
+                ? results.receipt.scheduleId.toString()
+                : null,
+        };
     }
 
     /**
@@ -273,7 +268,7 @@ export class TransferOperation {
         receiverAccountId: string | AccountId,
         senderAccountId: string | AccountId,
         options: TransferNftOptions = {},
-    ): Promise<TransactionResult> {
+    ) {
         this.validator.validateNftTransfer({
             tokenId,
             serial,
@@ -286,17 +281,12 @@ export class TransferOperation {
             receiverAccountId,
             senderAccountId,
         );
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "CryptoTransfer",
-                serviceName: "AccountService",
-                methodName: "transferNft",
-                timestamp: new Date(),
-            },
-            toTransactionResult,
-        );
+        return await this.executor.run(tx, options, {
+            type: "CryptoTransfer",
+            serviceName: "AccountService",
+            methodName: "transferNft",
+            timestamp: new Date(),
+        });
     }
 
     /**
@@ -312,7 +302,7 @@ export class TransferOperation {
         receiverAccountId: string | AccountId,
         senderAccountId: string | AccountId,
         options: ScheduleTransferNftOptions = {},
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validateNftTransfer({
             tokenId,
             serial,
@@ -327,7 +317,7 @@ export class TransferOperation {
         );
         const { transactionOptions, scheduleOptions } =
             splitScheduleOptions(options);
-        return await this.executor.scheduleRun(
+        const results = await this.executor.scheduleRun(
             tx,
             transactionOptions,
             {
@@ -338,6 +328,11 @@ export class TransferOperation {
             },
             scheduleOptions,
         );
+        return {
+            scheduleId: results.receipt.scheduleId
+                ? results.receipt.scheduleId.toString()
+                : null,
+        };
     }
 
     private buildHbarTransfer(

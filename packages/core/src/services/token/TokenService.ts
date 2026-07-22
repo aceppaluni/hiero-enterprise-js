@@ -6,13 +6,7 @@ import {
     type TokenId,
 } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../context/index.js";
-import type {
-    ScheduleOptions,
-    ScheduledResult,
-    TransactionResult,
-    MintResult,
-    SupplyChangeResult,
-} from "../transaction/index.js";
+import type { ScheduleOptions } from "../transaction/index.js";
 import { TokenInfoQuery, TokenNftInfoQuery } from "./queries/index.js";
 import type { TokenInfoResult, TokenNftInfoResult } from "./queries/index.js";
 import {
@@ -279,9 +273,7 @@ export class TokenService {
      * });
      * ```
      */
-    async createFungibleToken(
-        options: CreateFungibleTokenOptions,
-    ): Promise<string> {
+    async createFungibleToken(options: CreateFungibleTokenOptions) {
         return await this.createOperation.execute(
             this.buildFungibleOperationOptions(options),
         );
@@ -317,7 +309,7 @@ export class TokenService {
     async scheduleCreateFungibleToken(
         options: CreateFungibleTokenOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.createOperation.schedule(
             this.buildFungibleOperationOptions(options),
             scheduleOptions,
@@ -361,7 +353,7 @@ export class TokenService {
      * });
      * ```
      */
-    async createNft(options: CreateNftOptions): Promise<string> {
+    async createNft(options: CreateNftOptions) {
         return await this.createOperation.execute(
             this.buildNftOperationOptions(options),
         );
@@ -395,7 +387,7 @@ export class TokenService {
     async scheduleCreateNft(
         options: CreateNftOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.createOperation.schedule(
             this.buildNftOperationOptions(options),
             scheduleOptions,
@@ -414,7 +406,7 @@ export class TokenService {
      * @returns The transaction id/status, the serials minted (NFTs; empty
      *   for fungible mints), and the total supply after the mint
      */
-    async mintToken(options: MintTokenOptions): Promise<MintResult> {
+    async mintToken(options: MintTokenOptions) {
         return await this.mintOperation.execute(options);
     }
 
@@ -431,7 +423,7 @@ export class TokenService {
     async scheduleMintToken(
         options: MintTokenOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.mintOperation.schedule(options, scheduleOptions);
     }
 
@@ -451,7 +443,7 @@ export class TokenService {
      * @returns The transaction id/status and the new total supply (a
      *   decimal string)
      */
-    async burnToken(options: BurnTokenOptions): Promise<SupplyChangeResult> {
+    async burnToken(options: BurnTokenOptions) {
         return await this.burnOperation.execute(options);
     }
 
@@ -468,7 +460,7 @@ export class TokenService {
     async scheduleBurnToken(
         options: BurnTokenOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.burnOperation.schedule(options, scheduleOptions);
     }
 
@@ -496,7 +488,7 @@ export class TokenService {
      * @returns The transaction id/status and the new total supply (a
      *   decimal string)
      */
-    async wipeToken(options: WipeTokenOptions): Promise<SupplyChangeResult> {
+    async wipeToken(options: WipeTokenOptions) {
         return await this.wipeOperation.execute(options);
     }
 
@@ -508,9 +500,7 @@ export class TokenService {
      * @param options.accountId - Account to associate the token with
      * @param options.tokenId - Token to associate to the account
      */
-    async associateToken(
-        options: AssociateTokenOptions,
-    ): Promise<TransactionResult> {
+    async associateToken(options: AssociateTokenOptions) {
         return await this.associateOperation.execute(options);
     }
 
@@ -526,7 +516,7 @@ export class TokenService {
     async scheduleAssociateToken(
         options: AssociateTokenOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.associateOperation.schedule(options, scheduleOptions);
     }
 
@@ -541,9 +531,7 @@ export class TokenService {
      * @param options.accountId - Account to dissociate the tokens from
      * @param options.tokenIds - Tokens to dissociate from the account (at least one)
      */
-    async dissociateToken(
-        options: DissociateTokenOptions,
-    ): Promise<TransactionResult> {
+    async dissociateToken(options: DissociateTokenOptions) {
         return await this.dissociateOperation.execute(options);
     }
 
@@ -559,7 +547,7 @@ export class TokenService {
     async scheduleDissociateToken(
         options: DissociateTokenOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.dissociateOperation.schedule(
             options,
             scheduleOptions,
@@ -592,7 +580,7 @@ export class TokenService {
      * @param options.metadata - New token-level metadata bytes
      * @param options.keyVerificationMode - How to verify replacement keys (`TokenKeyValidation.FullValidation` or `TokenKeyValidation.NoValidation`)
      */
-    async updateToken(options: UpdateTokenOptions): Promise<TransactionResult> {
+    async updateToken(options: UpdateTokenOptions) {
         return await this.updateOperation.execute(options);
     }
 
@@ -607,7 +595,7 @@ export class TokenService {
     async scheduleUpdateToken(
         options: UpdateTokenOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.updateOperation.schedule(options, scheduleOptions);
     }
 
@@ -642,7 +630,7 @@ export class TokenService {
      * });
      * ```
      */
-    async updateNfts(options: UpdateNftsOptions): Promise<TransactionResult> {
+    async updateNfts(options: UpdateNftsOptions) {
         return await this.updateNftsOperation.execute(options);
     }
 
@@ -659,7 +647,7 @@ export class TokenService {
      *
      * @param options.tokenId - Token to delete
      */
-    async deleteToken(options: DeleteTokenOptions): Promise<TransactionResult> {
+    async deleteToken(options: DeleteTokenOptions) {
         return await this.deleteOperation.execute(options);
     }
 
@@ -678,7 +666,7 @@ export class TokenService {
      * @param options.tokenId - Token whose relationship will be frozen
      * @param options.accountId - Account whose relationship will be frozen
      */
-    async freezeToken(options: FreezeTokenOptions): Promise<TransactionResult> {
+    async freezeToken(options: FreezeTokenOptions) {
         return await this.freezeOperation.execute(options);
     }
 
@@ -696,9 +684,7 @@ export class TokenService {
      * @param options.tokenId - Token whose relationship will be unfrozen
      * @param options.accountId - Account whose relationship will be unfrozen
      */
-    async unfreezeToken(
-        options: UnfreezeTokenOptions,
-    ): Promise<TransactionResult> {
+    async unfreezeToken(options: UnfreezeTokenOptions) {
         return await this.unfreezeOperation.execute(options);
     }
 
@@ -717,9 +703,7 @@ export class TokenService {
      * @param options.tokenId - Token whose relationship will be granted KYC
      * @param options.accountId - Account to grant KYC approval to
      */
-    async grantKycToken(
-        options: GrantKycTokenOptions,
-    ): Promise<TransactionResult> {
+    async grantKycToken(options: GrantKycTokenOptions) {
         return await this.grantKycOperation.execute(options);
     }
 
@@ -738,9 +722,7 @@ export class TokenService {
      * @param options.tokenId - Token whose relationship will have KYC revoked
      * @param options.accountId - Account to revoke KYC approval from
      */
-    async revokeKycToken(
-        options: RevokeKycTokenOptions,
-    ): Promise<TransactionResult> {
+    async revokeKycToken(options: RevokeKycTokenOptions) {
         return await this.revokeKycOperation.execute(options);
     }
 
@@ -757,7 +739,7 @@ export class TokenService {
      *
      * @param options.tokenId - Token to pause
      */
-    async pauseToken(options: PauseTokenOptions): Promise<TransactionResult> {
+    async pauseToken(options: PauseTokenOptions) {
         return await this.pauseOperation.execute(options);
     }
 
@@ -774,9 +756,7 @@ export class TokenService {
      *
      * @param options.tokenId - Token to unpause
      */
-    async unpauseToken(
-        options: UnpauseTokenOptions,
-    ): Promise<TransactionResult> {
+    async unpauseToken(options: UnpauseTokenOptions) {
         return await this.unpauseOperation.execute(options);
     }
 
@@ -794,9 +774,7 @@ export class TokenService {
      * @param options.tokenId - Token whose fee schedule will be replaced
      * @param options.customFees - Replacement fee schedule (empty array clears all fees)
      */
-    async updateTokenFeeSchedule(
-        options: UpdateTokenFeeScheduleOptions,
-    ): Promise<TransactionResult> {
+    async updateTokenFeeSchedule(options: UpdateTokenFeeScheduleOptions) {
         return await this.feeScheduleUpdateOperation.execute(options);
     }
 
@@ -824,9 +802,7 @@ export class TokenService {
      *     receiverAccountId, amount, expectedDecimals?)` entries to apply
      *     atomically in a single transaction.
      */
-    async airdropFungibleToken(
-        options: AirdropFungibleTokenOptions,
-    ): Promise<TransactionResult> {
+    async airdropFungibleToken(options: AirdropFungibleTokenOptions) {
         return await this.airdropOperation.execute(options);
     }
 
@@ -856,7 +832,7 @@ export class TokenService {
      *     senderAccountId, receiverAccountId)` entries to apply atomically
      *     in a single transaction.
      */
-    async airdropNft(options: AirdropNftOptions): Promise<TransactionResult> {
+    async airdropNft(options: AirdropNftOptions) {
         return await this.airdropNftOperation.execute(options);
     }
 
@@ -914,9 +890,7 @@ export class TokenService {
      * });
      * ```
      */
-    async claimAirdrop(
-        options: ClaimAirdropOptions,
-    ): Promise<TransactionResult> {
+    async claimAirdrop(options: ClaimAirdropOptions) {
         return await this.claimAirdropOperation.execute(options);
     }
 
@@ -978,9 +952,7 @@ export class TokenService {
      * });
      * ```
      */
-    async cancelAirdrop(
-        options: CancelAirdropOptions,
-    ): Promise<TransactionResult> {
+    async cancelAirdrop(options: CancelAirdropOptions) {
         return await this.cancelAirdropOperation.execute(options);
     }
 
@@ -1031,9 +1003,7 @@ export class TokenService {
      * });
      * ```
      */
-    async rejectTokensFlow(
-        options: RejectTokensOptions,
-    ): Promise<TransactionResult> {
+    async rejectTokensFlow(options: RejectTokensOptions) {
         return await this.rejectOperation.execute(options);
     }
 

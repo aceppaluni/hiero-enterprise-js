@@ -1,15 +1,10 @@
 import { AccountUpdateTransaction } from "@hiero-ledger/sdk";
 import type { Key } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import {
-    TransactionExecutor,
-    toTransactionResult,
-} from "../../transaction/index.js";
+import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
-    TransactionResult,
 } from "../../transaction/index.js";
 import { UpdateAccountValidator } from "../validation/UpdateAccountValidator.js";
 
@@ -73,37 +68,32 @@ export class UpdateAccountOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: UpdateAccountValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new UpdateAccountValidator();
     }
 
     /** Update account execute handler. */
-    async execute(options: UpdateAccountOptions): Promise<TransactionResult> {
+    async execute(options: UpdateAccountOptions) {
         this.validator.validate(options);
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "AccountUpdate",
-                serviceName: "AccountService",
-                methodName: "updateAccount",
-                timestamp: new Date(),
-            },
-            toTransactionResult,
-        );
+        return await this.executor.run(tx, options, {
+            type: "AccountUpdate",
+            serviceName: "AccountService",
+            methodName: "updateAccount",
+            timestamp: new Date(),
+        });
     }
 
     /** Schedule account update */
     async schedule(
         options: UpdateAccountOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
         const tx = this.build(options);
-        return await this.executor.scheduleRun(
+        const results = await this.executor.scheduleRun(
             tx,
             options,
             {
@@ -114,6 +104,11 @@ export class UpdateAccountOperation {
             },
             scheduleOptions,
         );
+        return {
+            scheduleId: results.receipt.scheduleId
+                ? results.receipt.scheduleId.toString()
+                : null,
+        };
     }
 
     /**

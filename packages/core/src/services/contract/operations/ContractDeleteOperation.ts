@@ -1,15 +1,10 @@
 import type { AccountId, ContractId } from "@hiero-ledger/sdk";
 import { ContractDeleteTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import {
-    TransactionExecutor,
-    toTransactionResult,
-} from "../../transaction/index.js";
+import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
-    TransactionResult,
 } from "../../transaction/index.js";
 import { ContractDeleteValidator } from "../validation/index.js";
 
@@ -55,7 +50,7 @@ export class ContractDeleteOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: ContractDeleteValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new ContractDeleteValidator();
     }
@@ -63,36 +58,29 @@ export class ContractDeleteOperation {
     /**
      * Submit a `ContractDeleteTransaction`.
      */
-    async execute(
-        options: ContractDeleteOperationOptions,
-    ): Promise<TransactionResult> {
+    async execute(options: ContractDeleteOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "ContractDelete",
-                serviceName: "ContractService",
-                methodName: "deleteContract",
-                timestamp: new Date(),
-            },
-            toTransactionResult,
-        );
+        return await this.executor.run(tx, options, {
+            type: "ContractDelete",
+            serviceName: "ContractService",
+            methodName: "deleteContract",
+            timestamp: new Date(),
+        });
     }
 
     /** Schedule a `ContractDeleteTransaction` for deferred multi-sig execution. */
     async schedule(
         options: ContractDeleteOperationOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.scheduleRun(
+        const results = await this.executor.scheduleRun(
             tx,
             options,
             {
@@ -103,6 +91,11 @@ export class ContractDeleteOperation {
             },
             scheduleOptions,
         );
+        return {
+            scheduleId: results.receipt.scheduleId
+                ? results.receipt.scheduleId.toString()
+                : null,
+        };
     }
 
     /**

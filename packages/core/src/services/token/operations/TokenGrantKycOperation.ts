@@ -1,14 +1,8 @@
 import type { AccountId, TokenId } from "@hiero-ledger/sdk";
 import { TokenGrantKycTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import {
-    TransactionExecutor,
-    toTransactionResult,
-} from "../../transaction/index.js";
-import type {
-    TransactionOptions,
-    TransactionResult,
-} from "../../transaction/index.js";
+import { TransactionExecutor } from "../../transaction/index.js";
+import type { TransactionOptions } from "../../transaction/index.js";
 import { TokenGrantKycValidator } from "../validation/index.js";
 
 /**
@@ -33,30 +27,23 @@ export class TokenGrantKycOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenGrantKycValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenGrantKycValidator();
     }
 
     /** Submit a `TokenGrantKycTransaction`. */
-    async execute(
-        options: TokenGrantKycOperationOptions,
-    ): Promise<TransactionResult> {
+    async execute(options: TokenGrantKycOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenGrantKyc",
-                serviceName: "TokenService",
-                methodName: "grantKycToken",
-                timestamp: new Date(),
-            },
-            toTransactionResult,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenGrantKyc",
+            serviceName: "TokenService",
+            methodName: "grantKycToken",
+            timestamp: new Date(),
+        });
     }
 
     private build(

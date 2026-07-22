@@ -1,14 +1,8 @@
 import type { FileId } from "@hiero-ledger/sdk";
 import { FileAppendTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import {
-    TransactionExecutor,
-    toTransactionResult,
-} from "../../transaction/index.js";
-import type {
-    TransactionOptions,
-    TransactionResult,
-} from "../../transaction/index.js";
+import { TransactionExecutor } from "../../transaction/index.js";
+import type { TransactionOptions } from "../../transaction/index.js";
 import { FileAppendValidator } from "../validation/index.js";
 
 /**
@@ -56,30 +50,23 @@ export class FileAppendOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: FileAppendValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new FileAppendValidator();
     }
 
     /** Submit a `FileAppendTransaction`. */
-    async execute(
-        options: FileAppendOperationOptions,
-    ): Promise<TransactionResult> {
+    async execute(options: FileAppendOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "FileAppend",
-                serviceName: "FileService",
-                methodName: "appendToFile",
-                timestamp: new Date(),
-            },
-            toTransactionResult,
-        );
+        return await this.executor.run(tx, options, {
+            type: "FileAppend",
+            serviceName: "FileService",
+            methodName: "appendToFile",
+            timestamp: new Date(),
+        });
     }
 
     private build(options: FileAppendOperationOptions): FileAppendTransaction {

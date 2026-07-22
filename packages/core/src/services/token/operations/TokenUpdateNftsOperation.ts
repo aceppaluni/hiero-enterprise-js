@@ -1,14 +1,8 @@
 import type { TokenId } from "@hiero-ledger/sdk";
 import { TokenUpdateNftsTransaction, Long } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import {
-    TransactionExecutor,
-    toTransactionResult,
-} from "../../transaction/index.js";
-import type {
-    TransactionOptions,
-    TransactionResult,
-} from "../../transaction/index.js";
+import { TransactionExecutor } from "../../transaction/index.js";
+import type { TransactionOptions } from "../../transaction/index.js";
 import { TokenUpdateNftsValidator } from "../validation/index.js";
 
 /**
@@ -52,30 +46,23 @@ export class TokenUpdateNftsOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenUpdateNftsValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenUpdateNftsValidator();
     }
 
     /** Submit a `TokenUpdateNftsTransaction`. */
-    async execute(
-        options: TokenUpdateNftsOperationOptions,
-    ): Promise<TransactionResult> {
+    async execute(options: TokenUpdateNftsOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenUpdateNfts",
-                serviceName: "TokenService",
-                methodName: "updateNfts",
-                timestamp: new Date(),
-            },
-            toTransactionResult,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenUpdateNfts",
+            serviceName: "TokenService",
+            methodName: "updateNfts",
+            timestamp: new Date(),
+        });
     }
 
     private build(

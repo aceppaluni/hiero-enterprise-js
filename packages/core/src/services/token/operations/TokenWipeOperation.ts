@@ -3,9 +3,9 @@ import type { TokenId, AccountId, Long } from "@hiero-ledger/sdk";
 import { TokenWipeTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
 import { TransactionExecutor } from "../../transaction/index.js";
-import type { SupplyChangeResult } from "../../transaction/index.js";
 import type { TransactionOptions } from "../../transaction/index.js";
 import { TokenWipeValidator } from "../validation/index.js";
+import { HieroError } from "../../../errors/HieroError.js";
 
 /**
  * Low-level options for the `TokenWipeTransaction` SDK transaction.
@@ -28,7 +28,7 @@ export class TokenWipeOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenWipeValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenWipeValidator();
     }
@@ -36,37 +36,36 @@ export class TokenWipeOperation {
     /**
      * Submit a `TokenWipeTransaction`.
      *
-     * @returns The transaction id/status and the token's new total supply
-     *   after the wipe, as a decimal string.
+     * @returns The executor's shared fields plus the token's new total
+     *   supply after the wipe, as a decimal string.
      */
-    async execute(
-        options: TokenWipeOperationOptions,
-    ): Promise<SupplyChangeResult> {
+    async execute(options: TokenWipeOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenWipe",
-                serviceName: "TokenService",
-                methodName: "wipeToken",
-                timestamp: new Date(),
-            },
-            (outcome) => {
-                if (outcome.receipt.totalSupply == null) {
-                    throw new Error(
-                        "TokenWipe receipt did not include totalSupply.",
-                    );
-                }
-                return {
-                    ...outcome.toResult(),
-                    totalSupply: outcome.receipt.totalSupply.toString(),
-                };
-            },
-        );
+        const results = await this.executor.run(tx, options, {
+            type: "TokenWipe",
+            serviceName: "TokenService",
+            methodName: "wipeToken",
+            timestamp: new Date(),
+        });
+
+        if (results.receipt.totalSupply == null) {
+            throw new HieroError(
+                "TokenWipe receipt did not include totalSupply.",
+                {
+                    code: "SDK_ERROR",
+                    context: "TokenWipeOperation.execute",
+                    transactionId: results.transactionId,
+                },
+            );
+        }
+
+        return {
+            ...results,
+            totalSupply: results.receipt.totalSupply.toString(),
+        };
     }
 
     private build(options: TokenWipeOperationOptions): TokenWipeTransaction {

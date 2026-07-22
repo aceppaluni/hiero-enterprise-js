@@ -1,15 +1,10 @@
 import type { AccountId, TokenId } from "@hiero-ledger/sdk";
 import { TokenAssociateTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import {
-    TransactionExecutor,
-    toTransactionResult,
-} from "../../transaction/index.js";
+import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
-    TransactionResult,
 } from "../../transaction/index.js";
 import { TokenAssociateValidator } from "../validation/index.js";
 
@@ -27,42 +22,35 @@ export class TokenAssociateOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenAssociateValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenAssociateValidator();
     }
 
     /** Submit a `TokenAssociateTransaction`. */
-    async execute(
-        options: TokenAssociateOperationOptions,
-    ): Promise<TransactionResult> {
+    async execute(options: TokenAssociateOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenAssociate",
-                serviceName: "TokenService",
-                methodName: "associateToken",
-                timestamp: new Date(),
-            },
-            toTransactionResult,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenAssociate",
+            serviceName: "TokenService",
+            methodName: "associateToken",
+            timestamp: new Date(),
+        });
     }
 
     /** Schedule a `TokenAssociateTransaction` for deferred multi-sig execution. */
     async schedule(
         options: TokenAssociateOperationOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.scheduleRun(
+        const results = await this.executor.scheduleRun(
             tx,
             options,
             {
@@ -73,6 +61,11 @@ export class TokenAssociateOperation {
             },
             scheduleOptions,
         );
+        return {
+            scheduleId: results.receipt.scheduleId
+                ? results.receipt.scheduleId.toString()
+                : null,
+        };
     }
 
     private build(

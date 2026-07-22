@@ -1,14 +1,8 @@
 import type { TokenId } from "@hiero-ledger/sdk";
 import { TokenUnpauseTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import {
-    TransactionExecutor,
-    toTransactionResult,
-} from "../../transaction/index.js";
-import type {
-    TransactionOptions,
-    TransactionResult,
-} from "../../transaction/index.js";
+import { TransactionExecutor } from "../../transaction/index.js";
+import type { TransactionOptions } from "../../transaction/index.js";
 import { TokenUnpauseValidator } from "../validation/index.js";
 
 /**
@@ -33,30 +27,23 @@ export class TokenUnpauseOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenUnpauseValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenUnpauseValidator();
     }
 
     /** Submit a `TokenUnpauseTransaction`. */
-    async execute(
-        options: TokenUnpauseOperationOptions,
-    ): Promise<TransactionResult> {
+    async execute(options: TokenUnpauseOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenUnpause",
-                serviceName: "TokenService",
-                methodName: "unpauseToken",
-                timestamp: new Date(),
-            },
-            toTransactionResult,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenUnpause",
+            serviceName: "TokenService",
+            methodName: "unpauseToken",
+            timestamp: new Date(),
+        });
     }
 
     private build(

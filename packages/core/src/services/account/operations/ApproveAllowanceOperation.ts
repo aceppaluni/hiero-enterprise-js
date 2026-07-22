@@ -6,14 +6,8 @@ import {
     AccountId,
 } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import {
-    TransactionExecutor,
-    toTransactionResult,
-} from "../../transaction/index.js";
-import type {
-    TransactionOptions,
-    TransactionResult,
-} from "../../transaction/index.js";
+import { TransactionExecutor } from "../../transaction/index.js";
+import type { TransactionOptions } from "../../transaction/index.js";
 import { ApproveAllowanceValidator } from "../validation/index.js";
 
 /**
@@ -139,7 +133,7 @@ export class ApproveAllowanceOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: ApproveAllowanceValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new ApproveAllowanceValidator();
     }
@@ -148,24 +142,17 @@ export class ApproveAllowanceOperation {
     async execute(
         options: ApproveAllowanceOptions,
         methodName = "approveAllowance",
-    ): Promise<TransactionResult> {
+    ) {
         this.validator.validate(options);
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "AccountAllowanceApprove",
-                serviceName: "AccountService",
-                methodName,
-                timestamp: new Date(),
-            },
-            // The receipt carries nothing allowance-specific (allowances
-            // are not itemised in receipts), so the floor is the honest
-            // result: the transaction id and consensus status.
-            toTransactionResult,
-        );
+        // The receipt carries nothing allowance-specific
+        return await this.executor.run(tx, options, {
+            type: "AccountAllowanceApprove",
+            serviceName: "AccountService",
+            methodName,
+            timestamp: new Date(),
+        });
     }
 
     /**

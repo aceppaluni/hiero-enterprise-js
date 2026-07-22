@@ -13,7 +13,6 @@ import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "../../transaction/index.js";
 import { ContractCreateValidator } from "../validation/index.js";
 
@@ -77,40 +76,41 @@ export class ContractCreateOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: ContractCreateValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new ContractCreateValidator();
     }
 
     /** Submit a `ContractCreateTransaction` and return the new contract ID. */
-    async execute(options: ContractCreateOperationOptions): Promise<string> {
+    async execute(options: ContractCreateOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "ContractCreate",
-                serviceName: "ContractService",
-                methodName: "createContract",
-                timestamp: new Date(),
-            },
-            (outcome) => outcome.receipt.contractId!.toString(),
-        );
+        const results = await this.executor.run(tx, options, {
+            type: "ContractCreate",
+            serviceName: "ContractService",
+            methodName: "createContract",
+            timestamp: new Date(),
+        });
+        return {
+            ...results,
+            contractId: results.receipt.contractId
+                ? results.receipt.contractId.toString()
+                : null,
+        };
     }
 
     /** Schedule a `ContractCreateTransaction` for deferred multi-sig execution. */
     async schedule(
         options: ContractCreateOperationOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.scheduleRun(
+        const results = await this.executor.scheduleRun(
             tx,
             options,
             {
@@ -121,6 +121,11 @@ export class ContractCreateOperation {
             },
             scheduleOptions,
         );
+        return {
+            scheduleId: results.receipt.scheduleId
+                ? results.receipt.scheduleId.toString()
+                : null,
+        };
     }
 
     /**

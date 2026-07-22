@@ -1,14 +1,8 @@
 import type { AccountId, TokenId } from "@hiero-ledger/sdk";
 import { TokenRevokeKycTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import {
-    TransactionExecutor,
-    toTransactionResult,
-} from "../../transaction/index.js";
-import type {
-    TransactionOptions,
-    TransactionResult,
-} from "../../transaction/index.js";
+import { TransactionExecutor } from "../../transaction/index.js";
+import type { TransactionOptions } from "../../transaction/index.js";
 import { TokenRevokeKycValidator } from "../validation/index.js";
 
 /**
@@ -33,30 +27,23 @@ export class TokenRevokeKycOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenRevokeKycValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenRevokeKycValidator();
     }
 
     /** Submit a `TokenRevokeKycTransaction`. */
-    async execute(
-        options: TokenRevokeKycOperationOptions,
-    ): Promise<TransactionResult> {
+    async execute(options: TokenRevokeKycOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenRevokeKyc",
-                serviceName: "TokenService",
-                methodName: "revokeKycToken",
-                timestamp: new Date(),
-            },
-            toTransactionResult,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenRevokeKyc",
+            serviceName: "TokenService",
+            methodName: "revokeKycToken",
+            timestamp: new Date(),
+        });
     }
 
     private build(

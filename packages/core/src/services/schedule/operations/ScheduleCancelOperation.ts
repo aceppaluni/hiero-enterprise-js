@@ -1,14 +1,8 @@
 import type { PrivateKey, ScheduleId } from "@hiero-ledger/sdk";
 import { ScheduleDeleteTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import {
-    TransactionExecutor,
-    toTransactionResult,
-} from "../../transaction/index.js";
-import type {
-    TransactionOptions,
-    TransactionResult,
-} from "../../transaction/index.js";
+import { TransactionExecutor } from "../../transaction/index.js";
+import type { TransactionOptions } from "../../transaction/index.js";
 
 /**
  * Options for cancelling a pending scheduled transaction.
@@ -30,12 +24,12 @@ export interface ScheduleCancelOptions extends TransactionOptions {
 export class ScheduleCancelOperation {
     private readonly executor: TransactionExecutor;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
     }
 
     /** Schedule cancel execute handler. */
-    async execute(options: ScheduleCancelOptions): Promise<TransactionResult> {
+    async execute(options: ScheduleCancelOptions) {
         // adminKey must co-sign the ScheduleDeleteTransaction — prepend it so
         // the executor freezes and signs before the operator auto-sign
         const opts: ScheduleCancelOptions = {
@@ -48,16 +42,11 @@ export class ScheduleCancelOperation {
         const tx = new ScheduleDeleteTransaction().setScheduleId(
             options.scheduleId,
         );
-        return this.executor.run(
-            tx,
-            opts,
-            {
-                type: "ScheduleDelete",
-                serviceName: "ScheduleService",
-                methodName: "cancel",
-                timestamp: new Date(),
-            },
-            toTransactionResult,
-        );
+        return this.executor.run(tx, opts, {
+            type: "ScheduleDelete",
+            serviceName: "ScheduleService",
+            methodName: "cancel",
+            timestamp: new Date(),
+        });
     }
 }

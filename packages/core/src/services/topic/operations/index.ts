@@ -13,5 +13,4 @@ export {
 export {
     TopicMessageSubmitOperation,
     type TopicMessageSubmitOperationOptions,
-    type TopicMessageSubmitResult,
 } from "./TopicMessageSubmitOperation.js";

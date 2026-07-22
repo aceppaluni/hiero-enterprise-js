@@ -37,10 +37,7 @@ import type {
 import { AccountBalanceQuery, AccountSignatureQuery } from "./queries/index.js";
 import type {
     ScheduleOptions,
-    ScheduledResult,
     TransactionOptions,
-    TransactionResult,
-    AutoCreateResult,
 } from "../transaction/index.js";
 
 /**
@@ -118,7 +115,7 @@ export class AccountService {
     async scheduleCreateAccount(
         options: CreateAccountOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.createOperation.schedule(options, scheduleOptions);
     }
 
@@ -135,9 +132,7 @@ export class AccountService {
      *   (retrying re-sends the transfer). Check
      *   `result.accountId === undefined` to detect it.
      */
-    async autoCreateEvmAccount(
-        options: AutoCreateEvmAccountOptions,
-    ): Promise<AutoCreateResult> {
+    async autoCreateEvmAccount(options: AutoCreateEvmAccountOptions) {
         return await this.autoCreateOperation.execute(options);
     }
 
@@ -152,7 +147,7 @@ export class AccountService {
     async scheduleAutoCreateEvmAccount(
         options: AutoCreateEvmAccountOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.autoCreateOperation.schedule(
             options,
             scheduleOptions,
@@ -166,9 +161,7 @@ export class AccountService {
      * @param options.accountKey - Private key of the account being deleted
      * @param options.transferAccountId - Account to receive remaining balance (defaults to operator)
      */
-    async deleteAccount(
-        options: DeleteAccountOptions,
-    ): Promise<TransactionResult> {
+    async deleteAccount(options: DeleteAccountOptions) {
         return await this.deleteOperation.execute(options);
     }
 
@@ -186,7 +179,7 @@ export class AccountService {
     async scheduleDeleteAccount(
         options: ScheduleDeleteAccountOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.deleteOperation.schedule(options, scheduleOptions);
     }
 
@@ -206,9 +199,7 @@ export class AccountService {
      * @param options.declineStakingReward - Whether to decline staking rewards
      * @param options.autoRenewPeriod - Auto-renew period in seconds (30–90 days)
      */
-    async updateAccount(
-        options: UpdateAccountOptions,
-    ): Promise<TransactionResult> {
+    async updateAccount(options: UpdateAccountOptions) {
         return await this.updateOperation.execute(options);
     }
 
@@ -230,7 +221,7 @@ export class AccountService {
     async scheduleUpdateAccount(
         options: UpdateAccountOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.updateOperation.schedule(options, scheduleOptions);
     }
 
@@ -308,9 +299,7 @@ export class AccountService {
      *
      * @param options.hbarAllowances - HBAR spending allowances to approve (at least one)
      */
-    async approveHbarAllowance(
-        options: ApproveHbarAllowanceOptions,
-    ): Promise<TransactionResult> {
+    async approveHbarAllowance(options: ApproveHbarAllowanceOptions) {
         if (!options.hbarAllowances?.length) {
             throw normalizeError(
                 new Error(
@@ -334,9 +323,7 @@ export class AccountService {
      *
      * @param options.tokenAllowances - Fungible token allowances to approve (at least one)
      */
-    async approveTokenAllowance(
-        options: ApproveTokenAllowanceOptions,
-    ): Promise<TransactionResult> {
+    async approveTokenAllowance(options: ApproveTokenAllowanceOptions) {
         if (!options.tokenAllowances?.length) {
             throw normalizeError(
                 new Error(
@@ -360,9 +347,7 @@ export class AccountService {
      *
      * @param options.nftAllowances - NFT allowances to approve (at least one)
      */
-    async approveNftAllowance(
-        options: ApproveNftAllowanceOptions,
-    ): Promise<TransactionResult> {
+    async approveNftAllowance(options: ApproveNftAllowanceOptions) {
         if (!options.nftAllowances?.length) {
             throw normalizeError(
                 new Error(
@@ -395,7 +380,7 @@ export class AccountService {
     async deleteNftAllowance(
         allowances: NftAllowanceDeletion[],
         options: DeleteAllowanceOptions = {},
-    ): Promise<TransactionResult> {
+    ) {
         if (!allowances?.length) {
             throw normalizeError(
                 new Error(
@@ -427,7 +412,7 @@ export class AccountService {
     async deleteAllNftAllowances(
         allowances: NftAllSerialsAllowanceDeletion[],
         options: DeleteAllNftAllowancesOptions = {},
-    ): Promise<TransactionResult> {
+    ) {
         if (!allowances?.length) {
             throw normalizeError(
                 new Error(
@@ -456,7 +441,7 @@ export class AccountService {
     async deleteHbarAllowance(
         allowances: HbarAllowanceDeletion[],
         options: TransactionOptions = {},
-    ): Promise<TransactionResult> {
+    ) {
         if (!allowances?.length) {
             throw normalizeError(
                 new Error(
@@ -491,7 +476,7 @@ export class AccountService {
     async deleteTokenAllowance(
         allowances: TokenAllowanceDeletion[],
         options: TransactionOptions = {},
-    ): Promise<TransactionResult> {
+    ) {
         if (!allowances?.length) {
             throw normalizeError(
                 new Error(
@@ -536,7 +521,7 @@ export class AccountService {
         amount: number | Hbar,
         senderAccountId: string | AccountId,
         options?: TransferHbarOptions,
-    ): Promise<TransactionResult> {
+    ) {
         return await this.transferOperation.transferHbar(
             receiverAccountId,
             amount,
@@ -561,7 +546,7 @@ export class AccountService {
         amount: number | Hbar,
         senderAccountId: string | AccountId,
         options?: ScheduleTransferHbarOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.transferOperation.scheduleTransferHbar(
             receiverAccountId,
             amount,
@@ -587,7 +572,7 @@ export class AccountService {
         amount: number,
         senderAccountId: string | AccountId,
         options?: TransferTokenOptions,
-    ): Promise<TransactionResult> {
+    ) {
         return await this.transferOperation.transferToken(
             tokenId,
             receiverAccountId,
@@ -611,7 +596,7 @@ export class AccountService {
         amount: number,
         senderAccountId: string | AccountId,
         options?: ScheduleTransferTokenOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.transferOperation.scheduleTransferToken(
             tokenId,
             receiverAccountId,
@@ -638,7 +623,7 @@ export class AccountService {
         receiverAccountId: string | AccountId,
         senderAccountId: string | AccountId,
         options?: TransferNftOptions,
-    ): Promise<TransactionResult> {
+    ) {
         return await this.transferOperation.transferNft(
             tokenId,
             serial,
@@ -662,7 +647,7 @@ export class AccountService {
         receiverAccountId: string | AccountId,
         senderAccountId: string | AccountId,
         options?: ScheduleTransferNftOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.transferOperation.scheduleTransferNft(
             tokenId,
             serial,

@@ -2,14 +2,8 @@ import type BigNumber from "bignumber.js";
 import type { AccountId, TokenId } from "@hiero-ledger/sdk";
 import { Long, TokenAirdropTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import {
-    TransactionExecutor,
-    toTransactionResult,
-} from "../../transaction/index.js";
-import type {
-    TransactionOptions,
-    TransactionResult,
-} from "../../transaction/index.js";
+import { TransactionExecutor } from "../../transaction/index.js";
+import type { TransactionOptions } from "../../transaction/index.js";
 import { TokenAirdropValidator } from "../validation/index.js";
 
 /**
@@ -60,30 +54,23 @@ export class TokenAirdropOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenAirdropValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenAirdropValidator();
     }
 
     /** Submit a `TokenAirdropTransaction`. */
-    async execute(
-        options: TokenAirdropOperationOptions,
-    ): Promise<TransactionResult> {
+    async execute(options: TokenAirdropOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenAirdrop",
-                serviceName: "TokenService",
-                methodName: "airdropFungibleToken",
-                timestamp: new Date(),
-            },
-            toTransactionResult,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenAirdrop",
+            serviceName: "TokenService",
+            methodName: "airdropFungibleToken",
+            timestamp: new Date(),
+        });
     }
 
     private build(
