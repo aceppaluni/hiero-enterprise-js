@@ -21,7 +21,7 @@ describe("TopicInfoQuery", () => {
         const info = await topicService.getTopicInfo(topicId);
 
         // All scalars are plain-JS, not SDK primitives.
-        expect(info.topicId).toBe(topicId);
+        expect(info.topicId).toBe(topicId.toString());
         expect(info.topicMemo).toBe("integration: info plain");
         expect(typeof info.sequenceNumber).toBe("string");
         expect(info.sequenceNumber).toBe("0");

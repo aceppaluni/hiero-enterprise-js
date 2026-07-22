@@ -20,14 +20,14 @@ describe("TopicCreateOperation", () => {
             topicMemo: "integration: public topic",
         });
 
-        expect(topicId).toMatch(/^0\.0\.\d+$/);
+        expect(topicId.toString()).toMatch(/^0\.0\.\d+$/);
 
         // Query consensus directly — no mirror-node propagation lag.
         const info = await new TopicInfoQuery()
             .setTopicId(topicId)
             .execute(client);
 
-        expect(info.topicId.toString()).toBe(topicId);
+        expect(info.topicId).toBe(topicId.toString());
         expect(info.topicMemo).toBe("integration: public topic");
         // No admin key was supplied — topic is immutable.
         expect(info.adminKey).toBeNull();
@@ -47,13 +47,13 @@ describe("TopicCreateOperation", () => {
             additionalSigners: [adminKey],
         });
 
-        expect(topicId).toMatch(/^0\.0\.\d+$/);
+        expect(topicId.toString()).toMatch(/^0\.0\.\d+$/);
 
         const info = await new TopicInfoQuery()
             .setTopicId(topicId)
             .execute(client);
 
-        expect(info.topicId.toString()).toBe(topicId);
+        expect(info.topicId).toBe(topicId.toString());
         expect(info.topicMemo).toBe("integration: private topic");
         expect(info.adminKey).not.toBeNull();
         expect(info.submitKey).not.toBeNull();

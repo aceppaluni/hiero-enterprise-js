@@ -115,6 +115,6 @@ describe("TokenService update operations [Integration]", () => {
             { scheduleMemo: "integration scheduled update" },
         );
 
-        expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
+        expect(scheduled.scheduleId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 });

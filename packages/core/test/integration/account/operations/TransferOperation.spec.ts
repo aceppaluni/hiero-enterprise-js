@@ -232,7 +232,7 @@ describe("TransferOperation [Integration]", () => {
                 { scheduleMemo: "integration test schedule" },
             );
 
-            expect(result.scheduleId).toMatch(/^0\.0\.\d+$/);
+            expect(result.scheduleId.toString()).toMatch(/^0\.0\.\d+$/);
         });
     });
 });

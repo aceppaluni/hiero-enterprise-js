@@ -102,6 +102,6 @@ describe("ContractDeleteOperation", () => {
             { scheduleMemo: "integration scheduled contract delete" },
         );
 
-        expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
+        expect(scheduled.scheduleId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 });

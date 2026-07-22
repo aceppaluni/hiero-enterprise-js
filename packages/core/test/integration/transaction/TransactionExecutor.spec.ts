@@ -107,7 +107,7 @@ describe("TransactionExecutor [Integration]", () => {
                 { scheduleMemo: "executor integration schedule" },
             );
 
-            expect(result.scheduleId).toMatch(/^0\.0\.\d+$/);
+            expect(result.scheduleId.toString()).toMatch(/^0\.0\.\d+$/);
         });
     });
 });

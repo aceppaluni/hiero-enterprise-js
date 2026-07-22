@@ -158,7 +158,7 @@ describe("ContractExecuteOperation", () => {
             { scheduleMemo: "integration scheduled contract execute" },
         );
 
-        expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
+        expect(scheduled.scheduleId.toString()).toMatch(/^0\.0\.\d+$/);
 
         // Poll briefly to absorb any propagation lag before asserting state.
         expect(await waitForStoredValue(client, contractId, 99)).toBe(99);

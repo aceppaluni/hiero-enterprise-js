@@ -107,6 +107,6 @@ describe("TokenService burn operations [Integration]", () => {
             { scheduleMemo: "integration scheduled burn" },
         );
 
-        expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
+        expect(scheduled.scheduleId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 });

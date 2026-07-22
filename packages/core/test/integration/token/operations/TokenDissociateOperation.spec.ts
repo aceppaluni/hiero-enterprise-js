@@ -91,7 +91,7 @@ describe("TokenService dissociate operations [Integration]", () => {
                 { scheduleMemo: "integration scheduled dissociate" },
             );
 
-            expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
+            expect(scheduled.scheduleId.toString()).toMatch(/^0\.0\.\d+$/);
             return;
         }
 

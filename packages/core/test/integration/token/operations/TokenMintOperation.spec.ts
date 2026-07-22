@@ -73,6 +73,6 @@ describe("TokenService mint operations [Integration]", () => {
             { scheduleMemo: "integration scheduled mint" },
         );
 
-        expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
+        expect(scheduled.scheduleId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 });
