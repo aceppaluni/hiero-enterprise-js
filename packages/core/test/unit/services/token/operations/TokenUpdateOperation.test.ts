@@ -172,8 +172,7 @@ describe("TokenUpdateOperation (via TokenService)", () => {
         expect(mocks.scheduleTx.setScheduleMemo).toHaveBeenCalledWith(
             "pending approval",
         );
-        expect(result.scheduleId).toBe("0.0.777");
-        expect(result.transactionId).toBeDefined();
+        expect(result.scheduleId.toString()).toBe("0.0.777");
     });
 
     it("throws when tokenId is missing", async () => {

@@ -14,7 +14,7 @@ describe("TopicInfoQuery", () => {
     });
 
     it("returns plain-object info for a freshly created public topic", async () => {
-        const topicId = await topicService.createTopic({
+        const { topicId } = await topicService.createTopic({
             topicMemo: "integration: info plain",
         });
 
@@ -33,7 +33,7 @@ describe("TopicInfoQuery", () => {
     });
 
     it("projects expirationTime to an ISO-8601 string and autoRenewPeriod to seconds", async () => {
-        const topicId = await topicService.createTopic({
+        const { topicId } = await topicService.createTopic({
             topicMemo: "integration: info expiration",
         });
 
@@ -47,7 +47,7 @@ describe("TopicInfoQuery", () => {
     });
 
     it("reflects the latest sequenceNumber after messages are submitted", async () => {
-        const topicId = await topicService.createTopic({
+        const { topicId } = await topicService.createTopic({
             topicMemo: "integration: info sequence",
         });
 
@@ -62,7 +62,7 @@ describe("TopicInfoQuery", () => {
     it("exposes adminKey + autoRenewAccountId for a mutable topic", async () => {
         const adminKey = PrivateKey.generateED25519();
 
-        const topicId = await topicService.createTopic({
+        const { topicId } = await topicService.createTopic({
             topicMemo: "integration: info mutable",
             adminKey: adminKey.publicKey,
             autoRenewAccountId: operatorId,

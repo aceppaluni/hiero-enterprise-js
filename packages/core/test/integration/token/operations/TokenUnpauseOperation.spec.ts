@@ -27,7 +27,7 @@ describe("TokenService unpause operations [Integration]", () => {
     it("unpauses a previously paused token signed by the pause key", async () => {
         const pauseKey = PrivateKey.generateED25519();
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Unpause Integration",
             tokenSymbol: "UNPSE",
             decimals: 0,

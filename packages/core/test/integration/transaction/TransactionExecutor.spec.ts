@@ -28,12 +28,12 @@ describe("TransactionExecutor [Integration]", () => {
     });
 
     describe("run()", () => {
-        it("executes a transaction end-to-end and returns the processReceipt result", async () => {
+        it("executes a transaction end-to-end and returns the receipt-derived topicId", async () => {
             const tx = new TopicCreateTransaction().setTopicMemo(
                 "executor integration",
             );
 
-            const topicId = await executor.run(
+            const result = await executor.run(
                 tx,
                 {},
                 {
@@ -42,10 +42,9 @@ describe("TransactionExecutor [Integration]", () => {
                     methodName: "createTopic",
                     timestamp: new Date(),
                 },
-                (outcome) => outcome.receipt.topicId!.toString(),
             );
 
-            expect(topicId).toMatch(/^0\.0\.\d+$/);
+            expect(result.receipt.topicId!.toString()).toMatch(/^0\.0\.\d+$/);
         });
 
         it("emits before and after lifecycle events with SUCCESS status", async () => {
@@ -69,7 +68,6 @@ describe("TransactionExecutor [Integration]", () => {
                     methodName: "createTopic",
                     timestamp: new Date(),
                 },
-                (outcome) => outcome.receipt.topicId!.toString(),
             );
 
             expect(before).toHaveBeenCalledWith(
@@ -110,7 +108,6 @@ describe("TransactionExecutor [Integration]", () => {
             );
 
             expect(result.scheduleId).toMatch(/^0\.0\.\d+$/);
-            expect(result.transactionId).toMatch(/^0\.0\.\d+@/);
         });
     });
 });

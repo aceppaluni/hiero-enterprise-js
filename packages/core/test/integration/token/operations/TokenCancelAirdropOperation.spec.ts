@@ -33,7 +33,7 @@ describe("TokenService cancel airdrop operations [Integration]", () => {
     it("cancels a pending fungible airdrop so the receiver never receives the token", async () => {
         const receiver = await createTestAccount(accountService, 2);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Cancel Fungible Integration",
             tokenSymbol: "CFI",
             decimals: 0,
@@ -96,7 +96,7 @@ describe("TokenService cancel airdrop operations [Integration]", () => {
     it("cancels a pending NFT airdrop so the serial stays with the treasury", async () => {
         const receiver = await createTestAccount(accountService, 2);
 
-        const tokenId = await tokenService.createNft({
+        const { tokenId } = await tokenService.createNft({
             tokenName: "Cancel NFT Integration",
             tokenSymbol: "CNI",
             treasuryAccountId: owner.accountId,
@@ -157,7 +157,7 @@ describe("TokenService cancel airdrop operations [Integration]", () => {
     it("cancels a mixed batch of pending fungible and NFT airdrops in one transaction", async () => {
         const receiver = await createTestAccount(accountService, 2);
 
-        const fungibleTokenId = await tokenService.createFungibleToken({
+        const { tokenId: fungibleTokenId } = await tokenService.createFungibleToken({
             tokenName: "Cancel Batch Fungible Integration",
             tokenSymbol: "CBFI",
             decimals: 0,
@@ -167,7 +167,7 @@ describe("TokenService cancel airdrop operations [Integration]", () => {
             additionalSigners: [owner.key],
         });
 
-        const nftTokenId = await tokenService.createNft({
+        const { tokenId: nftTokenId } = await tokenService.createNft({
             tokenName: "Cancel Batch NFT Integration",
             tokenSymbol: "CBNI",
             treasuryAccountId: owner.accountId,

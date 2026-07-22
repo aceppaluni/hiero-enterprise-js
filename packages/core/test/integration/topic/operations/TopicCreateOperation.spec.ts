@@ -16,7 +16,7 @@ describe("TopicCreateOperation", () => {
     });
 
     it("creates a public, immutable topic with a memo", async () => {
-        const topicId = await topicService.createTopic({
+        const { topicId } = await topicService.createTopic({
             topicMemo: "integration: public topic",
         });
 
@@ -39,7 +39,7 @@ describe("TopicCreateOperation", () => {
         const adminKey = PrivateKey.generateED25519();
         const submitKey = PrivateKey.generateED25519();
 
-        const topicId = await topicService.createTopic({
+        const { topicId } = await topicService.createTopic({
             topicMemo: "integration: private topic",
             adminKey: adminKey.publicKey,
             submitKey: submitKey.publicKey,

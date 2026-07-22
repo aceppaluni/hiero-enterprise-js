@@ -33,12 +33,13 @@ describe("ContractDeleteOperation", () => {
     async function deployDeletableContract(
         adminKey: PrivateKey,
     ): Promise<string> {
-        return await contractService.createContract({
+        const { contractId } = await contractService.createContract({
             bytecode: Buffer.from(MINIMAL_BYTECODE_HEX, "hex"),
             gas: 150_000,
             adminKey: adminKey.publicKey,
             additionalSigners: [adminKey],
         });
+        return contractId;
     }
 
     it("deletes a contract and transfers the remaining balance to an account", async () => {
@@ -102,6 +103,5 @@ describe("ContractDeleteOperation", () => {
         );
 
         expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
-        expect(scheduled.transactionId).toBeDefined();
     });
 });

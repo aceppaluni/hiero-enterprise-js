@@ -70,9 +70,6 @@ export class ContractExecuteOperation {
 
     /**
      * Submit a `ContractExecuteTransaction`.
-     *
-     * @returns The transaction id/status; with `withFunctionResult: true`,
-     *   also the EVM outcome (return data, gas used) from the record.
      */
     async execute(options: ContractExecuteOperationOptions) {
         this.validator.validate(options);

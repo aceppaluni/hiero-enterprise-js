@@ -15,7 +15,7 @@ describe("FileAppendOperation", () => {
 
     it("appends bytes to an existing file", async () => {
         const initial = "part one:";
-        const fileId = await fileService.createFile({ contents: initial });
+        const { fileId } = await fileService.createFile({ contents: initial });
 
         await fileService.appendToFile({
             fileId,
@@ -29,7 +29,7 @@ describe("FileAppendOperation", () => {
     });
 
     it("auto-chunks a large payload across many appends", async () => {
-        const fileId = await fileService.createFile({ contents: "header:" });
+        const { fileId } = await fileService.createFile({ contents: "header:" });
 
         // 20 KiB — the SDK will sub-chunk this internally against
         // maxChunks * chunkSize.
@@ -50,7 +50,7 @@ describe("FileAppendOperation", () => {
     it("requires the file's key to sign the append", async () => {
         const customKey = PrivateKey.generateED25519();
 
-        const fileId = await fileService.createFile({
+        const { fileId } = await fileService.createFile({
             contents: "signed file",
             keys: [customKey.publicKey],
             // Every key assigned to a new file must sign FileCreate.

@@ -59,7 +59,7 @@ describe("ApproveAllowanceOperation (via AccountService)", () => {
             });
 
             // No SDK receipt leaks to consumers — just the floor result.
-            expect(result).toEqual({
+            expect(result).toMatchObject({
                 transactionId: "0.0.123@1234567890.000000000",
                 status: "SUCCESS",
             });

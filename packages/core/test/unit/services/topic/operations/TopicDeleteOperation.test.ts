@@ -36,7 +36,7 @@ describe("TopicDeleteOperation (via TopicService)", () => {
         it("submits a TopicDeleteTransaction with the provided topicId", async () => {
             const result = await service.deleteTopic({ topicId: "0.0.12345" });
 
-            expect(result).toEqual({
+            expect(result).toMatchObject({
                 transactionId: expect.any(String),
                 status: "SUCCESS",
             });

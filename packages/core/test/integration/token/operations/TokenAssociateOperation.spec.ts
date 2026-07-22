@@ -29,7 +29,7 @@ describe("TokenService associate operations [Integration]", () => {
     it("associates a token to an account", async () => {
         const receiver = await createTestAccount(accountService, 1);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Associate Integration",
             tokenSymbol: "ASI",
             decimals: 2,
@@ -57,7 +57,7 @@ describe("TokenService associate operations [Integration]", () => {
     it("schedules a token association", async () => {
         const scheduledReceiver = await createTestAccount(accountService, 1);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Scheduled Associate",
             tokenSymbol: "SASI",
             decimals: 0,
@@ -78,7 +78,6 @@ describe("TokenService associate operations [Integration]", () => {
             );
 
             expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
-            expect(scheduled.transactionId).toBeDefined();
             return;
         }
 

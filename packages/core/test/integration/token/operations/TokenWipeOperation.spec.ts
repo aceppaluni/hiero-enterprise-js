@@ -29,7 +29,7 @@ describe("TokenService wipe operations [Integration]", () => {
         const transferAmount = 400;
         const wipeAmount = 250;
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Wipe Fungible Integration",
             tokenSymbol: "WFI",
             decimals: 0,
@@ -74,7 +74,7 @@ describe("TokenService wipe operations [Integration]", () => {
     it("wipes specific NFT serials from a holder account", async () => {
         const holder = await createTestAccount(accountService, 2);
 
-        const tokenId = await tokenService.createNft({
+        const { tokenId } = await tokenService.createNft({
             tokenName: "Wipe NFT Integration",
             tokenSymbol: "WNI",
             treasuryAccountId: owner.accountId,

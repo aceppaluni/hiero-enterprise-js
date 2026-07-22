@@ -12,7 +12,7 @@ describe("FileContentsQuery", () => {
 
     it("round-trips a small string payload byte-for-byte", async () => {
         const payload = "hello from FileContentsQuery";
-        const fileId = await fileService.createFile({ contents: payload });
+        const { fileId } = await fileService.createFile({ contents: payload });
 
         const bytes = await fileService.getFileContents(fileId);
 
@@ -22,7 +22,7 @@ describe("FileContentsQuery", () => {
 
     it("round-trips a raw Uint8Array payload byte-for-byte", async () => {
         const payload = new Uint8Array([0xde, 0xad, 0xbe, 0xef, 0x00, 0xff]);
-        const fileId = await fileService.createFile({ contents: payload });
+        const { fileId } = await fileService.createFile({ contents: payload });
 
         const bytes = await fileService.getFileContents(fileId);
 
@@ -34,7 +34,7 @@ describe("FileContentsQuery", () => {
         // 6 KiB — spans the create + auto-append boundary.
         const size = 6 * 1024;
         const payload = Buffer.alloc(size, 0x64); // "dddd..."
-        const fileId = await fileService.createFile({ contents: payload });
+        const { fileId } = await fileService.createFile({ contents: payload });
 
         const bytes = await fileService.getFileContents(fileId);
         expect(bytes.byteLength).toBe(size);
@@ -43,7 +43,7 @@ describe("FileContentsQuery", () => {
     });
 
     it("returns an empty Uint8Array for a deleted file", async () => {
-        const fileId = await fileService.createFile({
+        const { fileId } = await fileService.createFile({
             contents: "will be deleted",
         });
         await fileService.deleteFile({ fileId });

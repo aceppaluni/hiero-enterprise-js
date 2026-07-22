@@ -19,7 +19,7 @@ describe("AccountService.deleteAllNftAllowances [Integration]", () => {
     it("deletes an approve-for-all-serials NFT allowance", async () => {
         const { owner, spender } = await createOwnerSpenderPair(client);
 
-        const tokenId = await tokenService.createNft({
+        const { tokenId } = await tokenService.createNft({
             tokenName: "Delete All NFT Allowance",
             tokenSymbol: "DANAL",
             treasuryAccountId: owner.accountId,

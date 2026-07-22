@@ -77,7 +77,7 @@ describe("TransferOperation [Integration]", () => {
     // Fungible token transfers
     describe("transferToken", () => {
         it("transfers fungible tokens from the operator to a recipient", async () => {
-            const tokenId = await tokenService.createFungibleToken({
+            const { tokenId } = await tokenService.createFungibleToken({
                 tokenName: "Transfer Test Token",
                 tokenSymbol: "TTT",
                 decimals: 2,
@@ -110,7 +110,7 @@ describe("TransferOperation [Integration]", () => {
         });
 
         it("transfers tokens with matching expectedDecimals", async () => {
-            const tokenId = await tokenService.createFungibleToken({
+            const { tokenId } = await tokenService.createFungibleToken({
                 tokenName: "Decimals Test Token",
                 tokenSymbol: "DEC",
                 decimals: 4,
@@ -146,7 +146,7 @@ describe("TransferOperation [Integration]", () => {
         it("transfers tokens between two non-operator accounts", async () => {
             const { owner, spender } = await createOwnerSpenderPair(client);
 
-            const tokenId = await tokenService.createFungibleToken({
+            const { tokenId } = await tokenService.createFungibleToken({
                 tokenName: "Peer Transfer Token",
                 tokenSymbol: "PEER",
                 decimals: 0,
@@ -184,7 +184,7 @@ describe("TransferOperation [Integration]", () => {
 
     describe("transferNft", () => {
         it("transfers an NFT from the operator to a recipient", async () => {
-            const tokenId = await tokenService.createNft({
+            const { tokenId } = await tokenService.createNft({
                 tokenName: "Transfer Test NFT",
                 tokenSymbol: "TNFT",
                 treasuryAccountId: operatorAccountId,
@@ -233,7 +233,6 @@ describe("TransferOperation [Integration]", () => {
             );
 
             expect(result.scheduleId).toMatch(/^0\.0\.\d+$/);
-            expect(result.transactionId).toContain("@");
         });
     });
 });

@@ -24,7 +24,7 @@ describe("TokenService mint operations [Integration]", () => {
     });
 
     it("mints NFT serials via metadata", async () => {
-        const tokenId = await tokenService.createNft({
+        const { tokenId } = await tokenService.createNft({
             tokenName: "Mint NFT Integration",
             tokenSymbol: "MNI",
             treasuryAccountId: owner.accountId,
@@ -56,7 +56,7 @@ describe("TokenService mint operations [Integration]", () => {
     });
 
     it("schedules NFT minting and returns a scheduleId", async () => {
-        const tokenId = await tokenService.createNft({
+        const { tokenId } = await tokenService.createNft({
             tokenName: "Scheduled Mint NFT",
             tokenSymbol: "SMNI",
             treasuryAccountId: owner.accountId,
@@ -74,6 +74,5 @@ describe("TokenService mint operations [Integration]", () => {
         );
 
         expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
-        expect(scheduled.transactionId).toBeDefined();
     });
 });

@@ -326,7 +326,7 @@ describe("TokenCreateValidator", () => {
             expect(() =>
                 validator.validate({
                     ...nftOptions,
-                    decimals: 0n,
+                    decimals: 0n as unknown as number,
                     initialSupply: 0n,
                 }),
             ).not.toThrow();
@@ -372,7 +372,7 @@ describe("TokenCreateValidator", () => {
             expect(() =>
                 validator.validate({
                     ...nftOptions,
-                    decimals: new BigNumber(2),
+                    decimals: new BigNumber(2) as unknown as number,
                 }),
             ).toThrow(/Non-fungible tokens must have decimals: 0/);
         });

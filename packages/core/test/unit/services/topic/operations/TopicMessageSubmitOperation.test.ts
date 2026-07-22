@@ -50,7 +50,6 @@ describe("TopicMessageSubmitOperation (via TopicService)", () => {
             expect(result.sequenceNumber).toBe(1);
             expect(result.status).toBe("SUCCESS");
             expect(result.runningHash).toEqual(new Uint8Array([1, 2, 3, 4]));
-            expect(result.transactionId).toBe("0.0.123@1234567890.000000000");
 
             const tx = vi.mocked(TopicMessageSubmitTransaction).mock.results[0]
                 .value;

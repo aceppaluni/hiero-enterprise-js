@@ -66,7 +66,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
     it("deletes a fungible token allowance by setting amount to 0", async () => {
         const { owner, spender } = await createOwnerSpenderPair(client);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Delete Allowance Token",
             tokenSymbol: "DAT",
             decimals: 2,
@@ -122,7 +122,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
     it("deletes an NFT allowance for specific serials", async () => {
         const { owner, spender } = await createOwnerSpenderPair(client);
 
-        const tokenId = await tokenService.createNft({
+        const { tokenId } = await tokenService.createNft({
             tokenName: "Delete NFT Allowance",
             tokenSymbol: "DNAL",
             treasuryAccountId: owner.accountId,

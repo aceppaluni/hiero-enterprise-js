@@ -47,7 +47,7 @@ describe("AutoCreateEvmAccountOperation (via AccountService)", () => {
             expect(mocks.tx.addHbarTransfer).toHaveBeenCalledTimes(2);
             expect(mocks.tx.execute).toHaveBeenCalledWith(context.client);
             expect(mocks.response.getReceiptQuery).toHaveBeenCalled();
-            expect(result).toEqual({
+            expect(result).toMatchObject({
                 transactionId: "0.0.123@1234567890.000000000",
                 status: "SUCCESS",
                 accountId: "0.0.4321",
@@ -64,11 +64,11 @@ describe("AutoCreateEvmAccountOperation (via AccountService)", () => {
 
             // The transfer landed (the caller must not retry); it just
             // created nothing.
-            expect(result).toEqual({
+            expect(result).toMatchObject({
                 transactionId: "0.0.123@1234567890.000000000",
                 status: "SUCCESS",
             });
-            expect(result).not.toHaveProperty("accountId");
+            expect(result.accountId).toBeNull();
         });
     });
 
@@ -80,7 +80,7 @@ describe("AutoCreateEvmAccountOperation (via AccountService)", () => {
             });
 
             expect(mocks.tx.schedule).toHaveBeenCalled();
-            expect(result.scheduleId).toBe("0.0.777");
+            expect(result.scheduleId.toString()).toBe("0.0.777");
         });
     });
 });

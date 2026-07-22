@@ -27,10 +27,11 @@ describe("FileUpdateOperation", () => {
 
     let fileId: string;
     beforeEach(async () => {
-        fileId = await fileService.createFile({
+        const created = await fileService.createFile({
             contents: "initial contents",
             fileMemo: "initial memo",
         });
+        fileId = created.fileId.toString();
     });
 
     it("updates the file memo", async () => {
@@ -76,7 +77,7 @@ describe("FileUpdateOperation", () => {
         // and prove the new key alone suffices afterwards.
         const oldKey = PrivateKey.generateED25519();
         const newKey = PrivateKey.generateED25519();
-        const customFileId = await fileService.createFile({
+        const { fileId: customFileId } = await fileService.createFile({
             contents: "rotatable",
             keys: [oldKey.publicKey],
             // Every key assigned to a new file must sign FileCreate.
@@ -115,7 +116,7 @@ describe("FileUpdateOperation", () => {
         // The network's auto-renew window for files caps at ~92 days
         // (8,000,001 seconds). Create a short-lived file so we have
         // room to extend within that window.
-        const shortLivedFileId = await fileService.createFile({
+        const { fileId: shortLivedFileId } = await fileService.createFile({
             contents: "short-lived",
             expirationTime: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         });

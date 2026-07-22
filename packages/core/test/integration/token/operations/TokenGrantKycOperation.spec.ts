@@ -26,7 +26,7 @@ describe("TokenService grantKyc operations [Integration]", () => {
     it("grants KYC on a token relationship for a holder account", async () => {
         const holder = await createTestAccount(accountService, 2);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "GrantKyc Integration",
             tokenSymbol: "GKYC",
             decimals: 0,

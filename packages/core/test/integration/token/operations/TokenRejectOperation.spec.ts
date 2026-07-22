@@ -39,7 +39,7 @@ describe("TokenService reject operations [Integration]", () => {
         const initialSupply = 1_000;
         const transferAmount = 250;
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Reject Fungible Integration",
             tokenSymbol: "RFI",
             decimals: 0,
@@ -108,7 +108,7 @@ describe("TokenService reject operations [Integration]", () => {
         // to have a unique token ID, so we mint TWO collections and
         // transfer one serial of each to the holder. Rejecting both in
         // one flow also exercises the dissociate step for two tokens.
-        const tokenIdA = await tokenService.createNft({
+        const { tokenId: tokenIdA } = await tokenService.createNft({
             tokenName: "Reject NFT A",
             tokenSymbol: "RNA",
             treasuryAccountId: owner.accountId,
@@ -116,7 +116,7 @@ describe("TokenService reject operations [Integration]", () => {
             additionalSigners: [owner.key],
         });
 
-        const tokenIdB = await tokenService.createNft({
+        const { tokenId: tokenIdB } = await tokenService.createNft({
             tokenName: "Reject NFT B",
             tokenSymbol: "RNB",
             treasuryAccountId: owner.accountId,
@@ -203,7 +203,7 @@ describe("TokenService reject operations [Integration]", () => {
         const fungibleSupply = 500;
         const fungibleTransfer = 100;
 
-        const fungibleTokenId = await tokenService.createFungibleToken({
+        const { tokenId: fungibleTokenId } = await tokenService.createFungibleToken({
             tokenName: "Reject Mixed Fungible",
             tokenSymbol: "RMF",
             decimals: 0,
@@ -213,7 +213,7 @@ describe("TokenService reject operations [Integration]", () => {
             additionalSigners: [owner.key],
         });
 
-        const nftTokenId = await tokenService.createNft({
+        const { tokenId: nftTokenId } = await tokenService.createNft({
             tokenName: "Reject Mixed NFT",
             tokenSymbol: "RMN",
             treasuryAccountId: owner.accountId,

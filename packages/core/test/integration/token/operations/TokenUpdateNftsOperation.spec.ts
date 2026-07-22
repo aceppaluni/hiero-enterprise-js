@@ -32,7 +32,7 @@ describe("TokenService updateNfts operations [Integration]", () => {
     it("updates the metadata of a single NFT serial", async () => {
         const metadataKey = PrivateKey.generateED25519();
 
-        const tokenId = await tokenService.createNft({
+        const { tokenId } = await tokenService.createNft({
             tokenName: "Update NFT Single",
             tokenSymbol: "UNS",
             treasuryAccountId: owner.accountId,
@@ -63,7 +63,7 @@ describe("TokenService updateNfts operations [Integration]", () => {
     it("updates multiple serials in one transaction and leaves others untouched", async () => {
         const metadataKey = PrivateKey.generateED25519();
 
-        const tokenId = await tokenService.createNft({
+        const { tokenId } = await tokenService.createNft({
             tokenName: "Update NFT Batch",
             tokenSymbol: "UNB",
             treasuryAccountId: owner.accountId,

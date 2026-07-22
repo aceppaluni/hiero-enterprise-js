@@ -27,7 +27,7 @@ describe("TokenService fee schedule update operations [Integration]", () => {
     it("updates a token's custom fee schedule with a fixed HBAR fee", async () => {
         const feeScheduleKey = PrivateKey.generateED25519();
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "FeeSchedule Integration",
             tokenSymbol: "FSCH",
             decimals: 0,

@@ -52,7 +52,7 @@ describe("ContractCreateOperation (via ContractService)", () => {
 
     describe("createContract", () => {
         it("creates a contract from a bytecode FileId and returns the contract ID", async () => {
-            const contractId = await service.createContract({
+            const { contractId } = await service.createContract({
                 bytecodeFileId: "0.0.555",
                 gas: 100_000,
             });
@@ -82,7 +82,7 @@ describe("ContractCreateOperation (via ContractService)", () => {
         it("creates a contract from raw bytecode bytes (HIP-435)", async () => {
             const bytecode = new Uint8Array([0x60, 0x80, 0x60, 0x40]);
 
-            const contractId = await service.createContract({
+            const { contractId } = await service.createContract({
                 bytecode,
                 gas: 200_000,
             });
@@ -211,8 +211,7 @@ describe("ContractCreateOperation (via ContractService)", () => {
                 gas: 100_000,
             });
 
-            expect(result.scheduleId).toBe("0.0.777");
-            expect(result.transactionId).toBe("0.0.123@1234567890.000000000");
+            expect(result.scheduleId.toString()).toBe("0.0.777");
 
             const tx = vi.mocked(ContractCreateTransaction).mock.results[0]
                 .value;

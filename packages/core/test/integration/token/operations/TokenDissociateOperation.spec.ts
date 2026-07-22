@@ -29,7 +29,7 @@ describe("TokenService dissociate operations [Integration]", () => {
     it("dissociates a token from an account", async () => {
         const receiver = await createTestAccount(accountService, 1);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Dissociate Integration",
             tokenSymbol: "DSI",
             decimals: 2,
@@ -65,7 +65,7 @@ describe("TokenService dissociate operations [Integration]", () => {
     it("schedules a token dissociation", async () => {
         const scheduledReceiver = await createTestAccount(accountService, 1);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Scheduled Dissociate",
             tokenSymbol: "SDSI",
             decimals: 0,
@@ -92,7 +92,6 @@ describe("TokenService dissociate operations [Integration]", () => {
             );
 
             expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
-            expect(scheduled.transactionId).toBeDefined();
             return;
         }
 

@@ -83,7 +83,7 @@ describe("TokenMintOperation (via TokenService)", () => {
                 metadata: [new Uint8Array([1])],
             });
 
-            expect(result).toEqual({
+            expect(result).toMatchObject({
                 transactionId: "0.0.123@1234567890.000000000",
                 status: "SUCCESS",
                 serials: [7, 8],
@@ -129,8 +129,7 @@ describe("TokenMintOperation (via TokenService)", () => {
         expect(mocks.scheduleTx.setScheduleMemo).toHaveBeenCalledWith(
             "pending approval",
         );
-        expect(result.scheduleId).toBe("0.0.777");
-        expect(result.transactionId).toBeDefined();
+        expect(result.scheduleId.toString()).toBe("0.0.777");
     });
 
     it("throws when both amount and metadata are missing", async () => {

@@ -27,7 +27,7 @@ describe("TokenService pause operations [Integration]", () => {
     it("pauses a token signed by the pause key", async () => {
         const pauseKey = PrivateKey.generateED25519();
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Pause Integration",
             tokenSymbol: "PAUSE",
             decimals: 0,

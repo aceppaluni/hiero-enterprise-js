@@ -72,7 +72,7 @@ describe("ContractCreateFlowOperation (via ContractService)", () => {
         it("submits a ContractCreateFlow with only required fields and returns the contractId", async () => {
             const bytecode = new Uint8Array([0x60, 0x80, 0x60, 0x40]);
 
-            const contractId = await service.createContractFlow({
+            const { contractId } = await service.createContractFlow({
                 bytecode,
                 gas: 150_000,
             });

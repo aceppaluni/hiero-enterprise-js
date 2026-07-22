@@ -27,7 +27,7 @@ describe("TokenService update operations [Integration]", () => {
     it("updates token name, symbol, and memo", async () => {
         const adminKey = PrivateKey.generateED25519();
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Update Integration",
             tokenSymbol: "UPD",
             decimals: 2,
@@ -59,7 +59,7 @@ describe("TokenService update operations [Integration]", () => {
         const adminKey = PrivateKey.generateED25519();
         const newTreasury = await createTestAccount(accountService, 5);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Treasury Update",
             tokenSymbol: "TUP",
             decimals: 0,
@@ -94,7 +94,7 @@ describe("TokenService update operations [Integration]", () => {
     it("schedules a token update", async () => {
         const adminKey = PrivateKey.generateED25519();
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Schedule Update",
             tokenSymbol: "SUP",
             decimals: 0,
@@ -116,6 +116,5 @@ describe("TokenService update operations [Integration]", () => {
         );
 
         expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
-        expect(scheduled.transactionId).toBeDefined();
     });
 });

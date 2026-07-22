@@ -19,7 +19,7 @@ describe("FileDeleteOperation", () => {
     });
 
     it("deletes an operator-owned file", async () => {
-        const fileId = await fileService.createFile({
+        const { fileId } = await fileService.createFile({
             contents: "to be deleted",
         });
 
@@ -41,7 +41,7 @@ describe("FileDeleteOperation", () => {
 
     it("deletes a custom-keyed file when the key signs", async () => {
         const customKey = PrivateKey.generateED25519();
-        const fileId = await fileService.createFile({
+        const { fileId } = await fileService.createFile({
             contents: "signed delete",
             keys: [customKey.publicKey],
             // Every key assigned to a new file must sign FileCreate.
@@ -64,7 +64,7 @@ describe("FileDeleteOperation", () => {
     });
 
     it("rejects deletion of an unmodifiable file (keys: [])", async () => {
-        const fileId = await fileService.createFile({
+        const { fileId } = await fileService.createFile({
             contents: "immutable",
             keys: [],
         });

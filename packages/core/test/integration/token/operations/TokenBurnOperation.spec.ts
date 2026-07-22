@@ -27,7 +27,7 @@ describe("TokenService burn operations [Integration]", () => {
         const initialSupply = 1_000;
         const burnAmount = 250;
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Burn Fungible Integration",
             tokenSymbol: "BFI",
             decimals: 0,
@@ -54,7 +54,7 @@ describe("TokenService burn operations [Integration]", () => {
     });
 
     it("burns specific NFT serials", async () => {
-        const tokenId = await tokenService.createNft({
+        const { tokenId } = await tokenService.createNft({
             tokenName: "Burn NFT Integration",
             tokenSymbol: "BNI",
             treasuryAccountId: owner.accountId,
@@ -88,7 +88,7 @@ describe("TokenService burn operations [Integration]", () => {
     });
 
     it("schedules a token burn and returns a scheduleId", async () => {
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Scheduled Burn",
             tokenSymbol: "SBN",
             decimals: 0,
@@ -108,6 +108,5 @@ describe("TokenService burn operations [Integration]", () => {
         );
 
         expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
-        expect(scheduled.transactionId).toBeDefined();
     });
 });

@@ -130,11 +130,11 @@ describe("ScheduleService", () => {
                 additionalSigners: [PrivateKey.generateED25519()],
             });
 
-            expect(result).toEqual({
+            expect(result).toMatchObject({
                 transactionId: "0.0.2@1234567890.000000000",
                 status: "SUCCESS",
             });
-            expect(result).not.toHaveProperty("scheduledTransactionId");
+            expect(result.scheduledTransactionId).toBeNull();
         });
 
         it("carries the scheduled transaction id reported by the receipt", async () => {

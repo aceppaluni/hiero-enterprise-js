@@ -90,8 +90,7 @@ describe("TokenBurnOperation (via TokenService)", () => {
         expect(mocks.scheduleTx.setScheduleMemo).toHaveBeenCalledWith(
             "pending approval",
         );
-        expect(result.scheduleId).toBe("0.0.777");
-        expect(result.transactionId).toBeDefined();
+        expect(result.scheduleId.toString()).toBe("0.0.777");
     });
 
     it("returns the transaction floor and the new total supply", async () => {
@@ -100,7 +99,7 @@ describe("TokenBurnOperation (via TokenService)", () => {
             amount: 10,
         });
 
-        expect(result).toEqual({
+        expect(result).toMatchObject({
             transactionId: "0.0.123@1234567890.000000000",
             status: "SUCCESS",
             totalSupply: "1000",

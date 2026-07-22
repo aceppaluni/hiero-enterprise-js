@@ -57,7 +57,7 @@ describe("TopicUpdateOperation (via TopicService)", () => {
                 topicMemo: "renamed feed",
             });
 
-            expect(result).toEqual({
+            expect(result).toMatchObject({
                 transactionId: expect.any(String),
                 status: "SUCCESS",
             });

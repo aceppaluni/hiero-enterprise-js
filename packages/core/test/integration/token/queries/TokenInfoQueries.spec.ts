@@ -25,7 +25,7 @@ describe("TokenService info queries [Integration]", () => {
 
     describe("getTokenInfo", () => {
         it("returns the definition of a fungible token", async () => {
-            const tokenId = await tokenService.createFungibleToken({
+            const { tokenId } = await tokenService.createFungibleToken({
                 tokenName: "Token Info Fungible Integration",
                 tokenSymbol: "TIFI",
                 decimals: 2,
@@ -62,7 +62,7 @@ describe("TokenService info queries [Integration]", () => {
         });
 
         it("returns the definition of an NFT collection (decimals 0, type NonFungibleUnique)", async () => {
-            const tokenId = await tokenService.createNft({
+            const { tokenId } = await tokenService.createNft({
                 tokenName: "Token Info NFT Integration",
                 tokenSymbol: "TINI",
                 treasuryAccountId: owner.accountId,
@@ -91,7 +91,7 @@ describe("TokenService info queries [Integration]", () => {
 
     describe("getNftInfo", () => {
         it("returns owner, creation time, and metadata for a minted NFT serial", async () => {
-            const tokenId = await tokenService.createNft({
+            const { tokenId } = await tokenService.createNft({
                 tokenName: "NFT Info Single Integration",
                 tokenSymbol: "NISI",
                 treasuryAccountId: owner.accountId,
@@ -127,7 +127,7 @@ describe("TokenService info queries [Integration]", () => {
         it("returns the post-transfer owner for a serial that was moved to another account", async () => {
             const receiver = await createTestAccount(accountService, 2);
 
-            const tokenId = await tokenService.createNft({
+            const { tokenId } = await tokenService.createNft({
                 tokenName: "NFT Info Transfer Integration",
                 tokenSymbol: "NITI",
                 treasuryAccountId: owner.accountId,

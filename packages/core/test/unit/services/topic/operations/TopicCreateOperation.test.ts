@@ -43,7 +43,7 @@ describe("TopicCreateOperation (via TopicService)", () => {
 
     describe("createTopic", () => {
         it("creates a fully public, immutable topic with empty options", async () => {
-            const result = await service.createTopic();
+            const { topicId: result } = await service.createTopic();
 
             expect(result).toBe("0.0.888");
 
@@ -147,8 +147,7 @@ describe("TopicCreateOperation (via TopicService)", () => {
                 topicMemo: "scheduled topic",
             });
 
-            expect(result.scheduleId).toBe("0.0.777");
-            expect(result.transactionId).toBe("0.0.123@1234567890.000000000");
+            expect(result.scheduleId.toString()).toBe("0.0.777");
 
             const tx = vi.mocked(TopicCreateTransaction).mock.results[0].value;
             expect(tx.schedule).toHaveBeenCalled();

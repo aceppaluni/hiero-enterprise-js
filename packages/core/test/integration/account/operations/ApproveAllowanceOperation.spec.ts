@@ -48,7 +48,7 @@ describe("AccountService approve-allowance operations [Integration]", () => {
     it("approves a fungible token allowance for a spender account", async () => {
         const { owner, spender } = await createOwnerSpenderPair(client);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Allowance Test Token",
             tokenSymbol: "ATT",
             decimals: 2,
@@ -84,7 +84,7 @@ describe("AccountService approve-allowance operations [Integration]", () => {
     it("approves an NFT allowance for specific serials", async () => {
         const { owner, spender } = await createOwnerSpenderPair(client);
 
-        const tokenId = await tokenService.createNft({
+        const { tokenId } = await tokenService.createNft({
             tokenName: "Allowance NFT",
             tokenSymbol: "ANFT",
             treasuryAccountId: owner.accountId,

@@ -26,7 +26,7 @@ describe("TokenService unfreeze operations [Integration]", () => {
     it("unfreezes a previously frozen token relationship", async () => {
         const holder = await createTestAccount(accountService, 2);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Unfreeze Integration",
             tokenSymbol: "UFRZ",
             decimals: 0,

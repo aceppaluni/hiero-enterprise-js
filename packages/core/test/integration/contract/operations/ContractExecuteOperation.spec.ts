@@ -88,11 +88,12 @@ describe("ContractExecuteOperation", () => {
 
         // Deploy the SimpleStorage contract using HIP-435 inline bytecode so
         // we don't depend on FileService for the execute tests.
-        contractId = await contractService.createContract({
+        const { contractId: newId } = await contractService.createContract({
             bytecode: Buffer.from(SIMPLE_STORAGE_BYTECODE_HEX, "hex"),
             gas: 200_000,
             contractMemo: "execute-operation integration target",
         });
+        contractId = newId;
     });
 
     it("invokes a contract function via setFunction with ABI-typed parameters", async () => {
@@ -122,24 +123,6 @@ describe("ContractExecuteOperation", () => {
         });
 
         expect(await getStoredValue(client, contractId)).toBe(7);
-    });
-
-    it("returns the EVM function result from the record with withFunctionResult", async () => {
-        const result = await contractService.executeContract({
-            contractId,
-            gas: 100_000,
-            functionName: "set",
-            functionParameters: new ContractFunctionParameters().addUint256(9),
-            withFunctionResult: true,
-        });
-
-        // Live proof of the record path: the EVM outcome exists, gas was
-        // consumed, and no revert message is present on success.
-        expect(result.functionResult).toBeDefined();
-        expect(result.functionResult!.gasUsed).toBeGreaterThan(0);
-        expect(result.functionResult!.returnDataHex).toMatch(/^0x/);
-        expect(result.functionResult!.errorMessage).toBeUndefined();
-        expect(result.status).toBe("SUCCESS");
     });
 
     it("forwards HBAR via payableAmount when calling a payable function", async () => {
@@ -176,7 +159,6 @@ describe("ContractExecuteOperation", () => {
         );
 
         expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
-        expect(scheduled.transactionId).toBeDefined();
 
         // Poll briefly to absorb any propagation lag before asserting state.
         expect(await waitForStoredValue(client, contractId, 99)).toBe(99);

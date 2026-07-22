@@ -28,11 +28,12 @@ describe("Contract queries", () => {
         const ctx = setupIntegrationTestEnv();
         contractService = new ContractService(ctx);
 
-        contractId = await contractService.createContract({
+        const { contractId: newId } = await contractService.createContract({
             bytecode: Buffer.from(SIMPLE_STORAGE_BYTECODE_HEX, "hex"),
             gas: 200_000,
             contractMemo: "contract-queries integration target",
         });
+        contractId = newId;
     });
 
     describe("callContract", () => {

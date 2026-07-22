@@ -26,7 +26,7 @@ describe("TokenService revokeKyc operations [Integration]", () => {
     it("revokes KYC on a token relationship for a holder account", async () => {
         const holder = await createTestAccount(accountService, 2);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "RevokeKyc Integration",
             tokenSymbol: "RKYC",
             decimals: 0,
