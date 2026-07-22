@@ -111,7 +111,7 @@ export class TopicCreateOperation {
 
         return {
             ...results,
-            topicId: results.receipt.topicId.toString(),
+            topicId: results.receipt.topicId,
         };
     }
 

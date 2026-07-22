@@ -33,7 +33,7 @@ describe("TopicUpdateOperation", () => {
             autoRenewAccountId: operatorId,
             additionalSigners: [adminKey],
         });
-        return topicId;
+        return topicId.toString();
     }
 
     let adminKey: PrivateKey;

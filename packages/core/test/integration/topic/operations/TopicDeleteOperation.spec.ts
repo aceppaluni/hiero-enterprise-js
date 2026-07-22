@@ -22,7 +22,7 @@ describe("TopicDeleteOperation", () => {
             autoRenewAccountId: operatorId,
             additionalSigners: [adminKey],
         });
-        return topicId;
+        return topicId.toString();
     }
 
     it("deletes a topic signed by the admin key", async () => {

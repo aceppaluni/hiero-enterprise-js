@@ -45,7 +45,7 @@ describe("TopicCreateOperation (via TopicService)", () => {
         it("creates a fully public, immutable topic with empty options", async () => {
             const { topicId: result } = await service.createTopic();
 
-            expect(result).toBe("0.0.888");
+            expect(result.toString()).toBe("0.0.888");
 
             const tx = vi.mocked(TopicCreateTransaction).mock.results[0].value;
             expect(tx.setTopicMemo).not.toHaveBeenCalled();
