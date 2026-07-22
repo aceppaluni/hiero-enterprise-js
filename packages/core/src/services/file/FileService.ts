@@ -188,7 +188,7 @@ export class FileService {
                         code: HieroErrorCodes.SdkError,
                         context: "FileService.createFile",
                         cause,
-                        fileId: result.fileId,
+                        fileId: result.fileId.toString(),
                     },
                 );
             }

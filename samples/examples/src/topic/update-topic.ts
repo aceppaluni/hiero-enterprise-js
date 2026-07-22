@@ -15,7 +15,11 @@
  * Run: pnpm tsx src/topic/update-topic.ts
  */
 
-import { HieroContext, PrivateKey, TopicService } from "@hiero-hackers/enterprise-core";
+import {
+    HieroContext,
+    PrivateKey,
+    TopicService,
+} from "@hiero-hackers/enterprise-core";
 import { getED25519Config } from "../env.js";
 
 /**
@@ -28,7 +32,7 @@ async function createMutableTopic(
     topicMemo: string,
 ) {
     const adminKey = PrivateKey.generateED25519();
-    const topicId = await topicService.createTopic({
+    const { topicId } = await topicService.createTopic({
         topicMemo,
         adminKey: adminKey.publicKey,
         autoRenewAccountId: context.operatorAccountId,
@@ -79,7 +83,7 @@ async function makeTopicPublic(
     // Provision a private topic first.
     const adminKey = PrivateKey.generateED25519();
     const submitKey = PrivateKey.generateED25519();
-    const topicId = await topicService.createTopic({
+    const { topicId } = await topicService.createTopic({
         topicMemo: "private feed",
         adminKey: adminKey.publicKey,
         submitKey: submitKey.publicKey,

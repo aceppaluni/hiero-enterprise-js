@@ -14,9 +14,9 @@ import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "../../transaction/index.js";
 import { TokenCreateValidator } from "../validation/index.js";
+import { HieroError } from "../../../errors/HieroError.js";
 
 /**
  * Low-level options for the `TokenCreate` SDK transaction.
@@ -76,11 +76,22 @@ export class TokenCreateOperation {
             methodName: "createToken",
             timestamp: new Date(),
         });
+
+        if (!results.receipt.tokenId) {
+            throw new HieroError(
+                "Token creation failed — no tokenId returned in receipt.",
+                {
+                    code: "SDK_ERROR",
+                    context: "TokenCreateOperation.execute",
+                    sdkStatus: results.status,
+                    transactionId: results.transactionId,
+                },
+            );
+        }
+
         return {
             ...results,
-            tokenId: results.receipt.tokenId
-                ? results.receipt.tokenId.toString()
-                : null,
+            tokenId: results.receipt.tokenId.toString(),
         };
     }
 
@@ -93,7 +104,7 @@ export class TokenCreateOperation {
 
         const tx = this.build(options);
 
-        const results = await this.executor.scheduleRun(
+        return await this.executor.scheduleRun(
             tx,
             options,
             {
@@ -104,11 +115,6 @@ export class TokenCreateOperation {
             },
             scheduleOptions,
         );
-        return {
-            scheduleId: results.receipt.scheduleId
-                ? results.receipt.scheduleId.toString()
-                : null,
-        };
     }
 
     /**

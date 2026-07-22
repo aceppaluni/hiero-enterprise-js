@@ -69,7 +69,7 @@ async function multiReceiverImmediateCredit(
     const receiver2 = await createKeyedAccount(accountService, 2, "receiver 2");
     const receiver3 = await createKeyedAccount(accountService, 2, "receiver 3");
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Multi Airdrop Demo Token",
         tokenSymbol: "MAIR",
         decimals: 0,
@@ -137,7 +137,7 @@ async function pendingAirdropToUnassociatedReceiver(
         "pending receiver",
     );
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Pending Airdrop Demo Token",
         tokenSymbol: "PAIR",
         decimals: 0,
@@ -196,7 +196,7 @@ async function mixedBatch(
         "unassociated receiver",
     );
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Mixed Airdrop Demo Token",
         tokenSymbol: "MIXAIR",
         decimals: 0,

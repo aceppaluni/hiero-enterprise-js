@@ -3,6 +3,7 @@ import { AccountCreateTransaction, PublicKey, Hbar } from "@hiero-ledger/sdk";
 import { AccountType } from "../../../types/index.js";
 import type { Account } from "../../../types/index.js";
 import type { IHieroContext } from "../../../context/index.js";
+import { HieroError } from "../../../errors/HieroError.js";
 import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
@@ -133,7 +134,7 @@ export class CreateAccountOperation {
     ) {
         this.validator.validate(options);
         const tx = this.build(options);
-        const results = await this.executor.scheduleRun(
+        return await this.executor.scheduleRun(
             tx,
             options,
             {
@@ -144,11 +145,6 @@ export class CreateAccountOperation {
             },
             scheduleOptions,
         );
-        return {
-            scheduleId: results.receipt.scheduleId
-                ? results.receipt.scheduleId.toString()
-                : null,
-        };
     }
 
     /**
@@ -235,8 +231,18 @@ export class CreateAccountOperation {
         receipt: TransactionReceipt,
         options: CreateAccountOptions,
     ): Account {
+        if (!receipt.accountId) {
+            throw new HieroError(
+                "Account creation failed — no accountId returned in receipt.",
+                {
+                    code: "SDK_ERROR",
+                    context: "CreateAccountOperation.execute",
+                    sdkStatus: receipt.status.toString(),
+                },
+            );
+        }
         const result: Account = {
-            accountId: receipt.accountId!.toString(),
+            accountId: receipt.accountId.toString(),
         };
 
         if (options.key != null) {

@@ -122,7 +122,7 @@ async function deleteTokenAllowance(
 
     // Owner creates a token they'll grant the spender access to.
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Revocation Demo Token",
         tokenSymbol: "RVDT",
         decimals: 2,
@@ -205,7 +205,7 @@ async function deleteNftAllowanceBySerials(
     });
     console.log("Spender account:", spender.accountId);
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Per-Serial Revocation NFT",
         tokenSymbol: "PSRN",
         treasuryAccountId: owner.accountId,
@@ -300,7 +300,7 @@ async function deleteAllNftAllowances(
     });
     console.log("Spender account:", spender.accountId);
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "All-Serials Revocation NFT",
         tokenSymbol: "ASRN",
         treasuryAccountId: owner.accountId,

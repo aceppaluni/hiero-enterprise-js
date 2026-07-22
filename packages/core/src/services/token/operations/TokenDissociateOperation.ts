@@ -52,7 +52,7 @@ export class TokenDissociateOperation {
 
         const tx = this.build(options);
 
-        const results = await this.executor.scheduleRun(
+        return await this.executor.scheduleRun(
             tx,
             options,
             {
@@ -63,11 +63,6 @@ export class TokenDissociateOperation {
             },
             scheduleOptions,
         );
-        return {
-            scheduleId: results.receipt.scheduleId
-                ? results.receipt.scheduleId.toString()
-                : null,
-        };
     }
 
     private build(

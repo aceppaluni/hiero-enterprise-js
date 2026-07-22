@@ -80,7 +80,7 @@ export class ContractDeleteOperation {
 
         const tx = this.build(options);
 
-        const results = await this.executor.scheduleRun(
+        return await this.executor.scheduleRun(
             tx,
             options,
             {
@@ -91,11 +91,6 @@ export class ContractDeleteOperation {
             },
             scheduleOptions,
         );
-        return {
-            scheduleId: results.receipt.scheduleId
-                ? results.receipt.scheduleId.toString()
-                : null,
-        };
     }
 
     /**

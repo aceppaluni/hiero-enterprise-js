@@ -41,7 +41,7 @@ async function unpauseToken(
 
     const pauseKey = PrivateKey.generateED25519();
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Unpause Demo Token",
         tokenSymbol: "UPD",
         decimals: 0,

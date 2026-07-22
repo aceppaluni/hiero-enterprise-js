@@ -41,7 +41,7 @@ async function pauseToken(
 
     const pauseKey = PrivateKey.generateED25519();
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Pause Demo Token",
         tokenSymbol: "PSD",
         decimals: 0,

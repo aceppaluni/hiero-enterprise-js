@@ -55,6 +55,7 @@ export class TokenBurnOperation {
                 {
                     code: "SDK_ERROR",
                     context: "TokenBurnOperation.execute",
+                    sdkStatus: results.status,
                     transactionId: results.transactionId,
                 },
             );
@@ -75,7 +76,7 @@ export class TokenBurnOperation {
 
         const tx = this.build(options);
 
-        const results = await this.executor.scheduleRun(
+        return await this.executor.scheduleRun(
             tx,
             options,
             {
@@ -86,11 +87,6 @@ export class TokenBurnOperation {
             },
             scheduleOptions,
         );
-        return {
-            scheduleId: results.receipt.scheduleId
-                ? results.receipt.scheduleId.toString()
-                : null,
-        };
     }
 
     private build(options: TokenBurnOperationOptions): TokenBurnTransaction {

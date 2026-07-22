@@ -52,7 +52,7 @@ async function createFungibleToken(
     // Treasury key signs because the operator is not the treasury — without
     // it the network will reject the transaction.
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Acme Coin",
         tokenSymbol: "ACME",
         decimals: 2,
@@ -113,7 +113,6 @@ async function scheduleCreateFungibleToken(
     );
 
     console.log("Schedule ID:", scheduled.scheduleId);
-    console.log("Transaction ID:", scheduled.transactionId);
     console.log();
 }
 

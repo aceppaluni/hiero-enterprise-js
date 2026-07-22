@@ -115,7 +115,7 @@ async function approveNftAllowanceBySerials(
     // Create an NFT collection and mint 3 serials.
     // The owner is the treasury so minted NFTs go directly to the owner account.
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Serial Allowance NFT",
         tokenSymbol: "SANFT",
         treasuryAccountId: owner.accountId,
@@ -218,7 +218,7 @@ async function approveNftWithDelegatingSpender(
     // Create an NFT collection and mint serials for the demo.
     // The owner is the treasury so minted NFTs go directly to the owner account.
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Delegation Demo NFT",
         tokenSymbol: "DDNFT",
         treasuryAccountId: owner.accountId,

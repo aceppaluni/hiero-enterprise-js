@@ -86,7 +86,7 @@ async function cancelPendingFungibleAirdrop(
         "cancel receiver",
     );
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Cancel Fungible Demo Token",
         tokenSymbol: "XFDT",
         decimals: 0,
@@ -152,7 +152,7 @@ async function cancelPendingNftAirdrop(
         "cancel nft receiver",
     );
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Cancel NFT Demo Collection",
         tokenSymbol: "XNDC",
         treasuryAccountId: owner.accountId,
@@ -222,17 +222,19 @@ async function cancelMixedBatch(
         "mixed cancel receiver",
     );
 
-    const fungibleTokenId = await tokenService.createFungibleToken({
-        tokenName: "Cancel Batch Fungible Demo",
-        tokenSymbol: "XBFD",
-        decimals: 0,
-        initialSupply: 100,
-        treasuryAccountId: owner.accountId,
-        supplyKey: owner.key.publicKey,
-        additionalSigners: [owner.key],
-    });
+    const { tokenId: fungibleTokenId } = await tokenService.createFungibleToken(
+        {
+            tokenName: "Cancel Batch Fungible Demo",
+            tokenSymbol: "XBFD",
+            decimals: 0,
+            initialSupply: 100,
+            treasuryAccountId: owner.accountId,
+            supplyKey: owner.key.publicKey,
+            additionalSigners: [owner.key],
+        },
+    );
 
-    const nftTokenId = await tokenService.createNft({
+    const { tokenId: nftTokenId } = await tokenService.createNft({
         tokenName: "Cancel Batch NFT Demo",
         tokenSymbol: "XBND",
         treasuryAccountId: owner.accountId,

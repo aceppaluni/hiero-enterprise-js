@@ -47,7 +47,7 @@ async function grantKycToken(
         memo: "grant kyc token holder",
     });
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Grant KYC Demo Token",
         tokenSymbol: "GKD",
         decimals: 0,

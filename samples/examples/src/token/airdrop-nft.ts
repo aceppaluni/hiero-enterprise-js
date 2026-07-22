@@ -74,7 +74,7 @@ async function multiReceiverImmediateCredit(
     const receiver2 = await createKeyedAccount(accountService, 2, "receiver 2");
     const receiver3 = await createKeyedAccount(accountService, 2, "receiver 3");
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Multi NFT Airdrop Demo",
         tokenSymbol: "MNAD",
         treasuryAccountId: owner.accountId,
@@ -154,7 +154,7 @@ async function pendingAirdropToUnassociatedReceiver(
         "pending nft receiver",
     );
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Pending NFT Airdrop Demo",
         tokenSymbol: "PNAD",
         treasuryAccountId: owner.accountId,
@@ -221,7 +221,7 @@ async function mixedBatch(
         "unassociated receiver",
     );
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Mixed NFT Airdrop Demo",
         tokenSymbol: "MIXNAD",
         treasuryAccountId: owner.accountId,

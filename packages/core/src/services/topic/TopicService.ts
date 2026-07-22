@@ -1,6 +1,6 @@
 import type { SubscriptionHandle, TopicId } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../context/index.js";
-import type { ScheduleOptions, ScheduledResult } from "../transaction/index.js";
+import type { ScheduleOptions } from "../transaction/index.js";
 import {
     TopicCreateOperation,
     TopicUpdateOperation,

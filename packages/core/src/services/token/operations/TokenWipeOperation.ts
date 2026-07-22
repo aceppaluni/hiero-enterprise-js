@@ -57,6 +57,7 @@ export class TokenWipeOperation {
                 {
                     code: "SDK_ERROR",
                     context: "TokenWipeOperation.execute",
+                    sdkStatus: results.status,
                     transactionId: results.transactionId,
                 },
             );

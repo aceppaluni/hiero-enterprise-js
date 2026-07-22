@@ -19,7 +19,11 @@
  * Run: pnpm tsx src/file/create-file.ts
  */
 
-import { FileService, HieroContext, PrivateKey } from "@hiero-hackers/enterprise-core";
+import {
+    FileService,
+    HieroContext,
+    PrivateKey,
+} from "@hiero-hackers/enterprise-core";
 import { getED25519Config } from "../env.js";
 
 /**
@@ -32,7 +36,7 @@ import { getED25519Config } from "../env.js";
 async function createEmptyFile(fileService: FileService) {
     console.log("=== Create empty file ===\n");
 
-    const fileId = await fileService.createFile();
+    const { fileId } = await fileService.createFile();
 
     console.log("File ID:", fileId);
     console.log("  - zero bytes, operator-modifiable");
@@ -51,7 +55,7 @@ async function createEmptyFile(fileService: FileService) {
 async function createSimpleFile(fileService: FileService) {
     console.log("=== Create file with initial contents ===\n");
 
-    const fileId = await fileService.createFile({
+    const { fileId } = await fileService.createFile({
         contents: "hello, hiero file service",
         fileMemo: "greeting",
     });
@@ -76,7 +80,7 @@ async function createCustomKeyedFile(fileService: FileService) {
 
     const customKey = PrivateKey.generateED25519();
 
-    const fileId = await fileService.createFile({
+    const { fileId } = await fileService.createFile({
         contents: "signed-only file",
         keys: [customKey.publicKey],
         // The custom key MUST co-sign FileCreate — otherwise the network
@@ -102,7 +106,7 @@ async function createCustomKeyedFile(fileService: FileService) {
 async function createImmutableFile(fileService: FileService) {
     console.log("=== Create immutable file (keys: []) ===\n");
 
-    const fileId = await fileService.createFile({
+    const { fileId } = await fileService.createFile({
         contents: "carved in stone",
         keys: [],
         fileMemo: "immutable",
@@ -128,7 +132,7 @@ async function createFileWithExpiration(fileService: FileService) {
     // (~92 days). Values past that cap trigger AUTORENEW_DURATION_NOT_IN_RANGE.
     const expirationTime = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
 
-    const fileId = await fileService.createFile({
+    const { fileId } = await fileService.createFile({
         contents: "long-lived",
         fileMemo: "retention: 90d",
         expirationTime,
@@ -157,7 +161,7 @@ async function createLargeFile(fileService: FileService) {
     // 10 KiB payload — three chunks under the ~4 KiB boundary.
     const payload = Buffer.alloc(10 * 1024, 0x61); // "aaaa..."
 
-    const fileId = await fileService.createFile({
+    const { fileId } = await fileService.createFile({
         contents: payload,
         fileMemo: "10 KiB blob",
     });

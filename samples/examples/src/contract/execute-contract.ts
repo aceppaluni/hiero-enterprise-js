@@ -66,7 +66,7 @@ const SIMPLE_STORAGE_BYTECODE_HEX =
 async function deploySimpleStorage(
     contractService: ContractService,
 ): Promise<string> {
-    const contractId = await contractService.createContract({
+    const { contractId } = await contractService.createContract({
         bytecode: Buffer.from(SIMPLE_STORAGE_BYTECODE_HEX, "hex"),
         gas: 200_000,
         contractMemo: "execute-contract sample target",
@@ -256,7 +256,6 @@ async function scheduleExecuteCall(
     );
 
     console.log("Schedule ID:", scheduled.scheduleId);
-    console.log("Transaction ID:", scheduled.transactionId);
     console.log();
 }
 

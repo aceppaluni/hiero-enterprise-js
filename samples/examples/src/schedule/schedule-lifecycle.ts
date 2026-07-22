@@ -49,20 +49,18 @@ async function main() {
         payerAccountId: payerAccount.accountId,
     };
 
-    const { scheduleId, transactionId } =
-        await accountService.scheduleCreateAccount(
-            {
-                publicKey: newAccountKey.publicKey.toStringRaw(),
-                keyType: AccountType.ED25519,
-                initialBalance: new Hbar(1),
-                memo: "scheduled account",
-            },
-            scheduleOptions,
-        );
+    const { scheduleId } = await accountService.scheduleCreateAccount(
+        {
+            publicKey: newAccountKey.publicKey.toStringRaw(),
+            keyType: AccountType.ED25519,
+            initialBalance: new Hbar(1),
+            memo: "scheduled account",
+        },
+        scheduleOptions,
+    );
 
     console.log("\n2. Schedule created");
     console.log("   scheduleId:", scheduleId);
-    console.log("   transactionId:", transactionId);
 
     // 3. Query initial state — should be pending (payer hasn't signed yet)
     const initialInfo = await scheduleService.getInfo(scheduleId);

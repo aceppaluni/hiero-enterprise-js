@@ -1,11 +1,11 @@
 import type { Key, Long, AccountId, CustomFixedFee } from "@hiero-ledger/sdk";
 import { TopicCreateTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
+import { HieroError } from "../../../errors/HieroError.js";
 import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "../../transaction/index.js";
 import { TopicCreateValidator } from "../validation/index.js";
 
@@ -96,11 +96,22 @@ export class TopicCreateOperation {
             methodName: "createTopic",
             timestamp: new Date(),
         });
+
+        if (!results.receipt.topicId) {
+            throw new HieroError(
+                "Topic creation failed — no topicId returned in receipt.",
+                {
+                    code: "SDK_ERROR",
+                    context: "TopicCreateOperation.execute",
+                    sdkStatus: results.status,
+                    transactionId: results.transactionId,
+                },
+            );
+        }
+
         return {
             ...results,
-            topicId: results.receipt.topicId
-                ? results.receipt.topicId.toString()
-                : null,
+            topicId: results.receipt.topicId.toString(),
         };
     }
 
@@ -113,7 +124,7 @@ export class TopicCreateOperation {
 
         const tx = this.build(options);
 
-        const results = await this.executor.scheduleRun(
+        return await this.executor.scheduleRun(
             tx,
             options,
             {
@@ -124,11 +135,6 @@ export class TopicCreateOperation {
             },
             scheduleOptions,
         );
-        return {
-            scheduleId: results.receipt.scheduleId
-                ? results.receipt.scheduleId.toString()
-                : null,
-        };
     }
 
     /**

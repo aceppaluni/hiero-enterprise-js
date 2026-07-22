@@ -136,7 +136,7 @@ app.post("/api/topics/:id/messages", async (req, res) => {
         });
         res.status(202).json({
             status: "submitted",
-            sequenceNumber: result.sequenceNumber.toString(),
+            sequenceNumber: result.sequenceNumber?.toString() ?? null,
             transactionId: result.transactionId,
         });
     } catch (error) {

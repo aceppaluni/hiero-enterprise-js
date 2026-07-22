@@ -37,7 +37,7 @@ async function burnFungibleToken(
         memo: "burn fungible token owner",
     });
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Burn Demo Token",
         tokenSymbol: "BDT",
         decimals: 0,
@@ -74,7 +74,7 @@ async function burnNftSerials(
         memo: "burn nft owner",
     });
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Burn NFT Collection",
         tokenSymbol: "BNC",
         treasuryAccountId: owner.accountId,
@@ -119,7 +119,7 @@ async function scheduleBurnToken(
         memo: "schedule burn owner",
     });
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Scheduled Burn Token",
         tokenSymbol: "SBT",
         decimals: 0,
@@ -141,7 +141,6 @@ async function scheduleBurnToken(
     console.log("Owner account:", owner.accountId);
     console.log("Token ID:", tokenId);
     console.log("Schedule ID:", scheduled.scheduleId);
-    console.log("Transaction ID:", scheduled.transactionId);
     console.log();
 }
 

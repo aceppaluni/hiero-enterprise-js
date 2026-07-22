@@ -47,7 +47,7 @@ async function revokeKycToken(
         memo: "revoke kyc token holder",
     });
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Revoke KYC Demo Token",
         tokenSymbol: "RKD",
         decimals: 0,

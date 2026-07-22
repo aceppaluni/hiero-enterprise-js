@@ -73,7 +73,7 @@ export class DeleteAccountOperation {
         options: ScheduleDeleteAccountOptions,
         scheduleOptions?: ScheduleOptions,
     ) {
-        const results = await this.executor.scheduleRun(
+        return await this.executor.scheduleRun(
             this.build(options),
             options,
             {
@@ -84,11 +84,6 @@ export class DeleteAccountOperation {
             },
             scheduleOptions,
         );
-        return {
-            scheduleId: results.receipt.scheduleId
-                ? results.receipt.scheduleId.toString()
-                : null,
-        };
     }
 
     /**

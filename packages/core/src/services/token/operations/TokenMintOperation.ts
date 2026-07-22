@@ -46,6 +46,7 @@ export class TokenMintOperation {
                 {
                     code: "SDK_ERROR",
                     context: "TokenMintOperation.execute",
+                    sdkStatus: results.status,
                     transactionId: results.transactionId,
                 },
             );
@@ -67,7 +68,7 @@ export class TokenMintOperation {
 
         const tx = this.build(options);
 
-        const results = await this.executor.scheduleRun(
+        return await this.executor.scheduleRun(
             tx,
             options,
             {
@@ -78,11 +79,6 @@ export class TokenMintOperation {
             },
             scheduleOptions,
         );
-        return {
-            scheduleId: results.receipt.scheduleId
-                ? results.receipt.scheduleId.toString()
-                : null,
-        };
     }
 
     private build(options: TokenMintOperationOptions): TokenMintTransaction {

@@ -44,7 +44,6 @@ async function main() {
     // Other parties sign via: ScheduleSignTransaction.setScheduleId(scheduled.scheduleId)
     console.log("Schedule created");
     console.log("  scheduleId:", scheduled.scheduleId);
-    console.log("  transactionId:", scheduled.transactionId);
 
     context.client.close();
 }

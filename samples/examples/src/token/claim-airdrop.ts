@@ -81,7 +81,7 @@ async function claimPendingFungibleAirdrop(
         "claim receiver",
     );
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Claim Fungible Demo Token",
         tokenSymbol: "CFDT",
         decimals: 0,
@@ -149,7 +149,7 @@ async function claimPendingNftAirdrop(
         "claim nft receiver",
     );
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Claim NFT Demo Collection",
         tokenSymbol: "CNDC",
         treasuryAccountId: owner.accountId,
@@ -221,17 +221,19 @@ async function claimMixedBatch(
         "mixed claim receiver",
     );
 
-    const fungibleTokenId = await tokenService.createFungibleToken({
-        tokenName: "Claim Batch Fungible Demo",
-        tokenSymbol: "CBFD",
-        decimals: 0,
-        initialSupply: 100,
-        treasuryAccountId: owner.accountId,
-        supplyKey: owner.key.publicKey,
-        additionalSigners: [owner.key],
-    });
+    const { tokenId: fungibleTokenId } = await tokenService.createFungibleToken(
+        {
+            tokenName: "Claim Batch Fungible Demo",
+            tokenSymbol: "CBFD",
+            decimals: 0,
+            initialSupply: 100,
+            treasuryAccountId: owner.accountId,
+            supplyKey: owner.key.publicKey,
+            additionalSigners: [owner.key],
+        },
+    );
 
-    const nftTokenId = await tokenService.createNft({
+    const { tokenId: nftTokenId } = await tokenService.createNft({
         tokenName: "Claim Batch NFT Demo",
         tokenSymbol: "CBND",
         treasuryAccountId: owner.accountId,

@@ -58,7 +58,7 @@ async function updateNftMetadata(
 
     const metadataKey = PrivateKey.generateED25519();
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Update NFTs Example",
         tokenSymbol: "UNX",
         treasuryAccountId: treasury.accountId,
@@ -108,7 +108,7 @@ async function updateMultipleNftSerials(
 
     const metadataKey = PrivateKey.generateED25519();
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Update NFTs Batch",
         tokenSymbol: "UNB",
         treasuryAccountId: treasury.accountId,

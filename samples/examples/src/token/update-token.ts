@@ -49,7 +49,7 @@ async function updateToken(
 
     const adminKey = PrivateKey.generateED25519();
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Original Name",
         tokenSymbol: "ORG",
         decimals: 2,
@@ -100,7 +100,7 @@ async function scheduleUpdateToken(
 
     const adminKey = PrivateKey.generateED25519();
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Scheduled Original",
         tokenSymbol: "SORG",
         decimals: 0,
@@ -123,7 +123,6 @@ async function scheduleUpdateToken(
     );
 
     console.log("Schedule ID:", scheduled.scheduleId);
-    console.log("Transaction ID:", scheduled.transactionId);
     console.log();
 }
 

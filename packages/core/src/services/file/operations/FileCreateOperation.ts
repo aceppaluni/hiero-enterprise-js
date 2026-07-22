@@ -4,6 +4,7 @@ import type { IHieroContext } from "../../../context/index.js";
 import { TransactionExecutor } from "../../transaction/index.js";
 import type { TransactionOptions } from "../../transaction/index.js";
 import { FileCreateValidator } from "../validation/index.js";
+import { HieroError } from "../../../index.js";
 
 /**
  * Low-level options for the `FileCreate` SDK transaction.
@@ -78,11 +79,21 @@ export class FileCreateOperation {
             timestamp: new Date(),
         });
 
+        if (!results.receipt.fileId) {
+            throw new HieroError(
+                "FileCreateTransaction succeeded but no file ID was returned",
+                {
+                    code: "SDK_ERROR",
+                    context: `FileCreateOperation.execute: ${JSON.stringify(options)}`,
+                    sdkStatus: results.status,
+                    transactionId: results.transactionId,
+                },
+            );
+        }
+
         return {
             ...results,
-            fileId: results.receipt.fileId
-                ? results.receipt.fileId.toString()
-                : null,
+            fileId: results.receipt.fileId,
         };
     }
 

@@ -145,7 +145,7 @@ export class TransferOperation {
         );
         const { transactionOptions, scheduleOptions } =
             splitScheduleOptions(options);
-        const results = await this.executor.scheduleRun(
+        return await this.executor.scheduleRun(
             tx,
             transactionOptions,
             {
@@ -156,11 +156,6 @@ export class TransferOperation {
             },
             scheduleOptions,
         );
-        return {
-            scheduleId: results.receipt.scheduleId
-                ? results.receipt.scheduleId.toString()
-                : null,
-        };
     }
 
     /**
@@ -233,7 +228,7 @@ export class TransferOperation {
         );
         const { transactionOptions, scheduleOptions } =
             splitScheduleOptions(options);
-        const results = await this.executor.scheduleRun(
+        return await this.executor.scheduleRun(
             tx,
             transactionOptions,
             {
@@ -244,11 +239,6 @@ export class TransferOperation {
             },
             scheduleOptions,
         );
-        return {
-            scheduleId: results.receipt.scheduleId
-                ? results.receipt.scheduleId.toString()
-                : null,
-        };
     }
 
     /**
@@ -317,7 +307,7 @@ export class TransferOperation {
         );
         const { transactionOptions, scheduleOptions } =
             splitScheduleOptions(options);
-        const results = await this.executor.scheduleRun(
+        return await this.executor.scheduleRun(
             tx,
             transactionOptions,
             {
@@ -328,11 +318,6 @@ export class TransferOperation {
             },
             scheduleOptions,
         );
-        return {
-            scheduleId: results.receipt.scheduleId
-                ? results.receipt.scheduleId.toString()
-                : null,
-        };
     }
 
     private buildHbarTransfer(

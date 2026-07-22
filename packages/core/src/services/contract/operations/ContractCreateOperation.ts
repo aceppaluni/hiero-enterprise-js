@@ -9,6 +9,7 @@ import type {
 } from "@hiero-ledger/sdk";
 import { ContractCreateTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
+import { HieroError } from "../../../errors/HieroError.js";
 import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
@@ -93,11 +94,22 @@ export class ContractCreateOperation {
             methodName: "createContract",
             timestamp: new Date(),
         });
+
+        if (!results.receipt.contractId) {
+            throw new HieroError(
+                "Contract creation failed — no contractId returned in receipt.",
+                {
+                    code: "SDK_ERROR",
+                    context: "ContractCreateOperation.execute",
+                    sdkStatus: results.status,
+                    transactionId: results.transactionId,
+                },
+            );
+        }
+
         return {
             ...results,
-            contractId: results.receipt.contractId
-                ? results.receipt.contractId.toString()
-                : null,
+            contractId: results.receipt.contractId.toString(),
         };
     }
 
@@ -110,7 +122,7 @@ export class ContractCreateOperation {
 
         const tx = this.build(options);
 
-        const results = await this.executor.scheduleRun(
+        return await this.executor.scheduleRun(
             tx,
             options,
             {
@@ -121,11 +133,6 @@ export class ContractCreateOperation {
             },
             scheduleOptions,
         );
-        return {
-            scheduleId: results.receipt.scheduleId
-                ? results.receipt.scheduleId.toString()
-                : null,
-        };
     }
 
     /**

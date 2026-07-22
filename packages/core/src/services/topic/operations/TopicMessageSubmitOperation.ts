@@ -79,12 +79,20 @@ export class TopicMessageSubmitOperation {
 
         const tx = this.build(options);
 
-        return await this.executor.run(tx, options, {
+        const results = await this.executor.run(tx, options, {
             type: "TopicMessageSubmit",
             serviceName: "TopicService",
             methodName: "submitMessage",
             timestamp: new Date(),
         });
+        return {
+            ...results,
+            // Sequence counters sit far below 2^53 — plain numbers are exact.
+            sequenceNumber: results.receipt.topicSequenceNumber
+                ? results.receipt.topicSequenceNumber.toNumber()
+                : null,
+            runningHash: results.receipt.topicRunningHash ?? null,
+        };
     }
 
     private build(

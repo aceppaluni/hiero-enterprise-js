@@ -47,7 +47,7 @@ async function wipeFungibleToken(
         memo: "wipe fungible token holder",
     });
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Wipe Demo Token",
         tokenSymbol: "WDT",
         decimals: 0,
@@ -109,7 +109,7 @@ async function wipeNftSerials(
         memo: "wipe nft holder",
     });
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Wipe NFT Collection",
         tokenSymbol: "WNC",
         treasuryAccountId: owner.accountId,

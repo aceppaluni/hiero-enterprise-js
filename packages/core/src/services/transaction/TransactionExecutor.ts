@@ -1,8 +1,8 @@
 import type { Transaction } from "@hiero-ledger/sdk";
 import { AccountId } from "@hiero-ledger/sdk";
-import type { IHieroContext } from "../../context/index.js";
+import { type IHieroContext } from "../../context/index.js";
 import type { TransactionEvent } from "../../listeners/index.js";
-import { normalizeError } from "../../errors/index.js";
+import { HieroError, normalizeError } from "../../errors/index.js";
 import type { TransactionOptions } from "./TransactionOptions.js";
 import type { ScheduleOptions } from "./ScheduleOptions.js";
 
@@ -113,7 +113,23 @@ export class TransactionExecutor {
             scheduleTx.setScheduleMemo(scheduleOptions.scheduleMemo);
         }
 
-        return this.run(scheduleTx, options, event);
+        const result = await this.run(scheduleTx, options, event);
+
+        if (!result.receipt.scheduleId) {
+            throw new HieroError(
+                "Schedule creation failed — no scheduleId returned in receipt.",
+                {
+                    code: "SDK_ERROR",
+                    context: `${event.serviceName}.${event.methodName}`,
+                    sdkStatus: result.status,
+                    transactionId: result.transactionId,
+                },
+            );
+        }
+
+        return {
+            scheduleId: result.receipt.scheduleId,
+        };
     }
 
     /**

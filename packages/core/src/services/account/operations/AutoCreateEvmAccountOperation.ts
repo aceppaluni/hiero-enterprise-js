@@ -66,7 +66,7 @@ export class AutoCreateEvmAccountOperation {
         options: AutoCreateEvmAccountOptions,
         scheduleOptions?: ScheduleOptions,
     ) {
-        const results = await this.executor.scheduleRun(
+        return await this.executor.scheduleRun(
             this.build(options),
             options,
             {
@@ -77,11 +77,6 @@ export class AutoCreateEvmAccountOperation {
             },
             scheduleOptions,
         );
-        return {
-            scheduleId: results.receipt.scheduleId
-                ? results.receipt.scheduleId.toString()
-                : null,
-        };
     }
 
     /**

@@ -46,7 +46,7 @@ const MINIMAL_BYTECODE_HEX =
 async function deployImmutableViaFlow(contractService: ContractService) {
     console.log("=== Deploy immutable contract via flow ===\n");
 
-    const contractId = await contractService.createContractFlow({
+    const { contractId } = await contractService.createContractFlow({
         bytecode: MINIMAL_BYTECODE_HEX,
         gas: 150_000,
         contractMemo: "deployed via flow — immutable",
@@ -66,7 +66,7 @@ async function deployMutableViaFlow(contractService: ContractService) {
 
     const adminKey = PrivateKey.generateED25519();
 
-    const contractId = await contractService.createContractFlow({
+    const { contractId } = await contractService.createContractFlow({
         bytecode: MINIMAL_BYTECODE_HEX,
         gas: 150_000,
         adminKey: adminKey.publicKey,
@@ -91,7 +91,7 @@ async function deployMutableViaFlow(contractService: ContractService) {
 async function deployWithChunkCap(contractService: ContractService) {
     console.log("=== Deploy with maxChunks cap ===\n");
 
-    const contractId = await contractService.createContractFlow({
+    const { contractId } = await contractService.createContractFlow({
         bytecode: MINIMAL_BYTECODE_HEX,
         gas: 150_000,
         maxChunks: 4,
