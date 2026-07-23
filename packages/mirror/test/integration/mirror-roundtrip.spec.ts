@@ -96,7 +96,7 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
             return page;
         }, `messages on ${topicId}`);
         const first = messages.data[0];
-        expect(first.topicId).toBe(topicId);
+        expect(first.topicId).toBe(topicId.toString());
         expect(Buffer.from(first.message, "base64").toString("utf8")).toContain(
             "hello from the integration suite",
         );
@@ -130,7 +130,9 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
             if (page.data.length === 0) throw new Error("not indexed yet");
             return page;
         }, `token search "${name}"`);
-        expect(search.data.map((entry) => entry.tokenId)).toContain(tokenId);
+        expect(search.data.map((entry) => entry.tokenId)).toContain(
+            tokenId.toString(),
+        );
 
         // The treasury shows up as a holder with the full supply.
         const holders = await eventually(async () => {
