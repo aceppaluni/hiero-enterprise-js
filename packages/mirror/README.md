@@ -279,7 +279,39 @@ HIERO_MIRROR_NODE_MAX_CONCURRENT=25
 HIERO_MIRROR_NODE_MAX_REQUESTS_PER_SECOND=50
 HIERO_MIRROR_NODE_TIMEOUT_MS=10000
 HIERO_MIRROR_NODE_MAX_RETRIES=3
+HIERO_MIRROR_NODE_RETRY_ON_404=false
 ```
+
+### Retrying freshly-created entities (`retryOn404`)
+
+Mirror nodes are eventually consistent: an entity can briefly return
+**HTTP 404** in the short window between its creating transaction reaching
+consensus and the mirror node importing it. When you query an entity right
+after creating it, retry the 404 on the same `maxRetries` budget and backoff
+as 429/5xx instead of failing immediately.
+
+Prefer the per-call `withRetryOn404()` view, so only the just-created lookup
+pays the extra retries — every other query on the client keeps failing fast
+on a genuine 404:
+
+```ts
+const account = await client.withRetryOn404().queryAccount(newAccountId);
+```
+
+The view shares the base client's concurrency + rate gate, so the pair
+counts against a single budget rather than doubling your effective request
+rate against the node.
+
+A client-wide `retryOn404: true` option (or `HIERO_MIRROR_NODE_RETRY_ON_404=true`)
+also exists, but it applies to **every** query — including genuine
+"no such entity" lookups, which then cost `maxRetries + 1` requests each
+before resolving. Reach for it only when a client exclusively reads
+freshly-created entities; otherwise use the view.
+
+Retry-on-404 defaults to **off** because a 404 is normally a legitimate "no
+such entity". Either way, a persistent 404 exhausts the retries and still
+surfaces as `NOT_FOUND` — so `orNull` keeps treating genuine absence as
+`null` (see [Errors](#errors)).
 
 ## Unit & timestamp helpers
 
@@ -322,6 +354,10 @@ if (account === null) {
     // never existed (or not yet imported by this mirror node)
 }
 ```
+
+If the `null` is because the entity was *just* created and hasn't been
+imported yet, use [`withRetryOn404()`](#retrying-freshly-created-entities-retryon404)
+so the client waits it out before giving up.
 
 ## Examples
 

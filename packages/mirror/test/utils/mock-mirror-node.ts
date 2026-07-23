@@ -26,7 +26,7 @@ import type {
  * Each method returns a sensible empty/default value.
  */
 export function createMockMirrorNodeClient(): MockMirrorNodeClient {
-    return {
+    const mock: MockMirrorNodeClient = {
         queryAccount: () => Promise.resolve(accountInfo()),
         queryAccountBalance: () => Promise.resolve(balance()),
         queryAccounts: () => Promise.resolve(emptyPage()),
@@ -82,7 +82,10 @@ export function createMockMirrorNodeClient(): MockMirrorNodeClient {
         queryFeeEstimate: () => Promise.resolve(feeEstimate()),
         fetchNextPage: () => Promise.resolve(emptyPage()),
         get: () => Promise.reject(new Error("not mocked")),
+        // The view shares the same mock; the pair counts as one client.
+        withRetryOn404: () => mock as unknown as MirrorNodeClient,
     };
+    return mock;
 }
 
 type MockMirrorNodeClient = {

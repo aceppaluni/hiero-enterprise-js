@@ -250,6 +250,18 @@ export interface MirrorNodeClientOptions {
     /** Max retries for 429/5xx/timeout responses (default: 3). */
     maxRetries?: number;
     /**
+     * Treat an HTTP 404 as a transient "not yet indexed" signal and retry
+     * it, reusing the same {@link maxRetries} budget and backoff as 429/5xx
+     * (default: `false`).
+     *
+     * Mirror nodes briefly 404 on freshly-created entities before the write
+     * propagates, so enable this only when you query an entity right after
+     * creating it. When the entity never appears the retries are exhausted
+     * and the outcome is still a `NotFound` MirrorError — so `orNull` keeps
+     * treating genuine absence as `null`.
+     */
+    retryOn404?: boolean;
+    /**
      * Maximum number of requests allowed in flight at once. Additional
      * requests queue and start as slots free up. This is *pro-active*
      * back-pressure: it bounds parallelism before the mirror node ever
@@ -268,6 +280,17 @@ export interface MirrorNodeClientOptions {
      * for safe large-volume fetching.
      */
     maxRequestsPerSecond?: number;
+    /**
+     * An existing {@link RequestGate} to share instead of creating a new one.
+     *
+     * Advanced/internal: {@link MirrorNodeClient.withRetryOn404} uses this so
+     * a derived view counts against the *same* concurrency + rate budget as
+     * its parent, rather than opening a second independent one against the
+     * same mirror node. When set, {@link maxConcurrent} and
+     * {@link maxRequestsPerSecond} are ignored — the shared gate already
+     * carries them.
+     */
+    gate?: RequestGate;
 }
 
 /**
@@ -298,9 +321,13 @@ export class MirrorNodeClient {
     private readonly baseUrl: string;
     private readonly timeoutMs: number;
     private readonly maxRetries: number;
+    private readonly retryOn404: boolean;
 
     /** Pro-active concurrency + rate limiter shared by every request. */
     private readonly gate: RequestGate;
+
+    /** Memoized {@link withRetryOn404} view, sharing this client's gate. */
+    private retryOn404View?: MirrorNodeClient;
 
     constructor(baseUrl: string, options?: MirrorNodeClientOptions) {
         // Remove trailing slashes
@@ -311,10 +338,44 @@ export class MirrorNodeClient {
         this.baseUrl = url;
         this.timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
         this.maxRetries = options?.maxRetries ?? DEFAULT_MAX_RETRIES;
-        this.gate = new RequestGate({
-            maxConcurrent: options?.maxConcurrent,
-            maxRequestsPerSecond: options?.maxRequestsPerSecond,
+        this.retryOn404 = options?.retryOn404 ?? false;
+        // A shared gate (from withRetryOn404) already carries the concurrency
+        // + rate settings, so the per-option knobs are only read when we
+        // create our own.
+        this.gate =
+            options?.gate ??
+            new RequestGate({
+                maxConcurrent: options?.maxConcurrent,
+                maxRequestsPerSecond: options?.maxRequestsPerSecond,
+            });
+    }
+
+    /**
+     * A view of this client that treats an HTTP 404 as a transient "not yet
+     * indexed" signal and retries it (see
+     * {@link MirrorNodeClientOptions.retryOn404}). Use it for the narrow case
+     * of reading an entity right after creating it, without paying the extra
+     * retries on every other query:
+     *
+     * ```ts
+     * const account = await client.withRetryOn404().queryAccount(id);
+     * ```
+     *
+     * The returned view shares this client's {@link RequestGate}, so the pair
+     * counts against a single concurrency + rate budget rather than opening a
+     * second, independent one against the same mirror node. The view is
+     * memoized — repeated calls return the same instance — and calling it on a
+     * client that already retries 404s returns the client itself.
+     */
+    withRetryOn404(): MirrorNodeClient {
+        if (this.retryOn404) return this;
+        this.retryOn404View ??= new MirrorNodeClient(this.baseUrl, {
+            timeoutMs: this.timeoutMs,
+            maxRetries: this.maxRetries,
+            retryOn404: true,
+            gate: this.gate,
         });
+        return this.retryOn404View;
     }
 
     /**
@@ -354,6 +415,10 @@ export class MirrorNodeClient {
      *   honouring the `Retry-After` header when present. The only POST
      *   endpoint (`/contracts/call`) is a transient simulation, so it is
      *   as safe to retry as a GET.
+     * - HTTP 404 is retried on the same budget only when `retryOn404` is
+     *   enabled (for mirror-node eventual consistency on freshly-created
+     *   entities); otherwise, and once retries are exhausted, it surfaces
+     *   as a terminal `NotFound`.
      * - Timeouts (AbortError / TimeoutError) are retried with exponential
      *   backoff, then surfaced as a TimedOut MirrorError. Other network
      *   errors (DNS, ECONNREFUSED, …) are surfaced immediately — they
@@ -415,11 +480,18 @@ export class MirrorNodeClient {
                 },
             );
         }
-        if (
-            (response.status === 429 || response.status >= 500) &&
-            attempt < this.maxRetries
-        ) {
+        const retryableStatus =
+            response.status === 429 ||
+            response.status >= 500 ||
+            (this.retryOn404 && response.status === 404);
+        if (retryableStatus && attempt < this.maxRetries) {
             clearTimeout(timer);
+            // Release the unread body so undici can reuse the connection
+            // instead of holding it open across the backoff (no-op when the
+            // response has no body).
+            await response.body?.cancel();
+            // A 404 carries no `Retry-After`, so parseRetryAfter returns
+            // null and the eventual-consistency case just backs off.
             const retryAfter = parseRetryAfter(
                 response.headers.get("retry-after"),
             );

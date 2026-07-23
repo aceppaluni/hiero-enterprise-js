@@ -17,6 +17,13 @@ export interface MirrorConfig {
     readonly mirrorNodeTimeoutMs?: number;
     /** Max retries for 429/5xx/timeout responses (default: 3) */
     readonly mirrorNodeMaxRetries?: number;
+    /**
+     * Retry HTTP 404 as a transient "not yet indexed" signal for
+     * freshly-created entities, reusing the retry/backoff budget
+     * (default: false). Still resolves to `NotFound`/`null` when the
+     * entity never appears.
+     */
+    readonly mirrorNodeRetryOn404?: boolean;
     /** Max concurrent requests (default: 25; `Infinity` disables) */
     readonly mirrorNodeMaxConcurrent?: number;
     /** Sustained request-rate ceiling in requests/second (default: unlimited) */
@@ -71,6 +78,28 @@ function numberFromEnv(raw: string | undefined): number | undefined {
 }
 
 /**
+ * Parse a boolean environment-variable value. Returns `undefined` when
+ * unset or empty so the corresponding default applies. Accepts
+ * `"true"`/`"1"` and `"false"`/`"0"` (case-insensitive); anything else
+ * throws `ConfigInvalid` so a typo (`"yes"`, `"ture"`) surfaces instead of
+ * silently meaning `false` — the boolean counterpart of `numberFromEnv`
+ * passing `NaN` through to downstream validation.
+ */
+function booleanFromEnv(
+    name: string,
+    raw: string | undefined,
+): boolean | undefined {
+    if (raw === undefined || raw.trim() === "") return undefined;
+    const normalized = raw.trim().toLowerCase();
+    if (normalized === "true" || normalized === "1") return true;
+    if (normalized === "false" || normalized === "0") return false;
+    throw new MirrorError(
+        `${name} must be "true", "false", "1", or "0", got "${raw}".`,
+        { code: MirrorErrorCodes.ConfigInvalid },
+    );
+}
+
+/**
  * Resolve a MirrorConfig from environment variables.
  *
  * Reads from (all optional):
@@ -78,6 +107,7 @@ function numberFromEnv(raw: string | undefined): number | undefined {
  *   HIERO_MIRROR_NODE_URL
  *   HIERO_MIRROR_NODE_TIMEOUT_MS
  *   HIERO_MIRROR_NODE_MAX_RETRIES
+ *   HIERO_MIRROR_NODE_RETRY_ON_404
  *   HIERO_MIRROR_NODE_MAX_CONCURRENT
  *   HIERO_MIRROR_NODE_MAX_REQUESTS_PER_SECOND
  */
@@ -90,6 +120,10 @@ export function mirrorConfigFromEnv(): MirrorConfig {
         ),
         mirrorNodeMaxRetries: numberFromEnv(
             process.env["HIERO_MIRROR_NODE_MAX_RETRIES"],
+        ),
+        mirrorNodeRetryOn404: booleanFromEnv(
+            "HIERO_MIRROR_NODE_RETRY_ON_404",
+            process.env["HIERO_MIRROR_NODE_RETRY_ON_404"],
         ),
         mirrorNodeMaxConcurrent: numberFromEnv(
             process.env["HIERO_MIRROR_NODE_MAX_CONCURRENT"],
@@ -122,6 +156,7 @@ export function createMirrorNodeClient(
     const options: MirrorNodeClientOptions = {
         timeoutMs: resolved.mirrorNodeTimeoutMs,
         maxRetries: resolved.mirrorNodeMaxRetries,
+        retryOn404: resolved.mirrorNodeRetryOn404,
         maxConcurrent: resolved.mirrorNodeMaxConcurrent,
         maxRequestsPerSecond: resolved.mirrorNodeMaxRequestsPerSecond,
     };
