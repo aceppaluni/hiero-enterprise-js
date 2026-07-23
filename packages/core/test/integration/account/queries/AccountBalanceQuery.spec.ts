@@ -25,7 +25,7 @@ describe("AccountBalanceQuery (via AccountService) [Integration]", () => {
 
         const balance = await client.getAccountBalance(account.accountId);
 
-        expect(balance.accountId).toBe(account.accountId);
+        expect(balance.accountId).toBe(account.accountId.toString());
         expect(balance.hbars).toBe(String(7 * 100_000_000));
         // Newly created account has no associated tokens
         expect(balance.tokens).toEqual([]);

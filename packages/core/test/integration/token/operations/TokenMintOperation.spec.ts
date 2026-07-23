@@ -49,9 +49,9 @@ describe("TokenService mint operations [Integration]", () => {
         const nft1 = await queryNftRecord(tokenId, 1);
         const nft2 = await queryNftRecord(tokenId, 2);
 
-        expect(nft1.token_id).toBe(tokenId);
+        expect(nft1.token_id).toBe(tokenId.toString());
         expect(nft1.account_id).toBe(owner.accountId);
-        expect(nft2.token_id).toBe(tokenId);
+        expect(nft2.token_id).toBe(tokenId.toString());
         expect(nft2.account_id).toBe(owner.accountId);
     });
 

@@ -40,7 +40,7 @@ describe("ContractCreateOperation", () => {
         });
 
         expect(contractId).toBeDefined();
-        expect(contractId).toMatch(/^0\.0\.\d+$/);
+        expect(contractId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 
     it("deploys a contract from raw bytecode embedded in-transaction (HIP-435)", async () => {
@@ -50,7 +50,7 @@ describe("ContractCreateOperation", () => {
         });
 
         expect(contractId).toBeDefined();
-        expect(contractId).toMatch(/^0\.0\.\d+$/);
+        expect(contractId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 
     it("deploys a contract with a memo recorded on the entity", async () => {
@@ -61,6 +61,6 @@ describe("ContractCreateOperation", () => {
         });
 
         expect(contractId).toBeDefined();
-        expect(contractId).toMatch(/^0\.0\.\d+$/);
+        expect(contractId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 });

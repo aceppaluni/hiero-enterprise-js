@@ -32,7 +32,7 @@ describe("ContractCreateFlowOperation", () => {
             contractMemo: "deployed via flow",
         });
 
-        expect(contractId).toMatch(/^0\.0\.\d+$/);
+        expect(contractId.toString()).toMatch(/^0\.0\.\d+$/);
 
         await waitForMirrorNodeRecord();
 
@@ -57,7 +57,7 @@ describe("ContractCreateFlowOperation", () => {
             additionalSigners: [adminKey],
         });
 
-        expect(contractId).toMatch(/^0\.0\.\d+$/);
+        expect(contractId.toString()).toMatch(/^0\.0\.\d+$/);
 
         await waitForMirrorNodeRecord();
 
@@ -65,7 +65,7 @@ describe("ContractCreateFlowOperation", () => {
             () => queryContractInfo(contractId),
             { description: `contract ${contractId}` },
         );
-        expect(info.contract_id).toBe(contractId);
+        expect(info.contract_id).toBe(contractId.toString());
         // Admin key was set, so contract is not immutable.
         expect(info.deleted).toBe(false);
     });

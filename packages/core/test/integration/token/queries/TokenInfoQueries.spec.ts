@@ -42,7 +42,7 @@ describe("TokenService info queries [Integration]", () => {
 
             const info = await tokenService.getTokenInfo(tokenId);
 
-            expect(info.tokenId).toBe(tokenId);
+            expect(info.tokenId).toBe(tokenId.toString());
             expect(info.name).toBe("Token Info Fungible Integration");
             expect(info.symbol).toBe("TIFI");
             expect(info.decimals).toBe(2);
@@ -76,7 +76,7 @@ describe("TokenService info queries [Integration]", () => {
 
             const info = await tokenService.getTokenInfo(tokenId);
 
-            expect(info.tokenId).toBe(tokenId);
+            expect(info.tokenId).toBe(tokenId.toString());
             expect(info.tokenType).toBe(TokenType.NonFungibleUnique);
             expect(info.decimals).toBe(0);
             expect(info.totalSupply).toBe("0");
@@ -110,7 +110,7 @@ describe("TokenService info queries [Integration]", () => {
             const info = await tokenService.getNftInfo(nftId);
 
             expect(info.nftId).toBe(`${tokenId}/1`);
-            expect(info.tokenId).toBe(tokenId);
+            expect(info.tokenId).toBe(tokenId.toString());
             expect(info.serial).toBe("1");
             expect(info.accountId).toBe(owner.accountId);
             expect(info.spenderId).toBeNull();
@@ -164,7 +164,7 @@ describe("TokenService info queries [Integration]", () => {
 
             const info = await tokenService.getNftInfo(`${tokenId}/1`);
 
-            expect(info.tokenId).toBe(tokenId);
+            expect(info.tokenId).toBe(tokenId.toString());
             expect(info.serial).toBe("1");
             expect(info.accountId).toBe(receiver.accountId);
         });

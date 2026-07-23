@@ -53,7 +53,7 @@ describe("TokenService associate operations [Integration]", () => {
         );
 
         expect(relationship).toBeDefined();
-        expect(relationship?.token_id).toBe(tokenId);
+        expect(relationship?.token_id).toBe(tokenId.toString());
     }, 120_000);
 
     it("schedules a token association", async () => {

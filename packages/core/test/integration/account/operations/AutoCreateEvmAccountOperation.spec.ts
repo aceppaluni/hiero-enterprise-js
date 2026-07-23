@@ -24,7 +24,7 @@ describe("AccountService.autoCreateEvmAccount [Integration]", () => {
 
         // The child receipt must report the hollow account the transfer
         // created — this is the live proof that setIncludeChildren works.
-        expect(result.accountId).toMatch(/^\d+\.\d+\.\d+$/);
+        expect(result.accountId?.toString()).toMatch(/^\d+\.\d+\.\d+$/);
         expect(result.status).toBe("SUCCESS");
         expect(result.transactionId).toContain("@");
     });
