@@ -27,12 +27,13 @@ describe("TopicUpdateOperation", () => {
         adminKey: PrivateKey,
         topicMemo = "integration: pre-update",
     ): Promise<string> {
-        return await topicService.createTopic({
+        const { topicId } = await topicService.createTopic({
             topicMemo,
             adminKey: adminKey.publicKey,
             autoRenewAccountId: operatorId,
             additionalSigners: [adminKey],
         });
+        return topicId.toString();
     }
 
     let adminKey: PrivateKey;

@@ -26,7 +26,7 @@ describe("TokenService revokeKyc operations [Integration]", () => {
     it("revokes KYC on a token relationship for a holder account", async () => {
         const holder = await createTestAccount(accountService, 2);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "RevokeKyc Integration",
             tokenSymbol: "RKYC",
             decimals: 0,
@@ -58,7 +58,9 @@ describe("TokenService revokeKyc operations [Integration]", () => {
         await waitForMirrorNodeRecord();
 
         const tokens = await queryAccountTokens(holder.accountId);
-        const relationship = tokens.find((t) => t.token_id === tokenId);
+        const relationship = tokens.find(
+            (t) => t.token_id === tokenId.toString(),
+        );
 
         expect(relationship).toBeDefined();
         expect(relationship?.kyc_status).toBe("REVOKED");

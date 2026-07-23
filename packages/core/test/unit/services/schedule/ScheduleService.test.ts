@@ -16,6 +16,7 @@ const SCHEDULE_ID = "0.0.777";
 const mockReceipt = {
     status: { toString: () => "SUCCESS" },
     scheduleId: { toString: () => SCHEDULE_ID },
+    scheduledTransactionId: null as { toString(): string } | null,
 };
 
 const mockResponse = {
@@ -119,6 +120,36 @@ describe("ScheduleService", () => {
             const tx = vi.mocked(ScheduleSignTransaction).mock.results[0].value;
             expect(tx.freezeWith).toHaveBeenCalledWith(context.client);
             expect(tx.sign).toHaveBeenCalledWith(signerKey);
+        });
+
+        it("omits scheduledTransactionId when the receipt does not carry one", async () => {
+            mockReceipt.scheduledTransactionId = null;
+
+            const result = await scheduleService.sign({
+                scheduleId: SCHEDULE_ID,
+                additionalSigners: [PrivateKey.generateED25519()],
+            });
+
+            expect(result).toMatchObject({
+                transactionId: "0.0.2@1234567890.000000000",
+                status: "SUCCESS",
+            });
+            expect(result.scheduledTransactionId).toBeNull();
+        });
+
+        it("carries the scheduled transaction id reported by the receipt", async () => {
+            mockReceipt.scheduledTransactionId = {
+                toString: () => "0.0.500@1234567890.000000001?scheduled",
+            };
+
+            const result = await scheduleService.sign({
+                scheduleId: SCHEDULE_ID,
+                additionalSigners: [PrivateKey.generateED25519()],
+            });
+
+            expect(result.scheduledTransactionId?.toString()).toBe(
+                "0.0.500@1234567890.000000001?scheduled",
+            );
         });
 
         it("supports external (HSM/KMS) signers", async () => {

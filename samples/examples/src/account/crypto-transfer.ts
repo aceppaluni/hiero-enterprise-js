@@ -61,12 +61,15 @@ async function transferHbar(accountService: AccountService) {
     // Move 1 HBAR from the sender to the receiver.
     // `amount` can be a number (interpreted as whole HBAR) or an Hbar value.
 
-    await accountService.transferHbar(
+    const result = await accountService.transferHbar(
         receiver.accountId,
         new Hbar(1),
         sender.accountId,
         { additionalSigners: [senderKey] },
     );
+    // The result carries the transaction id — the caller's reference for
+    // explorer links, mirror node lookups, or payment correlation.
+    console.log("Transferred:", result.transactionId, result.status);
 
     const balance = await accountService.getAccountBalance(receiver.accountId);
     console.log("Receiver balance:", balance.hbars, "tinybars");
@@ -110,7 +113,7 @@ async function transferToken(
 
     // Sender creates the token and holds the full initial supply as treasury.
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Transfer Demo Token",
         tokenSymbol: "TXD",
         decimals: 2,
@@ -146,7 +149,7 @@ async function transferToken(
     );
 
     const balance = await accountService.getAccountBalance(receiver.accountId);
-    const held = balance.tokens.find((t) => t.tokenId === tokenId);
+    const held = balance.tokens.find((t) => t.tokenId === tokenId.toString());
     console.log("Receiver token balance:", held?.balance);
     console.log();
 }
@@ -183,7 +186,7 @@ async function transferNft(
     });
     console.log("Receiver account:", receiver.accountId);
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Transfer Demo NFT",
         tokenSymbol: "TXDN",
         treasuryAccountId: sender.accountId,
@@ -264,19 +267,17 @@ async function scheduleTransferHbar(accountService: AccountService) {
     // once created. Omit `additionalSigners` for true multi-party flows where
     // another party will sign later via `ScheduleService.sign`.
 
-    const { scheduleId, transactionId } =
-        await accountService.scheduleTransferHbar(
-            receiver.accountId,
-            2,
-            sender.accountId,
-            {
-                scheduleMemo: "scheduled hbar transfer demo",
-                additionalSigners: [senderKey],
-            },
-        );
+    const { scheduleId } = await accountService.scheduleTransferHbar(
+        receiver.accountId,
+        2,
+        sender.accountId,
+        {
+            scheduleMemo: "scheduled hbar transfer demo",
+            additionalSigners: [senderKey],
+        },
+    );
 
     console.log("Schedule ID:   ", scheduleId);
-    console.log("Transaction ID:", transactionId);
     console.log();
 }
 
@@ -311,7 +312,7 @@ async function scheduleTransferToken(
     });
     console.log("Receiver account:", receiver.accountId);
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Scheduled Transfer Token",
         tokenSymbol: "STX",
         decimals: 0,
@@ -328,20 +329,18 @@ async function scheduleTransferToken(
         additionalSigners: [receiverKey],
     });
 
-    const { scheduleId, transactionId } =
-        await accountService.scheduleTransferToken(
-            tokenId,
-            receiver.accountId,
-            100,
-            sender.accountId,
-            {
-                scheduleMemo: "scheduled token transfer demo",
-                additionalSigners: [senderKey],
-            },
-        );
+    const { scheduleId } = await accountService.scheduleTransferToken(
+        tokenId,
+        receiver.accountId,
+        100,
+        sender.accountId,
+        {
+            scheduleMemo: "scheduled token transfer demo",
+            additionalSigners: [senderKey],
+        },
+    );
 
     console.log("Schedule ID:   ", scheduleId);
-    console.log("Transaction ID:", transactionId);
     console.log();
 }
 
@@ -376,7 +375,7 @@ async function scheduleTransferNft(
     });
     console.log("Receiver account:", receiver.accountId);
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Scheduled NFT",
         tokenSymbol: "SNFT",
         treasuryAccountId: sender.accountId,
@@ -399,20 +398,18 @@ async function scheduleTransferNft(
         additionalSigners: [receiverKey],
     });
 
-    const { scheduleId, transactionId } =
-        await accountService.scheduleTransferNft(
-            tokenId,
-            serial,
-            receiver.accountId,
-            sender.accountId,
-            {
-                scheduleMemo: "scheduled nft transfer demo",
-                additionalSigners: [senderKey],
-            },
-        );
+    const { scheduleId } = await accountService.scheduleTransferNft(
+        tokenId,
+        serial,
+        receiver.accountId,
+        sender.accountId,
+        {
+            scheduleMemo: "scheduled nft transfer demo",
+            additionalSigners: [senderKey],
+        },
+    );
 
     console.log("Schedule ID:   ", scheduleId);
-    console.log("Transaction ID:", transactionId);
     console.log();
 }
 

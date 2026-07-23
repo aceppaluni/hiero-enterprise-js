@@ -98,28 +98,23 @@ export class TopicUpdateOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TopicUpdateValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TopicUpdateValidator();
     }
 
     /** Submit a `TopicUpdateTransaction`. */
-    async execute(options: TopicUpdateOperationOptions): Promise<void> {
+    async execute(options: TopicUpdateOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TopicUpdate",
-                serviceName: "TopicService",
-                methodName: "updateTopic",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TopicUpdate",
+            serviceName: "TopicService",
+            methodName: "updateTopic",
+            timestamp: new Date(),
+        });
     }
 
     private build(

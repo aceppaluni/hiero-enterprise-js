@@ -36,7 +36,7 @@ async function main() {
     // 1. Simple property update
     // Update memo and staking — the account's own key must sign.
     await accountService.updateAccount({
-        accountId: account.accountId,
+        accountId: account.accountId.toString(),
         memo: "updated memo",
         maxAutomaticTokenAssociations: 10,
         additionalSigners: [originalKey], // account key must sign updates
@@ -50,7 +50,7 @@ async function main() {
     const newKey = PrivateKey.generateED25519();
 
     await accountService.updateAccount({
-        accountId: account.accountId,
+        accountId: account.accountId.toString(),
         key: newKey.publicKey,
         additionalSigners: [originalKey, newKey], // old + new must both sign
     });
@@ -71,7 +71,7 @@ async function main() {
     );
 
     await accountService.updateAccount({
-        accountId: account.accountId,
+        accountId: account.accountId.toString(),
         key: thresholdKey,
         additionalSigners: [newKey, key2], // old key + enough new threshold members
     });

@@ -9,13 +9,15 @@ import {
     AccountService,
     TokenService,
 } from "../../../../src/services/index.js";
-import { NftId, PendingAirdropId, TokenId } from "@hiero-ledger/sdk";
+import { NftId, PendingAirdropId } from "@hiero-ledger/sdk";
+import type { TokenId } from "@hiero-ledger/sdk";
 
 function tokenBalanceFor(
     balance: { tokens: { tokenId: string; balance: string }[] },
-    tokenId: string,
+    tokenId: string | TokenId,
 ): string | undefined {
-    return balance.tokens.find((t) => t.tokenId === tokenId)?.balance;
+    return balance.tokens.find((t) => t.tokenId === tokenId.toString())
+        ?.balance;
 }
 
 describe("TokenService cancel airdrop operations [Integration]", () => {
@@ -33,7 +35,7 @@ describe("TokenService cancel airdrop operations [Integration]", () => {
     it("cancels a pending fungible airdrop so the receiver never receives the token", async () => {
         const receiver = await createTestAccount(accountService, 2);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Cancel Fungible Integration",
             tokenSymbol: "CFI",
             decimals: 0,
@@ -71,7 +73,7 @@ describe("TokenService cancel airdrop operations [Integration]", () => {
                 new PendingAirdropId({
                     senderId: owner.accountId,
                     receiverId: receiver.accountId,
-                    tokenId: TokenId.fromString(tokenId),
+                    tokenId: tokenId,
                 }),
             ],
             additionalSigners: [owner.key],
@@ -96,7 +98,7 @@ describe("TokenService cancel airdrop operations [Integration]", () => {
     it("cancels a pending NFT airdrop so the serial stays with the treasury", async () => {
         const receiver = await createTestAccount(accountService, 2);
 
-        const tokenId = await tokenService.createNft({
+        const { tokenId } = await tokenService.createNft({
             tokenName: "Cancel NFT Integration",
             tokenSymbol: "CNI",
             treasuryAccountId: owner.accountId,
@@ -134,7 +136,7 @@ describe("TokenService cancel airdrop operations [Integration]", () => {
                 new PendingAirdropId({
                     senderId: owner.accountId,
                     receiverId: receiver.accountId,
-                    nftId: new NftId(TokenId.fromString(tokenId), 1),
+                    nftId: new NftId(tokenId, 1),
                 }),
             ],
             additionalSigners: [owner.key],
@@ -157,17 +159,18 @@ describe("TokenService cancel airdrop operations [Integration]", () => {
     it("cancels a mixed batch of pending fungible and NFT airdrops in one transaction", async () => {
         const receiver = await createTestAccount(accountService, 2);
 
-        const fungibleTokenId = await tokenService.createFungibleToken({
-            tokenName: "Cancel Batch Fungible Integration",
-            tokenSymbol: "CBFI",
-            decimals: 0,
-            initialSupply: 100,
-            treasuryAccountId: owner.accountId,
-            supplyKey: owner.key.publicKey,
-            additionalSigners: [owner.key],
-        });
+        const { tokenId: fungibleTokenId } =
+            await tokenService.createFungibleToken({
+                tokenName: "Cancel Batch Fungible Integration",
+                tokenSymbol: "CBFI",
+                decimals: 0,
+                initialSupply: 100,
+                treasuryAccountId: owner.accountId,
+                supplyKey: owner.key.publicKey,
+                additionalSigners: [owner.key],
+            });
 
-        const nftTokenId = await tokenService.createNft({
+        const { tokenId: nftTokenId } = await tokenService.createNft({
             tokenName: "Cancel Batch NFT Integration",
             tokenSymbol: "CBNI",
             treasuryAccountId: owner.accountId,
@@ -213,12 +216,12 @@ describe("TokenService cancel airdrop operations [Integration]", () => {
                 new PendingAirdropId({
                     senderId: owner.accountId,
                     receiverId: receiver.accountId,
-                    tokenId: TokenId.fromString(fungibleTokenId),
+                    tokenId: fungibleTokenId,
                 }),
                 new PendingAirdropId({
                     senderId: owner.accountId,
                     receiverId: receiver.accountId,
-                    nftId: new NftId(TokenId.fromString(nftTokenId), 1),
+                    nftId: new NftId(nftTokenId, 1),
                 }),
             ],
             additionalSigners: [owner.key],

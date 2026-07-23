@@ -27,30 +27,23 @@ export class TokenFeeScheduleUpdateOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenFeeScheduleUpdateValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenFeeScheduleUpdateValidator();
     }
 
     /** Submit a `TokenFeeScheduleUpdateTransaction`. */
-    async execute(
-        options: TokenFeeScheduleUpdateOperationOptions,
-    ): Promise<void> {
+    async execute(options: TokenFeeScheduleUpdateOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenFeeScheduleUpdate",
-                serviceName: "TokenService",
-                methodName: "updateTokenFeeSchedule",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenFeeScheduleUpdate",
+            serviceName: "TokenService",
+            methodName: "updateTokenFeeSchedule",
+            timestamp: new Date(),
+        });
     }
 
     private build(

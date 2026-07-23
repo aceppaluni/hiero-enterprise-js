@@ -64,13 +64,13 @@ describe("TokenCreateOperation (via TokenService)", () => {
 
     describe("createFungibleToken", () => {
         it("creates a token and returns the token ID", async () => {
-            const tokenId = await service.createFungibleToken({
+            const { tokenId } = await service.createFungibleToken({
                 tokenName: "Acme",
                 tokenSymbol: "ACME",
                 treasuryAccountId: "0.0.555",
             });
 
-            expect(tokenId).toBe("0.0.500");
+            expect(tokenId.toString()).toBe("0.0.500");
 
             const tx = vi.mocked(TokenCreateTransaction).mock.results[0].value;
             expect(tx.setTokenName).toHaveBeenCalledWith("Acme");
@@ -222,14 +222,14 @@ describe("TokenCreateOperation (via TokenService)", () => {
         it("creates an NFT collection with NonFungibleUnique type", async () => {
             const supplyKey = PrivateKey.generateED25519().publicKey;
 
-            const tokenId = await service.createNft({
+            const { tokenId } = await service.createNft({
                 tokenName: "Acme Art",
                 tokenSymbol: "ART",
                 treasuryAccountId: "0.0.555",
                 supplyKey,
             });
 
-            expect(tokenId).toBe("0.0.500");
+            expect(tokenId.toString()).toBe("0.0.500");
 
             const tx = vi.mocked(TokenCreateTransaction).mock.results[0].value;
             expect(tx.setTokenType).toHaveBeenCalledWith(
@@ -274,8 +274,7 @@ describe("TokenCreateOperation (via TokenService)", () => {
             expect(mocks.scheduleTx.setScheduleMemo).toHaveBeenCalledWith(
                 "pending approval",
             );
-            expect(result.scheduleId).toBe("0.0.777");
-            expect(result.transactionId).toBeDefined();
+            expect(result.scheduleId.toString()).toBe("0.0.777");
         });
     });
 
@@ -294,8 +293,7 @@ describe("TokenCreateOperation (via TokenService)", () => {
             );
 
             expect(mocks.tx.schedule).toHaveBeenCalled();
-            expect(result.scheduleId).toBe("0.0.777");
-            expect(result.transactionId).toBeDefined();
+            expect(result.scheduleId.toString()).toBe("0.0.777");
         });
     });
 

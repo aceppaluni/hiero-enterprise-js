@@ -45,6 +45,15 @@ describe("TransferOperation (via AccountService)", () => {
 
     // HBAR transfers
     describe("transferHbar", () => {
+        it("returns the transaction id and status (#134)", async () => {
+            const result = await service.transferHbar("0.0.200", 5, "0.0.100");
+
+            expect(result).toMatchObject({
+                transactionId: expect.any(String),
+                status: "SUCCESS",
+            });
+        });
+
         it("emits two addHbarTransfer calls: negated sender, positive receiver", async () => {
             await service.transferHbar("0.0.200", 5, "0.0.100");
 
@@ -122,7 +131,7 @@ describe("TransferOperation (via AccountService)", () => {
             );
 
             expect(mocks.tx.schedule).toHaveBeenCalledTimes(1);
-            expect(result.scheduleId).toBe("0.0.777");
+            expect(result.scheduleId.toString()).toBe("0.0.777");
         });
 
         it("forwards schedule-specific options (payer, adminKey, memo)", async () => {
@@ -260,7 +269,7 @@ describe("TransferOperation (via AccountService)", () => {
                 },
             );
 
-            expect(result.scheduleId).toBe("0.0.777");
+            expect(result.scheduleId.toString()).toBe("0.0.777");
             expect(mocks.scheduleTx.setScheduleMemo).toHaveBeenCalledWith(
                 "subscription",
             );
@@ -344,7 +353,7 @@ describe("TransferOperation (via AccountService)", () => {
                 { scheduleMemo: "nft handoff" },
             );
 
-            expect(result.scheduleId).toBe("0.0.777");
+            expect(result.scheduleId.toString()).toBe("0.0.777");
             expect(mocks.scheduleTx.setScheduleMemo).toHaveBeenCalledWith(
                 "nft handoff",
             );

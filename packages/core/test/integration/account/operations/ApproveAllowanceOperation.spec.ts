@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { Status } from "@hiero-ledger/sdk";
 import { setupIntegrationTestEnv } from "../../../utils/env.js";
 import { waitForMirrorNodeRecord } from "../../../utils/mirror-node.js";
 import {
@@ -26,7 +25,7 @@ describe("AccountService approve-allowance operations [Integration]", () => {
     it("approves an HBAR allowance for a spender account", async () => {
         const { owner, spender } = await createOwnerSpenderPair(client);
 
-        const approveReceipt = await client.approveHbarAllowance({
+        const approveResult = await client.approveHbarAllowance({
             hbarAllowances: [
                 {
                     ownerAccountId: owner.accountId,
@@ -36,7 +35,7 @@ describe("AccountService approve-allowance operations [Integration]", () => {
             ],
             additionalSigners: [owner.key],
         });
-        expect(approveReceipt.status).toBe(Status.Success);
+        expect(approveResult.status).toBe("SUCCESS");
 
         await waitForMirrorNodeRecord();
 
@@ -49,7 +48,7 @@ describe("AccountService approve-allowance operations [Integration]", () => {
     it("approves a fungible token allowance for a spender account", async () => {
         const { owner, spender } = await createOwnerSpenderPair(client);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Allowance Test Token",
             tokenSymbol: "ATT",
             decimals: 2,
@@ -59,10 +58,10 @@ describe("AccountService approve-allowance operations [Integration]", () => {
             additionalSigners: [owner.key],
         });
 
-        const approveReceipt = await client.approveTokenAllowance({
+        const approveResult = await client.approveTokenAllowance({
             tokenAllowances: [
                 {
-                    tokenId,
+                    tokenId: tokenId.toString(),
                     ownerAccountId: owner.accountId,
                     spenderAccountId: spender.accountId,
                     amount: 500,
@@ -70,13 +69,15 @@ describe("AccountService approve-allowance operations [Integration]", () => {
             ],
             additionalSigners: [owner.key],
         });
-        expect(approveReceipt.status).toBe(Status.Success);
+        expect(approveResult.status).toBe("SUCCESS");
 
         await waitForMirrorNodeRecord();
 
         const allowances = await queryTokenAllowances(owner.accountId);
         const match = allowances.find(
-            (a) => a.spender === spender.accountId && a.token_id === tokenId,
+            (a) =>
+                a.spender === spender.accountId &&
+                a.token_id === tokenId.toString(),
         );
         expect(match).toBeDefined();
         expect(match!.amount).toBe(500);
@@ -85,7 +86,7 @@ describe("AccountService approve-allowance operations [Integration]", () => {
     it("approves an NFT allowance for specific serials", async () => {
         const { owner, spender } = await createOwnerSpenderPair(client);
 
-        const tokenId = await tokenService.createNft({
+        const { tokenId } = await tokenService.createNft({
             tokenName: "Allowance NFT",
             tokenSymbol: "ANFT",
             treasuryAccountId: owner.accountId,
@@ -99,10 +100,10 @@ describe("AccountService approve-allowance operations [Integration]", () => {
             additionalSigners: [owner.key],
         });
 
-        const approveReceipt = await client.approveNftAllowance({
+        const approveResult = await client.approveNftAllowance({
             nftAllowances: [
                 {
-                    tokenId,
+                    tokenId: tokenId.toString(),
                     ownerAccountId: owner.accountId,
                     spenderAccountId: spender.accountId,
                     serialNumbers: [1, 2],
@@ -110,7 +111,7 @@ describe("AccountService approve-allowance operations [Integration]", () => {
             ],
             additionalSigners: [owner.key],
         });
-        expect(approveReceipt.status).toBe(Status.Success);
+        expect(approveResult.status).toBe("SUCCESS");
 
         await waitForMirrorNodeRecord();
 

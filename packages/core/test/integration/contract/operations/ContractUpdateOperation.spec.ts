@@ -30,13 +30,14 @@ describe("ContractUpdateOperation", () => {
     async function deployMutableContract(
         adminKey: PrivateKey,
     ): Promise<string> {
-        return await contractService.createContract({
+        const { contractId } = await contractService.createContract({
             bytecode: Buffer.from(MINIMAL_BYTECODE_HEX, "hex"),
             gas: 150_000,
             adminKey: adminKey.publicKey,
             contractMemo: "initial memo",
             additionalSigners: [adminKey],
         });
+        return contractId.toString();
     }
 
     it("updates the contract memo", async () => {
@@ -101,7 +102,6 @@ describe("ContractUpdateOperation", () => {
             { scheduleMemo: "integration scheduled contract update" },
         );
 
-        expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
-        expect(scheduled.transactionId).toBeDefined();
+        expect(scheduled.scheduleId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 });

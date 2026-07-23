@@ -1,19 +1,16 @@
-import type { Transaction, TransactionReceipt } from "@hiero-ledger/sdk";
+import type { Transaction } from "@hiero-ledger/sdk";
 import { AccountId } from "@hiero-ledger/sdk";
-import type { IHieroContext } from "../../context/index.js";
+import { type IHieroContext } from "../../context/index.js";
 import type { TransactionEvent } from "../../listeners/index.js";
-import { normalizeError } from "../../errors/index.js";
+import { HieroError, normalizeError } from "../../errors/index.js";
 import type { TransactionOptions } from "./TransactionOptions.js";
-import type { ScheduleOptions, ScheduledResult } from "./ScheduleOptions.js";
+import type { ScheduleOptions } from "./ScheduleOptions.js";
 
 /**
  * Owns the full transaction lifecycle shared across all service operations:
  * applying base options, optional freeze, additional signers, execute,
- * receipt, and before/after event emission.
+ * receipt fetch, and before/after event emission.
  *
- * Operations call `run()` or `scheduleRun()`, supplying a pre-built transaction
- * and a `processReceipt` callback that maps the receipt to the operation's
- * return type. This keeps all boilerplate in one place.
  */
 export class TransactionExecutor {
     constructor(private readonly context: IHieroContext) {}
@@ -24,17 +21,12 @@ export class TransactionExecutor {
      * @param tx - The built (but not yet executed) transaction.
      * @param options - Base transaction options (fees, signers, etc.).
      * @param event - Event metadata emitted before and after execution.
-     * @param processReceipt - Maps the receipt + transactionId to the operation result.
      */
-    async run<TResult>(
+    async run(
         tx: Transaction,
         options: TransactionOptions,
         event: TransactionEvent,
-        processReceipt: (
-            receipt: TransactionReceipt,
-            transactionId: string,
-        ) => TResult,
-    ): Promise<TResult> {
+    ) {
         // Apply base SDK options before any signing or execution
         this.applyBaseOptions(tx, options);
 
@@ -42,9 +34,7 @@ export class TransactionExecutor {
         const start = Date.now();
 
         try {
-            // Always freeze before signing or execution — the SDK requires
-            // a frozen transaction for sign/signWith/_addSignatureLegacy and
-            // custom networks may not auto-freeze correctly in execute().
+            // Always freeze before signing or execution
             tx.freezeWith(this.context.client);
 
             // Apply offline signatures after freeze (requires stable tx hash)
@@ -54,9 +44,10 @@ export class TransactionExecutor {
 
             // execute() auto-signs with the operator key via the client
             const response = await tx.execute(this.context.client);
-            const receipt = await response.getReceipt(this.context.client);
             const transactionId = response.transactionId.toString();
-            const result = processReceipt(receipt, transactionId);
+
+            // Fetch the receipt so the after-event carries a real chain
+            const receipt = await response.getReceipt(this.context.client);
 
             await this.context.emitAfterTransaction({
                 ...event,
@@ -65,7 +56,12 @@ export class TransactionExecutor {
                 durationMs: Date.now() - start,
             });
 
-            return result;
+            return {
+                response,
+                receipt,
+                transactionId: response.transactionId.toString(),
+                status: receipt.status.toString(),
+            };
         } catch (error) {
             await this.context.emitAfterTransaction({
                 ...event,
@@ -97,7 +93,7 @@ export class TransactionExecutor {
         options: TransactionOptions,
         event: TransactionEvent,
         scheduleOptions: ScheduleOptions = {},
-    ): Promise<ScheduledResult> {
+    ) {
         // tx.schedule() wraps the inner transaction in a ScheduleCreateTransaction
         const scheduleTx = tx.schedule();
 
@@ -117,15 +113,23 @@ export class TransactionExecutor {
             scheduleTx.setScheduleMemo(scheduleOptions.scheduleMemo);
         }
 
-        return await this.run(
-            scheduleTx,
-            options,
-            event,
-            (receipt, transactionId) => ({
-                scheduleId: receipt.scheduleId!.toString(),
-                transactionId,
-            }),
-        );
+        const result = await this.run(scheduleTx, options, event);
+
+        if (!result.receipt.scheduleId) {
+            throw new HieroError(
+                "Schedule creation failed — no scheduleId returned in receipt.",
+                {
+                    code: "SDK_ERROR",
+                    context: `${event.serviceName}.${event.methodName}`,
+                    sdkStatus: result.status,
+                    transactionId: result.transactionId,
+                },
+            );
+        }
+
+        return {
+            scheduleId: result.receipt.scheduleId,
+        };
     }
 
     /**

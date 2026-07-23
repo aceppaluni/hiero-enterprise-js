@@ -107,7 +107,7 @@ describe("ContractCreateValidator", () => {
             expect(() =>
                 validator.validate({
                     ...baseOptions,
-                    initialBalance: -1n,
+                    initialBalance: -1n as unknown as number,
                 }),
             ).toThrow(/initialBalance must not be negative/);
         });

@@ -31,7 +31,7 @@ async function readSmallFile(fileService: FileService) {
     console.log("=== Read a small file ===\n");
 
     const payload = "hello, hiero file service";
-    const fileId = await fileService.createFile({
+    const { fileId } = await fileService.createFile({
         contents: payload,
         fileMemo: "small demo",
     });
@@ -39,7 +39,7 @@ async function readSmallFile(fileService: FileService) {
     const info = await fileService.getFileInfo(fileId);
     const bytes = await fileService.getFileContents(fileId);
 
-    console.log("File ID:", fileId);
+    console.log("File ID:", fileId.toString());
     console.log("  - size (info):", info.size.toString(), "bytes");
     console.log("  - memo:", info.fileMemo);
     console.log("  - isDeleted:", info.isDeleted);
@@ -58,7 +58,7 @@ async function readLargeFile(fileService: FileService) {
     const size = 8 * 1024;
     const payload = Buffer.alloc(size, 0x62); // "bbbb..."
 
-    const fileId = await fileService.createFile({
+    const { fileId } = await fileService.createFile({
         contents: payload,
         fileMemo: "8 KiB blob",
     });
@@ -83,7 +83,7 @@ async function readLargeFile(fileService: FileService) {
 async function inspectImmutableFile(fileService: FileService) {
     console.log("=== Inspect an immutable file's metadata ===\n");
 
-    const fileId = await fileService.createFile({
+    const { fileId } = await fileService.createFile({
         contents: "immutable",
         keys: [],
         fileMemo: "no keys",
@@ -106,7 +106,7 @@ async function inspectImmutableFile(fileService: FileService) {
 async function readDeletedFile(fileService: FileService) {
     console.log("=== Read a deleted file ===\n");
 
-    const fileId = await fileService.createFile({
+    const { fileId } = await fileService.createFile({
         contents: "delete-me",
         fileMemo: "before deletion",
     });

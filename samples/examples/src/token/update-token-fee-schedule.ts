@@ -39,7 +39,7 @@ async function updateTokenFeeSchedule(
 
     const feeScheduleKey = PrivateKey.generateED25519();
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Fee Schedule Demo Token",
         tokenSymbol: "FSD",
         decimals: 0,

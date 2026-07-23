@@ -17,10 +17,7 @@
  * node may add still passes through unchanged.
  */
 export type MirrorKeyType =
-    | "ED25519"
-    | "ECDSA_SECP256K1"
-    | "ProtobufEncoded"
-    | (string & {});
+    "ED25519" | "ECDSA_SECP256K1" | "ProtobufEncoded" | (string & {});
 
 /**
  * A key as the mirror node reports it: the serialized key material plus the

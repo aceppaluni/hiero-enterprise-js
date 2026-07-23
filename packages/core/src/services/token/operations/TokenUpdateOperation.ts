@@ -12,7 +12,6 @@ import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "../../transaction/index.js";
 import { TokenUpdateValidator } from "../validation/index.js";
 
@@ -51,35 +50,30 @@ export class TokenUpdateOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenUpdateValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenUpdateValidator();
     }
 
     /** Submit a `TokenUpdateTransaction`. */
-    async execute(options: TokenUpdateOperationOptions): Promise<void> {
+    async execute(options: TokenUpdateOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenUpdate",
-                serviceName: "TokenService",
-                methodName: "updateToken",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenUpdate",
+            serviceName: "TokenService",
+            methodName: "updateToken",
+            timestamp: new Date(),
+        });
     }
 
     /** Schedule a `TokenUpdateTransaction` for deferred multi-sig execution. */
     async schedule(
         options: TokenUpdateOperationOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
 
         const tx = this.build(options);

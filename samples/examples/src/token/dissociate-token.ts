@@ -46,7 +46,7 @@ async function dissociateToken(
         memo: "dissociate token receiver",
     });
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Dissociate Demo Token",
         tokenSymbol: "DDT",
         decimals: 2,
@@ -97,7 +97,7 @@ async function scheduleDissociateToken(
         memo: "schedule dissociate receiver",
     });
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Scheduled Dissociate Token",
         tokenSymbol: "SDT",
         decimals: 0,
@@ -113,12 +113,7 @@ async function scheduleDissociateToken(
         additionalSigners: [scheduledReceiverKey],
     });
 
-    let scheduled:
-        | {
-              scheduleId: string;
-              transactionId: string;
-          }
-        | undefined;
+    let scheduled: Awaited<ReturnType<TokenService["scheduleDissociateToken"]>>;
 
     try {
         scheduled = await tokenService.scheduleDissociateToken(
@@ -146,7 +141,6 @@ async function scheduleDissociateToken(
     console.log("Receiver account:", scheduledReceiver.accountId);
     console.log("Token ID:", tokenId);
     console.log("Schedule ID:", scheduled.scheduleId);
-    console.log("Transaction ID:", scheduled.transactionId);
     console.log();
 }
 

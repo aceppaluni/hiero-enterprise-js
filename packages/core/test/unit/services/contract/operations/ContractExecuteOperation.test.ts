@@ -52,7 +52,10 @@ describe("ContractExecuteOperation (via ContractService)", () => {
                 functionName: "increment",
             });
 
-            expect(result).toBeUndefined();
+            expect(result).toMatchObject({
+                transactionId: expect.any(String),
+                status: "SUCCESS",
+            });
 
             const tx = vi.mocked(ContractExecuteTransaction).mock.results[0]
                 .value;
@@ -64,6 +67,16 @@ describe("ContractExecuteOperation (via ContractService)", () => {
             expect(mocks.response.getReceipt).toHaveBeenCalledWith(
                 context.client,
             );
+        });
+
+        it("does not fetch the record unless withFunctionResult is set", async () => {
+            await service.executeContract({
+                contractId: "0.0.12345",
+                gas: 100_000,
+                functionName: "increment",
+            });
+
+            expect(mocks.response.recordExecute).not.toHaveBeenCalled();
         });
 
         it("forwards ABI-typed function parameters", async () => {
@@ -178,8 +191,7 @@ describe("ContractExecuteOperation (via ContractService)", () => {
                 functionName: "set",
             });
 
-            expect(result.scheduleId).toBe("0.0.777");
-            expect(result.transactionId).toBe("0.0.123@1234567890.000000000");
+            expect(result.scheduleId.toString()).toBe("0.0.777");
 
             const tx = vi.mocked(ContractExecuteTransaction).mock.results[0]
                 .value;

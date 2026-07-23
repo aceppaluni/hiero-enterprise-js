@@ -28,28 +28,23 @@ export class TopicDeleteOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TopicDeleteValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TopicDeleteValidator();
     }
 
     /** Submit a `TopicDeleteTransaction`. */
-    async execute(options: TopicDeleteOperationOptions): Promise<void> {
+    async execute(options: TopicDeleteOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TopicDelete",
-                serviceName: "TopicService",
-                methodName: "deleteTopic",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TopicDelete",
+            serviceName: "TopicService",
+            methodName: "deleteTopic",
+            timestamp: new Date(),
+        });
     }
 
     private build(

@@ -5,7 +5,6 @@ import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "../../transaction/index.js";
 import { TokenAssociateValidator } from "../validation/index.js";
 
@@ -23,35 +22,30 @@ export class TokenAssociateOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenAssociateValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenAssociateValidator();
     }
 
     /** Submit a `TokenAssociateTransaction`. */
-    async execute(options: TokenAssociateOperationOptions): Promise<void> {
+    async execute(options: TokenAssociateOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenAssociate",
-                serviceName: "TokenService",
-                methodName: "associateToken",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenAssociate",
+            serviceName: "TokenService",
+            methodName: "associateToken",
+            timestamp: new Date(),
+        });
     }
 
     /** Schedule a `TokenAssociateTransaction` for deferred multi-sig execution. */
     async schedule(
         options: TokenAssociateOperationOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
 
         const tx = this.build(options);

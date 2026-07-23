@@ -7,4 +7,4 @@ export type {
     LegacySignature,
 } from "./TransactionOptions.js";
 export type { QueryOptions } from "./QueryOptions.js";
-export type { ScheduleOptions, ScheduledResult } from "./ScheduleOptions.js";
+export type { ScheduleOptions } from "./ScheduleOptions.js";

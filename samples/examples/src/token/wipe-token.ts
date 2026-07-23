@@ -47,7 +47,7 @@ async function wipeFungibleToken(
         memo: "wipe fungible token holder",
     });
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Wipe Demo Token",
         tokenSymbol: "WDT",
         decimals: 0,
@@ -72,7 +72,7 @@ async function wipeFungibleToken(
         { additionalSigners: [ownerKey] },
     );
 
-    const newTotalSupply = await tokenService.wipeToken({
+    const wipeResult = await tokenService.wipeToken({
         tokenId,
         accountId: holder.accountId,
         amount: 250,
@@ -83,7 +83,7 @@ async function wipeFungibleToken(
     console.log("Holder account:", holder.accountId);
     console.log("Token ID:", tokenId);
     console.log("Wiped amount: 250");
-    console.log("New total supply:", newTotalSupply.toString());
+    console.log("New total supply:", wipeResult.totalSupply);
     console.log();
 }
 
@@ -109,7 +109,7 @@ async function wipeNftSerials(
         memo: "wipe nft holder",
     });
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Wipe NFT Collection",
         tokenSymbol: "WNC",
         treasuryAccountId: owner.accountId,
@@ -149,7 +149,7 @@ async function wipeNftSerials(
         { additionalSigners: [ownerKey] },
     );
 
-    const newTotalSupply = await tokenService.wipeToken({
+    const wipeResult = await tokenService.wipeToken({
         tokenId,
         accountId: holder.accountId,
         serials: [1, 2],
@@ -160,7 +160,7 @@ async function wipeNftSerials(
     console.log("Holder account:", holder.accountId);
     console.log("Token ID:", tokenId);
     console.log("Wiped serials: 1, 2");
-    console.log("New total supply:", newTotalSupply.toString());
+    console.log("New total supply:", wipeResult.totalSupply);
     console.log();
 }
 

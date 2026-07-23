@@ -5,7 +5,6 @@ import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "../../transaction/index.js";
 import { UpdateAccountValidator } from "../validation/UpdateAccountValidator.js";
 
@@ -69,38 +68,29 @@ export class UpdateAccountOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: UpdateAccountValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new UpdateAccountValidator();
     }
 
     /** Update account execute handler. */
-    async execute(options: UpdateAccountOptions): Promise<void> {
+    async execute(options: UpdateAccountOptions) {
         this.validator.validate(options);
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "AccountUpdate",
-                serviceName: "AccountService",
-                methodName: "updateAccount",
-                timestamp: new Date(),
-            },
-
-            // TODO: Return something meaningful here
-            // can return a full receipt like
-            // (receipt) => (receipt)
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "AccountUpdate",
+            serviceName: "AccountService",
+            methodName: "updateAccount",
+            timestamp: new Date(),
+        });
     }
 
     /** Schedule account update */
     async schedule(
         options: UpdateAccountOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
         const tx = this.build(options);
         return await this.executor.scheduleRun(

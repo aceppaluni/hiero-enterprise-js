@@ -29,7 +29,7 @@ describe("TokenService associate operations [Integration]", () => {
     it("associates a token to an account", async () => {
         const receiver = await createTestAccount(accountService, 1);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Associate Integration",
             tokenSymbol: "ASI",
             decimals: 2,
@@ -48,16 +48,18 @@ describe("TokenService associate operations [Integration]", () => {
         await waitForMirrorNodeRecord();
 
         const tokens = await queryAccountTokens(receiver.accountId);
-        const relationship = tokens.find((t) => t.token_id === tokenId);
+        const relationship = tokens.find(
+            (t) => t.token_id === tokenId.toString(),
+        );
 
         expect(relationship).toBeDefined();
-        expect(relationship?.token_id).toBe(tokenId);
+        expect(relationship?.token_id).toBe(tokenId.toString());
     }, 120_000);
 
     it("schedules a token association", async () => {
         const scheduledReceiver = await createTestAccount(accountService, 1);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Scheduled Associate",
             tokenSymbol: "SASI",
             decimals: 0,
@@ -77,8 +79,7 @@ describe("TokenService associate operations [Integration]", () => {
                 { scheduleMemo: "integration scheduled associate" },
             );
 
-            expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
-            expect(scheduled.transactionId).toBeDefined();
+            expect(scheduled.scheduleId.toString()).toMatch(/^0\.0\.\d+$/);
             return;
         }
 

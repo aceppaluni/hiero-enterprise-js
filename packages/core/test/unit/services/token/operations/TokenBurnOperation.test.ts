@@ -90,17 +90,20 @@ describe("TokenBurnOperation (via TokenService)", () => {
         expect(mocks.scheduleTx.setScheduleMemo).toHaveBeenCalledWith(
             "pending approval",
         );
-        expect(result.scheduleId).toBe("0.0.777");
-        expect(result.transactionId).toBeDefined();
+        expect(result.scheduleId.toString()).toBe("0.0.777");
     });
 
-    it("returns the new total supply from the receipt", async () => {
-        const totalSupply = await service.burnToken({
+    it("returns the transaction floor and the new total supply", async () => {
+        const result = await service.burnToken({
             tokenId: "0.0.500",
             amount: 10,
         });
 
-        expect(totalSupply).toBe(mocks.receipt.totalSupply);
+        expect(result).toMatchObject({
+            transactionId: "0.0.123@1234567890.000000000",
+            status: "SUCCESS",
+            totalSupply: "1000",
+        });
     });
 
     it("throws when the receipt is missing totalSupply", async () => {

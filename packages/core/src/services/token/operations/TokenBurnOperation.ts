@@ -6,9 +6,9 @@ import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "../../transaction/index.js";
 import { TokenBurnValidator } from "../validation/index.js";
+import { HieroError } from "../../../errors/HieroError.js";
 
 /**
  * Low-level options for the `TokenBurnTransaction` SDK transaction.
@@ -26,7 +26,7 @@ export class TokenBurnOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenBurnValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenBurnValidator();
     }
@@ -34,38 +34,44 @@ export class TokenBurnOperation {
     /**
      * Submit a `TokenBurnTransaction`.
      *
-     * @returns The token's new total supply after the burn.
+     * @returns The executor's shared fields plus the token's new total
+     *   supply after the burn (a decimal string — supplies can exceed 2^53).
      */
-    async execute(options: TokenBurnOperationOptions): Promise<Long> {
+    async execute(options: TokenBurnOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenBurn",
-                serviceName: "TokenService",
-                methodName: "burnToken",
-                timestamp: new Date(),
-            },
-            (receipt) => {
-                if (receipt.totalSupply == null) {
-                    throw new Error(
-                        "TokenBurn receipt did not include totalSupply.",
-                    );
-                }
-                return receipt.totalSupply;
-            },
-        );
+        const results = await this.executor.run(tx, options, {
+            type: "TokenBurn",
+            serviceName: "TokenService",
+            methodName: "burnToken",
+            timestamp: new Date(),
+        });
+
+        if (results.receipt.totalSupply == null) {
+            throw new HieroError(
+                "TokenBurn receipt did not include totalSupply.",
+                {
+                    code: "SDK_ERROR",
+                    context: "TokenBurnOperation.execute",
+                    sdkStatus: results.status,
+                    transactionId: results.transactionId,
+                },
+            );
+        }
+
+        return {
+            ...results,
+            totalSupply: results.receipt.totalSupply.toString(),
+        };
     }
 
     /** Schedule a `TokenBurnTransaction` for deferred multi-sig execution. */
     async schedule(
         options: TokenBurnOperationOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
 
         const tx = this.build(options);

@@ -8,7 +8,7 @@ import type {
 } from "@hiero-ledger/sdk";
 import { ContractCreateFlow } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
-import { normalizeError } from "../../../errors/index.js";
+import { HieroError, normalizeError } from "../../../errors/index.js";
 import type { FlowOptions } from "../../transaction/index.js";
 import { ContractCreateFlowValidator } from "../validation/index.js";
 
@@ -95,9 +95,7 @@ export class ContractCreateFlowOperation {
      * the lifecycle (signers, execute, receipt, events) is owned by the
      * operation directly rather than by the shared `TransactionExecutor`.
      */
-    async execute(
-        options: ContractCreateFlowOperationOptions,
-    ): Promise<string> {
+    async execute(options: ContractCreateFlowOperationOptions) {
         this.validator.validate(options);
 
         const flow = this.build(options);
@@ -124,7 +122,19 @@ export class ContractCreateFlowOperation {
             const response = await flow.execute(this.context.client);
             const receipt = await response.getReceipt(this.context.client);
             const transactionId = response.transactionId.toString();
-            const contractId = receipt.contractId!.toString();
+
+            if (!receipt.contractId) {
+                throw new HieroError(
+                    "Contract creation failed — no contractId returned in receipt.",
+                    {
+                        code: "SDK_ERROR",
+                        context: "ContractService.createContractFlow",
+                        sdkStatus: receipt.status.toString(),
+                        transactionId,
+                    },
+                );
+            }
+            const contractId = receipt.contractId;
 
             await this.context.emitAfterTransaction({
                 ...event,
@@ -133,7 +143,13 @@ export class ContractCreateFlowOperation {
                 durationMs: Date.now() - start,
             });
 
-            return contractId;
+            return {
+                response,
+                receipt,
+                transactionId,
+                status: receipt.status.toString(),
+                contractId,
+            };
         } catch (error) {
             await this.context.emitAfterTransaction({
                 ...event,

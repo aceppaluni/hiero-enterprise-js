@@ -72,12 +72,12 @@ describe("ContractCreateFlowOperation (via ContractService)", () => {
         it("submits a ContractCreateFlow with only required fields and returns the contractId", async () => {
             const bytecode = new Uint8Array([0x60, 0x80, 0x60, 0x40]);
 
-            const contractId = await service.createContractFlow({
+            const { contractId } = await service.createContractFlow({
                 bytecode,
                 gas: 150_000,
             });
 
-            expect(contractId).toBe("0.0.666");
+            expect(contractId.toString()).toBe("0.0.666");
             expect(vi.mocked(ContractCreateFlow)).toHaveBeenCalledTimes(1);
             expect(mocks.flow.setBytecode).toHaveBeenCalledWith(bytecode);
             expect(mocks.flow.setGas).toHaveBeenCalledWith(150_000);

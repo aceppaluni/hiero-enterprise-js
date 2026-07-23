@@ -28,28 +28,23 @@ export class FileDeleteOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: FileDeleteValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new FileDeleteValidator();
     }
 
     /** Submit a `FileDeleteTransaction`. */
-    async execute(options: FileDeleteOperationOptions): Promise<void> {
+    async execute(options: FileDeleteOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        await this.executor.run(
-            tx,
-            options,
-            {
-                type: "FileDelete",
-                serviceName: "FileService",
-                methodName: "deleteFile",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "FileDelete",
+            serviceName: "FileService",
+            methodName: "deleteFile",
+            timestamp: new Date(),
+        });
     }
 
     private build(options: FileDeleteOperationOptions): FileDeleteTransaction {

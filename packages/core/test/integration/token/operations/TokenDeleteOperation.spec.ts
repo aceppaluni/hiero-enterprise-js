@@ -27,7 +27,7 @@ describe("TokenService delete operations [Integration]", () => {
     it("deletes a token signed by the admin key", async () => {
         const adminKey = PrivateKey.generateED25519();
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Delete Integration",
             tokenSymbol: "DEL",
             decimals: 0,

@@ -9,11 +9,11 @@ import type {
 } from "@hiero-ledger/sdk";
 import { ContractCreateTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
+import { HieroError } from "../../../errors/HieroError.js";
 import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "../../transaction/index.js";
 import { ContractCreateValidator } from "../validation/index.js";
 
@@ -77,35 +77,47 @@ export class ContractCreateOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: ContractCreateValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new ContractCreateValidator();
     }
 
     /** Submit a `ContractCreateTransaction` and return the new contract ID. */
-    async execute(options: ContractCreateOperationOptions): Promise<string> {
+    async execute(options: ContractCreateOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "ContractCreate",
-                serviceName: "ContractService",
-                methodName: "createContract",
-                timestamp: new Date(),
-            },
-            (receipt) => receipt.contractId!.toString(),
-        );
+        const results = await this.executor.run(tx, options, {
+            type: "ContractCreate",
+            serviceName: "ContractService",
+            methodName: "createContract",
+            timestamp: new Date(),
+        });
+
+        if (!results.receipt.contractId) {
+            throw new HieroError(
+                "Contract creation failed — no contractId returned in receipt.",
+                {
+                    code: "SDK_ERROR",
+                    context: "ContractCreateOperation.execute",
+                    sdkStatus: results.status,
+                    transactionId: results.transactionId,
+                },
+            );
+        }
+
+        return {
+            ...results,
+            contractId: results.receipt.contractId,
+        };
     }
 
     /** Schedule a `ContractCreateTransaction` for deferred multi-sig execution. */
     async schedule(
         options: ContractCreateOperationOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
 
         const tx = this.build(options);

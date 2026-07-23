@@ -26,6 +26,7 @@
  * Run: pnpm tsx src/token/airdrop-fungible-token.ts
  */
 
+import type { TokenId } from "@hiero-hackers/enterprise-core";
 import {
     AccountService,
     AccountType,
@@ -38,9 +39,10 @@ import { getED25519Config } from "../env.js";
 
 function tokenBalanceFor(
     balance: Balance,
-    tokenId: string,
+    tokenId: string | TokenId,
 ): string | undefined {
-    return balance.tokens.find((t) => t.tokenId === tokenId)?.balance;
+    return balance.tokens.find((t) => t.tokenId === tokenId.toString())
+        ?.balance;
 }
 
 async function createKeyedAccount(
@@ -55,7 +57,7 @@ async function createKeyedAccount(
         initialBalance,
         memo,
     });
-    return { accountId: account.accountId, key };
+    return { accountId: account.accountId.toString(), key };
 }
 
 async function multiReceiverImmediateCredit(
@@ -69,7 +71,7 @@ async function multiReceiverImmediateCredit(
     const receiver2 = await createKeyedAccount(accountService, 2, "receiver 2");
     const receiver3 = await createKeyedAccount(accountService, 2, "receiver 3");
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Multi Airdrop Demo Token",
         tokenSymbol: "MAIR",
         decimals: 0,
@@ -91,20 +93,20 @@ async function multiReceiverImmediateCredit(
         airdrops: [
             {
                 tokenId,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver1.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver1.accountId.toString(),
                 amount: 10,
             },
             {
                 tokenId,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver2.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver2.accountId.toString(),
                 amount: 20,
             },
             {
                 tokenId,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver3.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver3.accountId.toString(),
                 amount: 30,
             },
         ],
@@ -137,7 +139,7 @@ async function pendingAirdropToUnassociatedReceiver(
         "pending receiver",
     );
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Pending Airdrop Demo Token",
         tokenSymbol: "PAIR",
         decimals: 0,
@@ -153,8 +155,8 @@ async function pendingAirdropToUnassociatedReceiver(
         airdrops: [
             {
                 tokenId,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver.accountId.toString(),
                 amount: 15,
             },
         ],
@@ -196,7 +198,7 @@ async function mixedBatch(
         "unassociated receiver",
     );
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Mixed Airdrop Demo Token",
         tokenSymbol: "MIXAIR",
         decimals: 0,
@@ -216,14 +218,14 @@ async function mixedBatch(
         airdrops: [
             {
                 tokenId,
-                senderAccountId: owner.accountId,
-                receiverAccountId: associated.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: associated.accountId.toString(),
                 amount: 7,
             },
             {
                 tokenId,
-                senderAccountId: owner.accountId,
-                receiverAccountId: unassociated.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: unassociated.accountId.toString(),
                 amount: 11,
             },
         ],

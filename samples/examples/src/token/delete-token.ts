@@ -46,7 +46,7 @@ async function deleteToken(
 
     const adminKey = PrivateKey.generateED25519();
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Doomed Token",
         tokenSymbol: "DOOM",
         decimals: 0,

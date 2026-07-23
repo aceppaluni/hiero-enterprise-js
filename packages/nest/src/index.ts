@@ -56,10 +56,7 @@ const EXPORTED_TOKENS = [
 ];
 
 type NestImport =
-    | Type<unknown>
-    | DynamicModule
-    | Promise<DynamicModule>
-    | ForwardReference;
+    Type<unknown> | DynamicModule | Promise<DynamicModule> | ForwardReference;
 
 /**
  * Options for async configuration of HieroModule.

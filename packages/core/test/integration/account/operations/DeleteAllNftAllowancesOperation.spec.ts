@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { Status } from "@hiero-ledger/sdk";
 import { setupIntegrationTestEnv } from "../../../utils/env.js";
 import { createOwnerSpenderPair } from "../../../utils/integration-fixtures.js";
 import {
@@ -20,7 +19,7 @@ describe("AccountService.deleteAllNftAllowances [Integration]", () => {
     it("deletes an approve-for-all-serials NFT allowance", async () => {
         const { owner, spender } = await createOwnerSpenderPair(client);
 
-        const tokenId = await tokenService.createNft({
+        const { tokenId } = await tokenService.createNft({
             tokenName: "Delete All NFT Allowance",
             tokenSymbol: "DANAL",
             treasuryAccountId: owner.accountId,
@@ -38,10 +37,10 @@ describe("AccountService.deleteAllNftAllowances [Integration]", () => {
         // receipt's status field rather than via a mirror-node lookup because
         // the Solo (local) Mirror Node does not populate the
         // `/api/v1/accounts/{id}/allowances/nfts` derived view.
-        const approveReceipt = await client.approveNftAllowance({
+        const approveResult = await client.approveNftAllowance({
             nftAllowances: [
                 {
-                    tokenId,
+                    tokenId: tokenId.toString(),
                     ownerAccountId: owner.accountId,
                     spenderAccountId: spender.accountId,
                     allSerials: true,
@@ -49,20 +48,20 @@ describe("AccountService.deleteAllNftAllowances [Integration]", () => {
             ],
             additionalSigners: [owner.key],
         });
-        expect(approveReceipt.status).toBe(Status.Success);
+        expect(approveResult.status).toBe("SUCCESS");
 
         // Revoke approve-for-all-serials. Same verification strategy — the
         // receipt status is the source of truth for this assertion.
-        const deleteReceipt = await client.deleteAllNftAllowances(
+        const deleteResult = await client.deleteAllNftAllowances(
             [
                 {
-                    tokenId,
+                    tokenId: tokenId.toString(),
                     ownerAccountId: owner.accountId,
                     spenderAccountId: spender.accountId,
                 },
             ],
             { additionalSigners: [owner.key] },
         );
-        expect(deleteReceipt.status).toBe(Status.Success);
+        expect(deleteResult.status).toBe("SUCCESS");
     });
 });

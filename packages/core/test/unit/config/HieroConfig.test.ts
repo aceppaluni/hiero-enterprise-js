@@ -19,7 +19,7 @@ describe("resolveConfigFromEnv", () => {
             HIERO_OPERATOR_KEY_TYPE: "ECDSA",
         };
         const config = resolveConfigFromEnv();
-        expect(config).toEqual({
+        expect(config).toMatchObject({
             network: "testnet",
             operatorId: "0.0.1",
             operatorKey: "key123",
@@ -46,7 +46,7 @@ describe("resolveConfigFromEnv", () => {
             HIERO_OPERATOR_KEY_TYPE: "ed25519",
             HIERO_NETWORK_NODES: "127.0.0.1:50211=0.0.3, 127.0.0.1:50212=0.0.4",
         };
-        expect(resolveConfigFromEnv()?.networkNodes).toEqual({
+        expect(resolveConfigFromEnv()?.networkNodes).toMatchObject({
             "127.0.0.1:50211": "0.0.3",
             "127.0.0.1:50212": "0.0.4",
         });

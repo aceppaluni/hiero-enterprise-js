@@ -78,11 +78,38 @@ export interface MockReceipt {
     totalSupply: { toString(): string } | null;
     topicSequenceNumber: { toString(): string; toNumber(): number };
     topicRunningHash: Uint8Array;
+    serials: Array<{ toNumber(): number }>;
+    /** Set when a schedule-sign completed the schedule. */
+    scheduledTransactionId: { toString(): string } | null;
+    /** Child receipts (populated when the executor asks for them). */
+    children: Array<{ accountId: { toString(): string } | null }>;
+}
+
+/** Minimal record shape for `outcome.getRecord()` consumers. */
+export interface MockRecord {
+    contractFunctionResult: {
+        bytes: Uint8Array;
+        gasUsed: { toNumber(): number };
+        errorMessage: string | null;
+    } | null;
 }
 
 export interface MockTransactionResponse {
     transactionId: { toString(): string };
     getReceipt: MockFn;
+    /**
+     * The `execute` spy behind `getRecordQuery()` — the executor fetches
+     * records via a direct query, so tests count *paid record queries* by
+     * counting calls to this spy (and stub record data on it).
+     */
+    recordExecute: MockFn;
+    getRecordQuery: MockFn;
+    /** Query used by the executor when child receipts are requested. */
+    getReceiptQuery: MockFn;
+    /** Spy behind `getReceiptQuery().setIncludeChildren(...)`. */
+    setIncludeChildren: MockFn;
+    /** The `execute` spy behind `getReceiptQuery()`. */
+    receiptQueryExecute: MockFn;
 }
 
 /**
@@ -132,6 +159,19 @@ export function buildMockReceipt(
         totalSupply: { toString: () => "1000" },
         topicSequenceNumber: { toString: () => "1", toNumber: () => 1 },
         topicRunningHash: new Uint8Array([1, 2, 3, 4]),
+        serials: [],
+        scheduledTransactionId: null,
+        children: [],
+        ...overrides,
+    };
+}
+
+/** Build a record with a contract function result (or none). */
+export function buildMockRecord(
+    overrides: Partial<MockRecord> = {},
+): MockRecord {
+    return {
+        contractFunctionResult: null,
         ...overrides,
     };
 }
@@ -170,9 +210,26 @@ export function buildMockTxBundle(
     extraMethods: readonly string[] = [],
 ): MockTxBundle {
     const receipt = buildMockReceipt();
+    const recordExecute = vi.fn().mockResolvedValue(buildMockRecord());
+    // Persistent spies for the child-receipt query so tests can observe
+    // the whole chain (a fresh vi.fn() per call would be unassertable).
+    const setIncludeChildren = vi.fn();
+    const receiptQueryExecute = vi.fn().mockResolvedValue(receipt);
+    const receiptQuery = {
+        setIncludeChildren,
+        execute: receiptQueryExecute,
+    };
+    setIncludeChildren.mockReturnValue(receiptQuery);
     const response: MockTransactionResponse = {
         transactionId: { toString: () => "0.0.123@1234567890.000000000" },
         getReceipt: vi.fn().mockResolvedValue(receipt),
+        recordExecute,
+        // Executor record path: query builder → record (spy counts paid queries).
+        getRecordQuery: vi.fn(() => ({ execute: recordExecute })),
+        // Executor path for child receipts: query builder → same receipt.
+        getReceiptQuery: vi.fn(() => receiptQuery),
+        setIncludeChildren,
+        receiptQueryExecute,
     };
 
     const scheduleTx: MockScheduleTransaction = {
@@ -195,12 +252,27 @@ export function buildMockTxBundle(
 }
 
 /**
- * Re-establish the `mockResolvedValue` / `mockReturnValue` chain that
- * `vi.clearAllMocks()` wipes. Call from `beforeEach` right after
- * `vi.clearAllMocks()`.
+ * Re-establish the bundle's `mockResolvedValue` / `mockReturnValue` /
+ * `mockImplementation` wiring. With this repo's vitest config,
+ * `vi.clearAllMocks()` clears call history only and leaves implementations
+ * intact — so this is defensive: it keeps the bundle working even if a
+ * test file resets implementations (`vi.resetAllMocks()`, `mockReset`,
+ * or a `mock*Once` that consumed the default). Call from `beforeEach`
+ * right after `vi.clearAllMocks()`.
  */
 export function reattachMockChain(bundle: MockTxBundle): void {
     bundle.response.getReceipt.mockResolvedValue(bundle.receipt);
+    bundle.response.recordExecute.mockResolvedValue(buildMockRecord());
+    bundle.response.getRecordQuery.mockImplementation(() => ({
+        execute: bundle.response.recordExecute,
+    }));
+    const receiptQuery = {
+        setIncludeChildren: bundle.response.setIncludeChildren,
+        execute: bundle.response.receiptQueryExecute,
+    };
+    bundle.response.setIncludeChildren.mockReturnValue(receiptQuery);
+    bundle.response.receiptQueryExecute.mockResolvedValue(bundle.receipt);
+    bundle.response.getReceiptQuery.mockImplementation(() => receiptQuery);
     bundle.tx.execute.mockResolvedValue(bundle.response);
     bundle.tx.sign.mockResolvedValue(undefined);
     bundle.tx.signWith.mockResolvedValue(undefined);

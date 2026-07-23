@@ -50,28 +50,23 @@ export class FileAppendOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: FileAppendValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new FileAppendValidator();
     }
 
     /** Submit a `FileAppendTransaction`. */
-    async execute(options: FileAppendOperationOptions): Promise<void> {
+    async execute(options: FileAppendOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        await this.executor.run(
-            tx,
-            options,
-            {
-                type: "FileAppend",
-                serviceName: "FileService",
-                methodName: "appendToFile",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "FileAppend",
+            serviceName: "FileService",
+            methodName: "appendToFile",
+            timestamp: new Date(),
+        });
     }
 
     private build(options: FileAppendOperationOptions): FileAppendTransaction {

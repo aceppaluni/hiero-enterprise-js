@@ -26,13 +26,13 @@ describe("ContractCreateFlowOperation", () => {
     });
 
     it("deploys a contract end-to-end via the flow (file upload + create + cleanup)", async () => {
-        const contractId = await contractService.createContractFlow({
+        const { contractId } = await contractService.createContractFlow({
             bytecode: MINIMAL_BYTECODE_HEX,
             gas: 150_000,
             contractMemo: "deployed via flow",
         });
 
-        expect(contractId).toMatch(/^0\.0\.\d+$/);
+        expect(contractId.toString()).toMatch(/^0\.0\.\d+$/);
 
         await waitForMirrorNodeRecord();
 
@@ -49,7 +49,7 @@ describe("ContractCreateFlowOperation", () => {
     it("deploys a mutable contract via the flow and signs with the admin key", async () => {
         const adminKey = PrivateKey.generateED25519();
 
-        const contractId = await contractService.createContractFlow({
+        const { contractId } = await contractService.createContractFlow({
             bytecode: MINIMAL_BYTECODE_HEX,
             gas: 150_000,
             adminKey: adminKey.publicKey,
@@ -57,7 +57,7 @@ describe("ContractCreateFlowOperation", () => {
             additionalSigners: [adminKey],
         });
 
-        expect(contractId).toMatch(/^0\.0\.\d+$/);
+        expect(contractId.toString()).toMatch(/^0\.0\.\d+$/);
 
         await waitForMirrorNodeRecord();
 
@@ -65,7 +65,7 @@ describe("ContractCreateFlowOperation", () => {
             () => queryContractInfo(contractId),
             { description: `contract ${contractId}` },
         );
-        expect(info.contract_id).toBe(contractId);
+        expect(info.contract_id).toBe(contractId.toString());
         // Admin key was set, so contract is not immutable.
         expect(info.deleted).toBe(false);
     });

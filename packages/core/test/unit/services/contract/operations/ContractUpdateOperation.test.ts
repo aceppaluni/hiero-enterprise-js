@@ -50,7 +50,10 @@ describe("ContractUpdateOperation (via ContractService)", () => {
                 contractId: "0.0.12345",
             });
 
-            expect(result).toBeUndefined();
+            expect(result).toMatchObject({
+                transactionId: expect.any(String),
+                status: "SUCCESS",
+            });
 
             const tx = vi.mocked(ContractUpdateTransaction).mock.results[0]
                 .value;
@@ -162,8 +165,7 @@ describe("ContractUpdateOperation (via ContractService)", () => {
                 contractMemo: "scheduled rename",
             });
 
-            expect(result.scheduleId).toBe("0.0.777");
-            expect(result.transactionId).toBe("0.0.123@1234567890.000000000");
+            expect(result.scheduleId.toString()).toBe("0.0.777");
 
             const tx = vi.mocked(ContractUpdateTransaction).mock.results[0]
                 .value;

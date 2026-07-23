@@ -9,7 +9,7 @@ import {
     AccountService,
     TokenService,
 } from "../../../../src/services/index.js";
-import { NftId, TokenId, TokenType, TokenSupplyType } from "@hiero-ledger/sdk";
+import { NftId, TokenType, TokenSupplyType } from "@hiero-ledger/sdk";
 
 describe("TokenService info queries [Integration]", () => {
     let accountService: AccountService;
@@ -25,7 +25,7 @@ describe("TokenService info queries [Integration]", () => {
 
     describe("getTokenInfo", () => {
         it("returns the definition of a fungible token", async () => {
-            const tokenId = await tokenService.createFungibleToken({
+            const { tokenId } = await tokenService.createFungibleToken({
                 tokenName: "Token Info Fungible Integration",
                 tokenSymbol: "TIFI",
                 decimals: 2,
@@ -42,7 +42,7 @@ describe("TokenService info queries [Integration]", () => {
 
             const info = await tokenService.getTokenInfo(tokenId);
 
-            expect(info.tokenId).toBe(tokenId);
+            expect(info.tokenId).toBe(tokenId.toString());
             expect(info.name).toBe("Token Info Fungible Integration");
             expect(info.symbol).toBe("TIFI");
             expect(info.decimals).toBe(2);
@@ -62,7 +62,7 @@ describe("TokenService info queries [Integration]", () => {
         });
 
         it("returns the definition of an NFT collection (decimals 0, type NonFungibleUnique)", async () => {
-            const tokenId = await tokenService.createNft({
+            const { tokenId } = await tokenService.createNft({
                 tokenName: "Token Info NFT Integration",
                 tokenSymbol: "TINI",
                 treasuryAccountId: owner.accountId,
@@ -74,11 +74,9 @@ describe("TokenService info queries [Integration]", () => {
 
             await waitForMirrorNodeRecord();
 
-            const info = await tokenService.getTokenInfo(
-                TokenId.fromString(tokenId),
-            );
+            const info = await tokenService.getTokenInfo(tokenId);
 
-            expect(info.tokenId).toBe(tokenId);
+            expect(info.tokenId).toBe(tokenId.toString());
             expect(info.tokenType).toBe(TokenType.NonFungibleUnique);
             expect(info.decimals).toBe(0);
             expect(info.totalSupply).toBe("0");
@@ -91,7 +89,7 @@ describe("TokenService info queries [Integration]", () => {
 
     describe("getNftInfo", () => {
         it("returns owner, creation time, and metadata for a minted NFT serial", async () => {
-            const tokenId = await tokenService.createNft({
+            const { tokenId } = await tokenService.createNft({
                 tokenName: "NFT Info Single Integration",
                 tokenSymbol: "NISI",
                 treasuryAccountId: owner.accountId,
@@ -108,11 +106,11 @@ describe("TokenService info queries [Integration]", () => {
 
             await waitForMirrorNodeRecord();
 
-            const nftId = new NftId(TokenId.fromString(tokenId), 1);
+            const nftId = new NftId(tokenId, 1);
             const info = await tokenService.getNftInfo(nftId);
 
             expect(info.nftId).toBe(`${tokenId}/1`);
-            expect(info.tokenId).toBe(tokenId);
+            expect(info.tokenId).toBe(tokenId.toString());
             expect(info.serial).toBe("1");
             expect(info.accountId).toBe(owner.accountId);
             expect(info.spenderId).toBeNull();
@@ -127,7 +125,7 @@ describe("TokenService info queries [Integration]", () => {
         it("returns the post-transfer owner for a serial that was moved to another account", async () => {
             const receiver = await createTestAccount(accountService, 2);
 
-            const tokenId = await tokenService.createNft({
+            const { tokenId } = await tokenService.createNft({
                 tokenName: "NFT Info Transfer Integration",
                 tokenSymbol: "NITI",
                 treasuryAccountId: owner.accountId,
@@ -166,7 +164,7 @@ describe("TokenService info queries [Integration]", () => {
 
             const info = await tokenService.getNftInfo(`${tokenId}/1`);
 
-            expect(info.tokenId).toBe(tokenId);
+            expect(info.tokenId).toBe(tokenId.toString());
             expect(info.serial).toBe("1");
             expect(info.accountId).toBe(receiver.accountId);
         });

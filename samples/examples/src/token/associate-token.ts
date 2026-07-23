@@ -41,7 +41,7 @@ async function associateToken(
         memo: "associate token receiver",
     });
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Associate Demo Token",
         tokenSymbol: "ADT",
         decimals: 2,
@@ -85,7 +85,7 @@ async function scheduleAssociateToken(
         memo: "schedule associate receiver",
     });
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Scheduled Associate Token",
         tokenSymbol: "SAT",
         decimals: 0,
@@ -95,12 +95,7 @@ async function scheduleAssociateToken(
         additionalSigners: [ownerKey],
     });
 
-    let scheduled:
-        | {
-              scheduleId: string;
-              transactionId: string;
-          }
-        | undefined;
+    let scheduled;
 
     try {
         scheduled = await tokenService.scheduleAssociateToken(
@@ -127,8 +122,7 @@ async function scheduleAssociateToken(
     console.log("Owner account:", owner.accountId);
     console.log("Receiver account:", scheduledReceiver.accountId);
     console.log("Token ID:", tokenId);
-    console.log("Schedule ID:", scheduled.scheduleId);
-    console.log("Transaction ID:", scheduled.transactionId);
+    console.log("Schedule ID:", scheduled.scheduleId.toString());
     console.log();
 }
 

@@ -29,7 +29,7 @@ describe("TokenService dissociate operations [Integration]", () => {
     it("dissociates a token from an account", async () => {
         const receiver = await createTestAccount(accountService, 1);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Dissociate Integration",
             tokenSymbol: "DSI",
             decimals: 2,
@@ -48,7 +48,9 @@ describe("TokenService dissociate operations [Integration]", () => {
         await waitForMirrorNodeRecord();
 
         const before = await queryAccountTokens(receiver.accountId);
-        expect(before.find((t) => t.token_id === tokenId)).toBeDefined();
+        expect(
+            before.find((t) => t.token_id === tokenId.toString()),
+        ).toBeDefined();
 
         await tokenService.dissociateToken({
             accountId: receiver.accountId,
@@ -59,13 +61,15 @@ describe("TokenService dissociate operations [Integration]", () => {
         await waitForMirrorNodeRecord();
 
         const after = await queryAccountTokens(receiver.accountId);
-        expect(after.find((t) => t.token_id === tokenId)).toBeUndefined();
+        expect(
+            after.find((t) => t.token_id === tokenId.toString()),
+        ).toBeUndefined();
     });
 
     it("schedules a token dissociation", async () => {
         const scheduledReceiver = await createTestAccount(accountService, 1);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Scheduled Dissociate",
             tokenSymbol: "SDSI",
             decimals: 0,
@@ -91,8 +95,7 @@ describe("TokenService dissociate operations [Integration]", () => {
                 { scheduleMemo: "integration scheduled dissociate" },
             );
 
-            expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
-            expect(scheduled.transactionId).toBeDefined();
+            expect(scheduled.scheduleId.toString()).toMatch(/^0\.0\.\d+$/);
             return;
         }
 

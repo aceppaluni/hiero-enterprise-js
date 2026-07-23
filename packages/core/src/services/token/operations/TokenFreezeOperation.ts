@@ -25,28 +25,23 @@ export class TokenFreezeOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenFreezeValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenFreezeValidator();
     }
 
     /** Submit a `TokenFreezeTransaction`. */
-    async execute(options: TokenFreezeOperationOptions): Promise<void> {
+    async execute(options: TokenFreezeOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenFreeze",
-                serviceName: "TokenService",
-                methodName: "freezeToken",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenFreeze",
+            serviceName: "TokenService",
+            methodName: "freezeToken",
+            timestamp: new Date(),
+        });
     }
 
     private build(

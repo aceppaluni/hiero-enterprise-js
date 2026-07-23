@@ -60,9 +60,11 @@ describe("FileCreateOperation (via FileService)", () => {
 
     describe("createFile", () => {
         it("submits a FileCreateTransaction with the operator's key by default", async () => {
-            const result = await service.createFile({ contents: "hello" });
+            const { fileId: result } = await service.createFile({
+                contents: "hello",
+            });
 
-            expect(result).toBe("0.0.555");
+            expect(result.toString()).toBe("0.0.555");
 
             const tx = vi.mocked(FileCreateTransaction).mock.results[0].value;
             expect(tx.setContents).toHaveBeenCalledWith("hello");
@@ -134,9 +136,11 @@ describe("FileCreateOperation (via FileService)", () => {
             // 4096 (single-tx limit) + 500 spillover.
             const large = Buffer.alloc(4596, 0x61);
 
-            const result = await service.createFile({ contents: large });
+            const { fileId: result } = await service.createFile({
+                contents: large,
+            });
 
-            expect(result).toBe("0.0.555");
+            expect(result.toString()).toBe("0.0.555");
 
             const createTx = vi.mocked(FileCreateTransaction).mock.results[0]
                 .value;
@@ -149,7 +153,18 @@ describe("FileCreateOperation (via FileService)", () => {
             expect(createArg.byteLength).toBe(4096);
 
             // Remainder went into the append, keyed by the new fileId.
-            expect(appendTx.setFileId).toHaveBeenCalledWith("0.0.555");
+            expect(appendTx.setFileId).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    toString: expect.any(Function),
+                }),
+            );
+            expect(
+                (
+                    appendTx.setFileId.mock.calls[0][0] as {
+                        toString(): string;
+                    }
+                ).toString(),
+            ).toBe("0.0.555");
             const appendArg = vi.mocked(appendTx.setContents).mock
                 .calls[0][0] as Uint8Array;
             expect(appendArg.byteLength).toBe(500);
@@ -199,9 +214,9 @@ describe("FileCreateOperation (via FileService)", () => {
         });
 
         it("creates an empty file when contents is omitted (SDK parity)", async () => {
-            const result = await service.createFile();
+            const { fileId: result } = await service.createFile();
 
-            expect(result).toBe("0.0.555");
+            expect(result.toString()).toBe("0.0.555");
 
             const tx = vi.mocked(FileCreateTransaction).mock.results[0].value;
             // No contents → setContents is never called (matches the SDK's
@@ -218,9 +233,9 @@ describe("FileCreateOperation (via FileService)", () => {
 
         it("creates an empty operator-modifiable file when called with no arguments", async () => {
             // DX shortcut: `createFile()` with no options behaves like
-            const result = await service.createFile();
+            const { fileId: result } = await service.createFile();
 
-            expect(result).toBe("0.0.555");
+            expect(result.toString()).toBe("0.0.555");
 
             const tx = vi.mocked(FileCreateTransaction).mock.results[0].value;
             expect(tx.setContents).not.toHaveBeenCalled();

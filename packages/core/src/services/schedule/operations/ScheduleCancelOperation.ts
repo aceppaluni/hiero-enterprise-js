@@ -24,12 +24,12 @@ export interface ScheduleCancelOptions extends TransactionOptions {
 export class ScheduleCancelOperation {
     private readonly executor: TransactionExecutor;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
     }
 
     /** Schedule cancel execute handler. */
-    async execute(options: ScheduleCancelOptions): Promise<void> {
+    async execute(options: ScheduleCancelOptions) {
         // adminKey must co-sign the ScheduleDeleteTransaction — prepend it so
         // the executor freezes and signs before the operator auto-sign
         const opts: ScheduleCancelOptions = {
@@ -42,18 +42,11 @@ export class ScheduleCancelOperation {
         const tx = new ScheduleDeleteTransaction().setScheduleId(
             options.scheduleId,
         );
-        return this.executor.run(
-            tx,
-            opts,
-            {
-                type: "ScheduleDelete",
-                serviceName: "ScheduleService",
-                methodName: "cancel",
-                timestamp: new Date(),
-            },
-
-            // TODO: return a more meaningful result here.
-            () => undefined,
-        );
+        return this.executor.run(tx, opts, {
+            type: "ScheduleDelete",
+            serviceName: "ScheduleService",
+            methodName: "cancel",
+            timestamp: new Date(),
+        });
     }
 }

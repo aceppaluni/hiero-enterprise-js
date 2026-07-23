@@ -49,7 +49,7 @@ describe("CreateAccountOperation (via AccountService)", () => {
             const pubKey = PrivateKey.generateED25519().publicKey.toString();
             const account = await service.createAccount({ publicKey: pubKey });
 
-            expect(account.accountId).toBe("0.0.999");
+            expect(account.accountId.toString()).toBe("0.0.999");
             expect(account.publicKey).toBeDefined();
             expect(account.evmAddress).toBeUndefined();
 
@@ -182,8 +182,7 @@ describe("CreateAccountOperation (via AccountService)", () => {
             expect(mocks.scheduleTx.setScheduleMemo).toHaveBeenCalledWith(
                 "pending approval",
             );
-            expect(result.scheduleId).toBe("0.0.777");
-            expect(result.transactionId).toBeDefined();
+            expect(result.scheduleId.toString()).toBe("0.0.777");
         });
     });
 });

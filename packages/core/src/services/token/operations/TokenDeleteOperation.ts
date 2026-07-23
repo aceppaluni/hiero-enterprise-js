@@ -24,28 +24,23 @@ export class TokenDeleteOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenDeleteValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenDeleteValidator();
     }
 
     /** Submit a `TokenDeleteTransaction`. */
-    async execute(options: TokenDeleteOperationOptions): Promise<void> {
+    async execute(options: TokenDeleteOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenDelete",
-                serviceName: "TokenService",
-                methodName: "deleteToken",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenDelete",
+            serviceName: "TokenService",
+            methodName: "deleteToken",
+            timestamp: new Date(),
+        });
     }
 
     private build(

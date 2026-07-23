@@ -33,6 +33,7 @@
  * Run: pnpm tsx src/token/claim-airdrop.ts
  */
 
+import type { TokenId } from "@hiero-hackers/enterprise-core";
 import {
     AccountService,
     AccountType,
@@ -40,7 +41,6 @@ import {
     NftId,
     PendingAirdropId,
     PrivateKey,
-    TokenId,
     TokenService,
     type Balance,
 } from "@hiero-hackers/enterprise-core";
@@ -48,9 +48,10 @@ import { getED25519Config } from "../env.js";
 
 function tokenBalanceFor(
     balance: Balance,
-    tokenId: string,
+    tokenId: string | TokenId,
 ): string | undefined {
-    return balance.tokens.find((t) => t.tokenId === tokenId)?.balance;
+    return balance.tokens.find((t) => t.tokenId === tokenId.toString())
+        ?.balance;
 }
 
 async function createKeyedAccount(
@@ -65,7 +66,7 @@ async function createKeyedAccount(
         initialBalance,
         memo,
     });
-    return { accountId: account.accountId, key };
+    return { accountId: account.accountId.toString(), key };
 }
 
 async function claimPendingFungibleAirdrop(
@@ -81,7 +82,7 @@ async function claimPendingFungibleAirdrop(
         "claim receiver",
     );
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Claim Fungible Demo Token",
         tokenSymbol: "CFDT",
         decimals: 0,
@@ -96,8 +97,8 @@ async function claimPendingFungibleAirdrop(
         airdrops: [
             {
                 tokenId,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver.accountId.toString(),
                 amount: 25,
             },
         ],
@@ -149,7 +150,7 @@ async function claimPendingNftAirdrop(
         "claim nft receiver",
     );
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Claim NFT Demo Collection",
         tokenSymbol: "CNDC",
         treasuryAccountId: owner.accountId,
@@ -169,8 +170,8 @@ async function claimPendingNftAirdrop(
             {
                 tokenId,
                 serial: 1,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver.accountId.toString(),
             },
         ],
         additionalSigners: [owner.key],
@@ -192,7 +193,7 @@ async function claimPendingNftAirdrop(
             new PendingAirdropId({
                 senderId: owner.accountId,
                 receiverId: receiver.accountId,
-                nftId: new NftId(TokenId.fromString(tokenId), 1),
+                nftId: new NftId(tokenId, 1),
             }),
         ],
         additionalSigners: [receiver.key],
@@ -221,17 +222,19 @@ async function claimMixedBatch(
         "mixed claim receiver",
     );
 
-    const fungibleTokenId = await tokenService.createFungibleToken({
-        tokenName: "Claim Batch Fungible Demo",
-        tokenSymbol: "CBFD",
-        decimals: 0,
-        initialSupply: 100,
-        treasuryAccountId: owner.accountId,
-        supplyKey: owner.key.publicKey,
-        additionalSigners: [owner.key],
-    });
+    const { tokenId: fungibleTokenId } = await tokenService.createFungibleToken(
+        {
+            tokenName: "Claim Batch Fungible Demo",
+            tokenSymbol: "CBFD",
+            decimals: 0,
+            initialSupply: 100,
+            treasuryAccountId: owner.accountId,
+            supplyKey: owner.key.publicKey,
+            additionalSigners: [owner.key],
+        },
+    );
 
-    const nftTokenId = await tokenService.createNft({
+    const { tokenId: nftTokenId } = await tokenService.createNft({
         tokenName: "Claim Batch NFT Demo",
         tokenSymbol: "CBND",
         treasuryAccountId: owner.accountId,
@@ -250,8 +253,8 @@ async function claimMixedBatch(
         airdrops: [
             {
                 tokenId: fungibleTokenId,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver.accountId.toString(),
                 amount: 12,
             },
         ],
@@ -262,8 +265,8 @@ async function claimMixedBatch(
             {
                 tokenId: nftTokenId,
                 serial: 1,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver.accountId.toString(),
             },
         ],
         additionalSigners: [owner.key],
@@ -280,7 +283,7 @@ async function claimMixedBatch(
             new PendingAirdropId({
                 senderId: owner.accountId,
                 receiverId: receiver.accountId,
-                nftId: new NftId(TokenId.fromString(nftTokenId), 1),
+                nftId: new NftId(nftTokenId, 1),
             }),
         ],
         additionalSigners: [receiver.key],

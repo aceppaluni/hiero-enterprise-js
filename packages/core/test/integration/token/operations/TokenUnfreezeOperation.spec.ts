@@ -26,7 +26,7 @@ describe("TokenService unfreeze operations [Integration]", () => {
     it("unfreezes a previously frozen token relationship", async () => {
         const holder = await createTestAccount(accountService, 2);
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Unfreeze Integration",
             tokenSymbol: "UFRZ",
             decimals: 0,
@@ -58,7 +58,9 @@ describe("TokenService unfreeze operations [Integration]", () => {
         await waitForMirrorNodeRecord();
 
         const tokens = await queryAccountTokens(holder.accountId);
-        const relationship = tokens.find((t) => t.token_id === tokenId);
+        const relationship = tokens.find(
+            (t) => t.token_id === tokenId.toString(),
+        );
 
         expect(relationship).toBeDefined();
         expect(relationship?.freeze_status).toBe("UNFROZEN");

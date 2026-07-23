@@ -73,7 +73,7 @@ describe("TopicMessageQuery", () => {
         "delivers a single submitted message to the listener",
         { timeout: TEST_TIMEOUT_MS },
         async () => {
-            const topicId = await topicService.createTopic({
+            const { topicId } = await topicService.createTopic({
                 topicMemo: "integration: subscribe single",
             });
 
@@ -136,7 +136,7 @@ describe("TopicMessageQuery", () => {
         "delivers multiple messages in consensus order up to the limit",
         { timeout: TEST_TIMEOUT_MS },
         async () => {
-            const topicId = await topicService.createTopic({
+            const { topicId } = await topicService.createTopic({
                 topicMemo: "integration: subscribe ordered",
             });
 
@@ -193,7 +193,7 @@ describe("TopicMessageQuery", () => {
         "unsubscribe stops further deliveries",
         { timeout: TEST_TIMEOUT_MS },
         async () => {
-            const topicId = await topicService.createTopic({
+            const { topicId } = await topicService.createTopic({
                 topicMemo: "integration: subscribe unsubscribe",
             });
 

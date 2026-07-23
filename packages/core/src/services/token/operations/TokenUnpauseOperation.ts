@@ -27,28 +27,23 @@ export class TokenUnpauseOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenUnpauseValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenUnpauseValidator();
     }
 
     /** Submit a `TokenUnpauseTransaction`. */
-    async execute(options: TokenUnpauseOperationOptions): Promise<void> {
+    async execute(options: TokenUnpauseOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenUnpause",
-                serviceName: "TokenService",
-                methodName: "unpauseToken",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenUnpause",
+            serviceName: "TokenService",
+            methodName: "unpauseToken",
+            timestamp: new Date(),
+        });
     }
 
     private build(

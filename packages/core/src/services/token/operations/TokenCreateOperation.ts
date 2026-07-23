@@ -14,9 +14,9 @@ import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "../../transaction/index.js";
 import { TokenCreateValidator } from "../validation/index.js";
+import { HieroError } from "../../../errors/HieroError.js";
 
 /**
  * Low-level options for the `TokenCreate` SDK transaction.
@@ -59,35 +59,47 @@ export class TokenCreateOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenCreateValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenCreateValidator();
     }
 
     /** Submit a `TokenCreateTransaction` and return the new token ID. */
-    async execute(options: TokenCreateOperationOptions): Promise<string> {
+    async execute(options: TokenCreateOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenCreate",
-                serviceName: "TokenService",
-                methodName: "createToken",
-                timestamp: new Date(),
-            },
-            (receipt) => receipt.tokenId!.toString(),
-        );
+        const results = await this.executor.run(tx, options, {
+            type: "TokenCreate",
+            serviceName: "TokenService",
+            methodName: "createToken",
+            timestamp: new Date(),
+        });
+
+        if (!results.receipt.tokenId) {
+            throw new HieroError(
+                "Token creation failed — no tokenId returned in receipt.",
+                {
+                    code: "SDK_ERROR",
+                    context: "TokenCreateOperation.execute",
+                    sdkStatus: results.status,
+                    transactionId: results.transactionId,
+                },
+            );
+        }
+
+        return {
+            ...results,
+            tokenId: results.receipt.tokenId,
+        };
     }
 
     /** Schedule a `TokenCreateTransaction` for deferred multi-sig execution. */
     async schedule(
         options: TokenCreateOperationOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
 
         const tx = this.build(options);

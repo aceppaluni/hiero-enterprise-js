@@ -46,28 +46,23 @@ export class TokenUpdateNftsOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenUpdateNftsValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenUpdateNftsValidator();
     }
 
     /** Submit a `TokenUpdateNftsTransaction`. */
-    async execute(options: TokenUpdateNftsOperationOptions): Promise<void> {
+    async execute(options: TokenUpdateNftsOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenUpdateNfts",
-                serviceName: "TokenService",
-                methodName: "updateNfts",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenUpdateNfts",
+            serviceName: "TokenService",
+            methodName: "updateNfts",
+            timestamp: new Date(),
+        });
     }
 
     private build(

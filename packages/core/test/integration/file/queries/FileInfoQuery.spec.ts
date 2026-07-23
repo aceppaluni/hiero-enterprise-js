@@ -13,14 +13,14 @@ describe("FileInfoQuery", () => {
 
     it("returns plain-object info for a freshly created file", async () => {
         const contents = "info-query payload";
-        const fileId = await fileService.createFile({
+        const { fileId } = await fileService.createFile({
             contents,
             fileMemo: "integration: info plain",
         });
 
         const info = await fileService.getFileInfo(fileId);
 
-        expect(info.fileId).toBe(fileId);
+        expect(info.fileId).toBe(fileId.toString());
         expect(info.fileMemo).toBe("integration: info plain");
         // Size is plain number (not SDK's Long).
         expect(typeof info.size).toBe("number");
@@ -31,7 +31,7 @@ describe("FileInfoQuery", () => {
     });
 
     it("projects expirationTime to an ISO-8601 string", async () => {
-        const fileId = await fileService.createFile({
+        const { fileId } = await fileService.createFile({
             contents: "with expiration",
         });
 
@@ -43,7 +43,7 @@ describe("FileInfoQuery", () => {
     });
 
     it("reports isDeleted: true after deletion (metadata is preserved)", async () => {
-        const fileId = await fileService.createFile({
+        const { fileId } = await fileService.createFile({
             contents: "delete me",
             fileMemo: "was here",
         });
@@ -60,7 +60,7 @@ describe("FileInfoQuery", () => {
     it("exposes the file's keys as-is for a custom-keyed file", async () => {
         const customKey = PrivateKey.generateED25519();
 
-        const fileId = await fileService.createFile({
+        const { fileId } = await fileService.createFile({
             contents: "keyed",
             keys: [customKey.publicKey],
             // Every key assigned to a new file must sign FileCreate.

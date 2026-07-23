@@ -5,7 +5,6 @@ import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "../../transaction/index.js";
 import { FileUpdateValidator } from "../validation/index.js";
 
@@ -68,35 +67,30 @@ export class FileUpdateOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: FileUpdateValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new FileUpdateValidator();
     }
 
     /** Submit a `FileUpdateTransaction`. */
-    async execute(options: FileUpdateOperationOptions): Promise<void> {
+    async execute(options: FileUpdateOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        await this.executor.run(
-            tx,
-            options,
-            {
-                type: "FileUpdate",
-                serviceName: "FileService",
-                methodName: "updateFile",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "FileUpdate",
+            serviceName: "FileService",
+            methodName: "updateFile",
+            timestamp: new Date(),
+        });
     }
 
     /** Schedule a `FileUpdateTransaction` for deferred multi-sig execution. */
     async schedule(
         options: FileUpdateOperationOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
 
         const tx = this.build(options);

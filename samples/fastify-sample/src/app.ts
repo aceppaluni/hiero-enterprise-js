@@ -93,7 +93,7 @@ app.post<{ Params: { id: string }; Body: { message: string } }>(
         reply.code(202);
         return {
             status: "submitted",
-            sequenceNumber: result.sequenceNumber.toString(),
+            sequenceNumber: result.sequenceNumber?.toString() ?? null,
             transactionId: result.transactionId,
         };
     },

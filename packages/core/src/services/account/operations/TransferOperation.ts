@@ -5,7 +5,6 @@ import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "../../transaction/index.js";
 import { TransferValidator } from "../validation/index.js";
 
@@ -72,7 +71,7 @@ export class TransferOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TransferValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TransferValidator();
     }
@@ -81,20 +80,24 @@ export class TransferOperation {
      * Transfer HBAR.
      *
      * @param receiverAccountId - Recipient account (string `"0.0.123"` or `AccountId`)
-     * @param amount - Amount in HBAR (number) or `Hbar` instance for tinybar precision
+     * @param amount - Amount in HBAR (number) or `Hbar` instance for tinybar
+     *   precision. The `number` path goes through a float — for exact amounts
+     *   (payments, accounting) prefer `Hbar.fromTinybars(...)`.
      * @param senderAccountId - Sender account. Pass the operator account when the
      *   operator is the sender; otherwise pass the sender's account **and** its
      *   private key via `options.additionalSigners` (or `options.externalSigners`
      *   for HSM/KMS keys) — otherwise the transaction will be rejected with
      *   `INVALID_SIGNATURE`.
      * @param options - Transaction options (fees, validity, signers, memo, etc.)
+     * @returns The transaction id and consensus status, for correlating the
+     *   transfer downstream (explorer links, mirror node lookups, receipts).
      */
     async transferHbar(
         receiverAccountId: string | AccountId,
         amount: number | Hbar,
         senderAccountId: string | AccountId,
         options: TransferHbarOptions = {},
-    ): Promise<void> {
+    ) {
         this.validator.validateHbarTransfer({
             receiverAccountId,
             senderAccountId,
@@ -105,17 +108,12 @@ export class TransferOperation {
             amount,
             senderAccountId,
         );
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "CryptoTransfer",
-                serviceName: "AccountService",
-                methodName: "transferHbar",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "CryptoTransfer",
+            serviceName: "AccountService",
+            methodName: "transferHbar",
+            timestamp: new Date(),
+        });
     }
 
     /**
@@ -134,7 +132,7 @@ export class TransferOperation {
         amount: number | Hbar,
         senderAccountId: string | AccountId,
         options: ScheduleTransferHbarOptions = {},
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validateHbarTransfer({
             receiverAccountId,
             senderAccountId,
@@ -177,7 +175,7 @@ export class TransferOperation {
         amount: number,
         senderAccountId: string | AccountId,
         options: TransferTokenOptions = {},
-    ): Promise<void> {
+    ) {
         this.validator.validateTokenTransfer({
             tokenId,
             receiverAccountId,
@@ -192,17 +190,12 @@ export class TransferOperation {
             senderAccountId,
             options.expectedDecimals,
         );
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "CryptoTransfer",
-                serviceName: "AccountService",
-                methodName: "transferToken",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "CryptoTransfer",
+            serviceName: "AccountService",
+            methodName: "transferToken",
+            timestamp: new Date(),
+        });
     }
 
     /**
@@ -218,7 +211,7 @@ export class TransferOperation {
         amount: number,
         senderAccountId: string | AccountId,
         options: ScheduleTransferTokenOptions = {},
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validateTokenTransfer({
             tokenId,
             receiverAccountId,
@@ -265,7 +258,7 @@ export class TransferOperation {
         receiverAccountId: string | AccountId,
         senderAccountId: string | AccountId,
         options: TransferNftOptions = {},
-    ): Promise<void> {
+    ) {
         this.validator.validateNftTransfer({
             tokenId,
             serial,
@@ -278,17 +271,12 @@ export class TransferOperation {
             receiverAccountId,
             senderAccountId,
         );
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "CryptoTransfer",
-                serviceName: "AccountService",
-                methodName: "transferNft",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "CryptoTransfer",
+            serviceName: "AccountService",
+            methodName: "transferNft",
+            timestamp: new Date(),
+        });
     }
 
     /**
@@ -304,7 +292,7 @@ export class TransferOperation {
         receiverAccountId: string | AccountId,
         senderAccountId: string | AccountId,
         options: ScheduleTransferNftOptions = {},
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validateNftTransfer({
             tokenId,
             serial,

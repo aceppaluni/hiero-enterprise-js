@@ -77,7 +77,7 @@ describe("TransferOperation [Integration]", () => {
     // Fungible token transfers
     describe("transferToken", () => {
         it("transfers fungible tokens from the operator to a recipient", async () => {
-            const tokenId = await tokenService.createFungibleToken({
+            const { tokenId } = await tokenService.createFungibleToken({
                 tokenName: "Transfer Test Token",
                 tokenSymbol: "TTT",
                 decimals: 2,
@@ -103,14 +103,14 @@ describe("TransferOperation [Integration]", () => {
 
             const balance = await client.getAccountBalance(receiver.accountId);
             const tokenBalance = balance.tokens.find(
-                (t) => t.tokenId === tokenId,
+                (t) => t.tokenId === tokenId.toString(),
             );
             expect(tokenBalance).toBeDefined();
             expect(tokenBalance!.balance).toBe("250");
         });
 
         it("transfers tokens with matching expectedDecimals", async () => {
-            const tokenId = await tokenService.createFungibleToken({
+            const { tokenId } = await tokenService.createFungibleToken({
                 tokenName: "Decimals Test Token",
                 tokenSymbol: "DEC",
                 decimals: 4,
@@ -138,7 +138,7 @@ describe("TransferOperation [Integration]", () => {
 
             const balance = await client.getAccountBalance(receiver.accountId);
             const tokenBalance = balance.tokens.find(
-                (t) => t.tokenId === tokenId,
+                (t) => t.tokenId === tokenId.toString(),
             );
             expect(tokenBalance!.balance).toBe("100");
         });
@@ -146,7 +146,7 @@ describe("TransferOperation [Integration]", () => {
         it("transfers tokens between two non-operator accounts", async () => {
             const { owner, spender } = await createOwnerSpenderPair(client);
 
-            const tokenId = await tokenService.createFungibleToken({
+            const { tokenId } = await tokenService.createFungibleToken({
                 tokenName: "Peer Transfer Token",
                 tokenSymbol: "PEER",
                 decimals: 0,
@@ -172,7 +172,7 @@ describe("TransferOperation [Integration]", () => {
 
             const balance = await client.getAccountBalance(spender.accountId);
             const tokenBalance = balance.tokens.find(
-                (t) => t.tokenId === tokenId,
+                (t) => t.tokenId === tokenId.toString(),
             );
             expect(tokenBalance!.balance).toBe("100");
         });
@@ -184,7 +184,7 @@ describe("TransferOperation [Integration]", () => {
 
     describe("transferNft", () => {
         it("transfers an NFT from the operator to a recipient", async () => {
-            const tokenId = await tokenService.createNft({
+            const { tokenId } = await tokenService.createNft({
                 tokenName: "Transfer Test NFT",
                 tokenSymbol: "TNFT",
                 treasuryAccountId: operatorAccountId,
@@ -232,8 +232,7 @@ describe("TransferOperation [Integration]", () => {
                 { scheduleMemo: "integration test schedule" },
             );
 
-            expect(result.scheduleId).toMatch(/^0\.0\.\d+$/);
-            expect(result.transactionId).toContain("@");
+            expect(result.scheduleId.toString()).toMatch(/^0\.0\.\d+$/);
         });
     });
 });

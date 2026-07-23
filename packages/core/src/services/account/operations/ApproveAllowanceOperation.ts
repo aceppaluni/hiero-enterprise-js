@@ -4,7 +4,6 @@ import {
     TokenId,
     NftId,
     AccountId,
-    type TransactionReceipt,
 } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
 import { TransactionExecutor } from "../../transaction/index.js";
@@ -134,7 +133,7 @@ export class ApproveAllowanceOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: ApproveAllowanceValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new ApproveAllowanceValidator();
     }
@@ -143,27 +142,17 @@ export class ApproveAllowanceOperation {
     async execute(
         options: ApproveAllowanceOptions,
         methodName = "approveAllowance",
-    ): Promise<TransactionReceipt> {
+    ) {
         this.validator.validate(options);
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "AccountAllowanceApprove",
-                serviceName: "AccountService",
-                methodName,
-                timestamp: new Date(),
-            },
-
-            // TODO: Return something meaningful here
-            // I agree the receipt contains useful information
-            // but it would be nice to return something more specific
-            // to allowance approval, e.g. the list of approved
-            // allowances with their status.
-            (receipt) => receipt,
-        );
+        // The receipt carries nothing allowance-specific
+        return await this.executor.run(tx, options, {
+            type: "AccountAllowanceApprove",
+            serviceName: "AccountService",
+            methodName,
+            timestamp: new Date(),
+        });
     }
 
     /**

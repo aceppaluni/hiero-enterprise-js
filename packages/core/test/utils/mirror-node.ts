@@ -1,3 +1,4 @@
+import type { AccountId, TokenId } from "@hiero-ledger/sdk";
 import { IntegrationTracker } from "./env.js";
 import { queryAccountTokens } from "./mirror-node-rest.js";
 
@@ -102,14 +103,15 @@ export async function waitForMirrorEntity<T>(
  * relationship row visible with `balance: 0`.
  */
 export async function waitForAccountTokensAbsent(
-    accountId: string,
-    tokenIds: string[],
+    accountId: string | AccountId,
+    tokenIds: Array<string | TokenId>,
     maxRetries = 30,
     delayMs = 2000,
 ): Promise<void> {
+    const tokenIdStrings = tokenIds.map((id) => id.toString());
     for (let i = 0; i < maxRetries; i++) {
         const relationships = await queryAccountTokens(accountId);
-        const stillPresent = tokenIds.filter((id) =>
+        const stillPresent = tokenIdStrings.filter((id) =>
             relationships.some((t) => t.token_id === id),
         );
         if (stillPresent.length === 0) return;
@@ -118,7 +120,7 @@ export async function waitForAccountTokensAbsent(
     }
 
     throw new Error(
-        `[Integration Test Timeout] Account ${accountId} still has token relationships [${tokenIds.join(
+        `[Integration Test Timeout] Account ${accountId} still has token relationships [${tokenIdStrings.join(
             ", ",
         )}] after ${(maxRetries * delayMs) / 1000} seconds.`,
     );

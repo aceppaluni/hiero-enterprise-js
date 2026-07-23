@@ -48,7 +48,7 @@ async function deployMutableContract(
     label: string,
 ): Promise<{ contractId: string; adminKey: PrivateKey }> {
     const adminKey = PrivateKey.generateED25519();
-    const contractId = await contractService.createContract({
+    const { contractId } = await contractService.createContract({
         bytecode: Buffer.from(MINIMAL_BYTECODE_HEX, "hex"),
         gas: 150_000,
         adminKey: adminKey.publicKey,
@@ -56,7 +56,7 @@ async function deployMutableContract(
         additionalSigners: [adminKey],
     });
     console.log(`Deployed ${label} contract:`, contractId);
-    return { contractId, adminKey };
+    return { contractId: contractId.toString(), adminKey };
 }
 
 /**
@@ -172,7 +172,6 @@ async function scheduleUpdate(contractService: ContractService) {
     );
 
     console.log("Schedule ID:", scheduled.scheduleId);
-    console.log("Transaction ID:", scheduled.transactionId);
     console.log();
 }
 

@@ -1,4 +1,4 @@
-import type { CustomFeeLimit, Long, TopicId } from "@hiero-ledger/sdk";
+import type { CustomFeeLimit, TopicId } from "@hiero-ledger/sdk";
 import { TopicMessageSubmitTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
 import { TransactionExecutor } from "../../transaction/index.js";
@@ -61,20 +61,11 @@ export interface TopicMessageSubmitOperationOptions extends TransactionOptions {
  * For multi-chunk submissions the values correspond to the **first**
  * chunk's receipt; subsequent chunks increment the sequence number.
  */
-export interface TopicMessageSubmitResult {
-    /** Topic-scoped sequence number assigned by the consensus node. */
-    sequenceNumber: Long;
-    /** Updated running hash of all messages on the topic. */
-    runningHash: Uint8Array;
-    /** Network transaction ID for the submission. */
-    transactionId: string;
-}
-
 export class TopicMessageSubmitOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TopicMessageSubmitValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TopicMessageSubmitValidator();
     }
@@ -83,28 +74,25 @@ export class TopicMessageSubmitOperation {
      * Submit a message to a topic. Returns the sequence number,
      * running hash, and transaction ID from the receipt.
      */
-    async execute(
-        options: TopicMessageSubmitOperationOptions,
-    ): Promise<TopicMessageSubmitResult> {
+    async execute(options: TopicMessageSubmitOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TopicMessageSubmit",
-                serviceName: "TopicService",
-                methodName: "submitMessage",
-                timestamp: new Date(),
-            },
-            (receipt, transactionId) => ({
-                sequenceNumber: receipt.topicSequenceNumber!,
-                runningHash: receipt.topicRunningHash!,
-                transactionId,
-            }),
-        );
+        const results = await this.executor.run(tx, options, {
+            type: "TopicMessageSubmit",
+            serviceName: "TopicService",
+            methodName: "submitMessage",
+            timestamp: new Date(),
+        });
+        return {
+            ...results,
+            // Sequence counters sit far below 2^53 — plain numbers are exact.
+            sequenceNumber: results.receipt.topicSequenceNumber
+                ? results.receipt.topicSequenceNumber.toNumber()
+                : null,
+            runningHash: results.receipt.topicRunningHash ?? null,
+        };
     }
 
     private build(

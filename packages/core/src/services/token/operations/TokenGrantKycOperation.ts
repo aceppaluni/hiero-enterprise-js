@@ -27,28 +27,23 @@ export class TokenGrantKycOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenGrantKycValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenGrantKycValidator();
     }
 
     /** Submit a `TokenGrantKycTransaction`. */
-    async execute(options: TokenGrantKycOperationOptions): Promise<void> {
+    async execute(options: TokenGrantKycOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenGrantKyc",
-                serviceName: "TokenService",
-                methodName: "grantKycToken",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenGrantKyc",
+            serviceName: "TokenService",
+            methodName: "grantKycToken",
+            timestamp: new Date(),
+        });
     }
 
     private build(

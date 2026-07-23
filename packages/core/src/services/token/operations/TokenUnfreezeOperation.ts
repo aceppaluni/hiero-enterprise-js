@@ -21,28 +21,23 @@ export class TokenUnfreezeOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenUnfreezeValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenUnfreezeValidator();
     }
 
     /** Submit a `TokenUnfreezeTransaction`. */
-    async execute(options: TokenUnfreezeOperationOptions): Promise<void> {
+    async execute(options: TokenUnfreezeOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenUnfreeze",
-                serviceName: "TokenService",
-                methodName: "unfreezeToken",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenUnfreeze",
+            serviceName: "TokenService",
+            methodName: "unfreezeToken",
+            timestamp: new Date(),
+        });
     }
 
     private build(

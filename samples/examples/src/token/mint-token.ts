@@ -36,7 +36,7 @@ async function mintToken(
         memo: "mint token owner",
     });
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Mint Demo Collection",
         tokenSymbol: "MDC",
         treasuryAccountId: owner.accountId,
@@ -69,7 +69,7 @@ async function scheduleMintToken(
         memo: "schedule mint owner",
     });
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Scheduled Mint Collection",
         tokenSymbol: "SMC",
         treasuryAccountId: owner.accountId,
@@ -89,7 +89,6 @@ async function scheduleMintToken(
     console.log("Owner account:", owner.accountId);
     console.log("Token ID:", tokenId);
     console.log("Schedule ID:", scheduled.scheduleId);
-    console.log("Transaction ID:", scheduled.transactionId);
     console.log();
 }
 

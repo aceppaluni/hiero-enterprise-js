@@ -1,8 +1,4 @@
-import {
-    AccountAllowanceApproveTransaction,
-    TokenId,
-    type TransactionReceipt,
-} from "@hiero-ledger/sdk";
+import { AccountAllowanceApproveTransaction, TokenId } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
 import { TransactionExecutor } from "../../transaction/index.js";
 import type { TransactionOptions } from "../../transaction/index.js";
@@ -39,7 +35,7 @@ export class DeleteAllNftAllowancesOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: DeleteAllNftAllowancesValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new DeleteAllNftAllowancesValidator();
     }
@@ -49,21 +45,16 @@ export class DeleteAllNftAllowancesOperation {
         allowances: NftAllSerialsAllowanceDeletion[],
         options: DeleteAllNftAllowancesOptions = {},
         methodName = "deleteAllNftAllowances",
-    ): Promise<TransactionReceipt> {
+    ) {
         this.validator.validate(allowances);
         const tx = this.build(allowances);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "AccountAllowanceApprove",
-                serviceName: "AccountService",
-                methodName,
-                timestamp: new Date(),
-            },
-            (receipt) => receipt,
-        );
+        return await this.executor.run(tx, options, {
+            type: "AccountAllowanceApprove",
+            serviceName: "AccountService",
+            methodName,
+            timestamp: new Date(),
+        });
     }
 
     /**

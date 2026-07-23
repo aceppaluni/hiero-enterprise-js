@@ -80,7 +80,7 @@ describe("DeleteAccountOperation (via AccountService)", () => {
             });
 
             expect(mocks.tx.schedule).toHaveBeenCalled();
-            expect(result.scheduleId).toBe("0.0.777");
+            expect(result.scheduleId.toString()).toBe("0.0.777");
         });
     });
 });

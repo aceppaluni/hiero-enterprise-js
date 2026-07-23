@@ -137,7 +137,7 @@ class TopicController {
         });
         return {
             status: "submitted",
-            sequenceNumber: result.sequenceNumber.toString(),
+            sequenceNumber: result.sequenceNumber?.toString() ?? null,
             transactionId: result.transactionId,
         };
     }

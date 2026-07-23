@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { NftId, TokenId } from "@hiero-ledger/sdk";
+import type { TokenId } from "@hiero-ledger/sdk";
+import { NftId } from "@hiero-ledger/sdk";
 import { setupIntegrationTestEnv } from "../../../utils/env.js";
 import {
     waitForMirrorNodeRecord,
@@ -17,9 +18,10 @@ import {
 
 function tokenBalanceFor(
     balance: { tokens: { tokenId: string; balance: string }[] },
-    tokenId: string,
+    tokenId: string | TokenId,
 ): string | undefined {
-    return balance.tokens.find((t) => t.tokenId === tokenId)?.balance;
+    return balance.tokens.find((t) => t.tokenId === tokenId.toString())
+        ?.balance;
 }
 
 describe("TokenService reject operations [Integration]", () => {
@@ -39,7 +41,7 @@ describe("TokenService reject operations [Integration]", () => {
         const initialSupply = 1_000;
         const transferAmount = 250;
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Reject Fungible Integration",
             tokenSymbol: "RFI",
             decimals: 0,
@@ -90,7 +92,7 @@ describe("TokenService reject operations [Integration]", () => {
         // and the treasury supply has been restored in full.
         const holderTokens = await queryAccountTokens(holder.accountId);
         expect(
-            holderTokens.find((t) => t.token_id === tokenId),
+            holderTokens.find((t) => t.token_id === tokenId.toString()),
         ).toBeUndefined();
 
         const treasuryBalance = await accountService.getAccountBalance(
@@ -108,7 +110,7 @@ describe("TokenService reject operations [Integration]", () => {
         // to have a unique token ID, so we mint TWO collections and
         // transfer one serial of each to the holder. Rejecting both in
         // one flow also exercises the dissociate step for two tokens.
-        const tokenIdA = await tokenService.createNft({
+        const { tokenId: tokenIdA } = await tokenService.createNft({
             tokenName: "Reject NFT A",
             tokenSymbol: "RNA",
             treasuryAccountId: owner.accountId,
@@ -116,7 +118,7 @@ describe("TokenService reject operations [Integration]", () => {
             additionalSigners: [owner.key],
         });
 
-        const tokenIdB = await tokenService.createNft({
+        const { tokenId: tokenIdB } = await tokenService.createNft({
             tokenName: "Reject NFT B",
             tokenSymbol: "RNB",
             treasuryAccountId: owner.accountId,
@@ -168,10 +170,7 @@ describe("TokenService reject operations [Integration]", () => {
 
         await tokenService.rejectTokensFlow({
             ownerId: holder.accountId,
-            nftIds: [
-                new NftId(TokenId.fromString(tokenIdA), 1),
-                new NftId(TokenId.fromString(tokenIdB), 1),
-            ],
+            nftIds: [new NftId(tokenIdA, 1), new NftId(tokenIdB, 1)],
             ownerKey: holder.key,
         });
 
@@ -185,10 +184,10 @@ describe("TokenService reject operations [Integration]", () => {
         // holds its only serial again.
         const holderTokens = await queryAccountTokens(holder.accountId);
         expect(
-            holderTokens.find((t) => t.token_id === tokenIdA),
+            holderTokens.find((t) => t.token_id === tokenIdA.toString()),
         ).toBeUndefined();
         expect(
-            holderTokens.find((t) => t.token_id === tokenIdB),
+            holderTokens.find((t) => t.token_id === tokenIdB.toString()),
         ).toBeUndefined();
 
         const treasuryBalance = await accountService.getAccountBalance(
@@ -203,17 +202,18 @@ describe("TokenService reject operations [Integration]", () => {
         const fungibleSupply = 500;
         const fungibleTransfer = 100;
 
-        const fungibleTokenId = await tokenService.createFungibleToken({
-            tokenName: "Reject Mixed Fungible",
-            tokenSymbol: "RMF",
-            decimals: 0,
-            initialSupply: fungibleSupply,
-            treasuryAccountId: owner.accountId,
-            supplyKey: owner.key.publicKey,
-            additionalSigners: [owner.key],
-        });
+        const { tokenId: fungibleTokenId } =
+            await tokenService.createFungibleToken({
+                tokenName: "Reject Mixed Fungible",
+                tokenSymbol: "RMF",
+                decimals: 0,
+                initialSupply: fungibleSupply,
+                treasuryAccountId: owner.accountId,
+                supplyKey: owner.key.publicKey,
+                additionalSigners: [owner.key],
+            });
 
-        const nftTokenId = await tokenService.createNft({
+        const { tokenId: nftTokenId } = await tokenService.createNft({
             tokenName: "Reject Mixed NFT",
             tokenSymbol: "RMN",
             treasuryAccountId: owner.accountId,
@@ -255,7 +255,7 @@ describe("TokenService reject operations [Integration]", () => {
         await tokenService.rejectTokensFlow({
             ownerId: holder.accountId,
             fungibleTokenIds: [fungibleTokenId],
-            nftIds: [new NftId(TokenId.fromString(nftTokenId), 1)],
+            nftIds: [new NftId(nftTokenId, 1)],
             ownerKey: holder.key,
         });
 
@@ -268,10 +268,10 @@ describe("TokenService reject operations [Integration]", () => {
         // Both relationships are gone after the dissociation step of the flow.
         const holderTokens = await queryAccountTokens(holder.accountId);
         expect(
-            holderTokens.find((t) => t.token_id === fungibleTokenId),
+            holderTokens.find((t) => t.token_id === fungibleTokenId.toString()),
         ).toBeUndefined();
         expect(
-            holderTokens.find((t) => t.token_id === nftTokenId),
+            holderTokens.find((t) => t.token_id === nftTokenId.toString()),
         ).toBeUndefined();
 
         // Treasury supply has been restored for both.

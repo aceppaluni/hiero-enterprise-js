@@ -1,11 +1,11 @@
 import type { Key, Long, AccountId, CustomFixedFee } from "@hiero-ledger/sdk";
 import { TopicCreateTransaction } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../../context/index.js";
+import { HieroError } from "../../../errors/HieroError.js";
 import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "../../transaction/index.js";
 import { TopicCreateValidator } from "../validation/index.js";
 
@@ -79,35 +79,47 @@ export class TopicCreateOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TopicCreateValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TopicCreateValidator();
     }
 
     /** Submit a `TopicCreateTransaction` and return the new topic ID. */
-    async execute(options: TopicCreateOperationOptions): Promise<string> {
+    async execute(options: TopicCreateOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TopicCreate",
-                serviceName: "TopicService",
-                methodName: "createTopic",
-                timestamp: new Date(),
-            },
-            (receipt) => receipt.topicId!.toString(),
-        );
+        const results = await this.executor.run(tx, options, {
+            type: "TopicCreate",
+            serviceName: "TopicService",
+            methodName: "createTopic",
+            timestamp: new Date(),
+        });
+
+        if (!results.receipt.topicId) {
+            throw new HieroError(
+                "Topic creation failed — no topicId returned in receipt.",
+                {
+                    code: "SDK_ERROR",
+                    context: "TopicCreateOperation.execute",
+                    sdkStatus: results.status,
+                    transactionId: results.transactionId,
+                },
+            );
+        }
+
+        return {
+            ...results,
+            topicId: results.receipt.topicId,
+        };
     }
 
     /** Schedule a `TopicCreateTransaction` for deferred multi-sig execution. */
     async schedule(
         options: TopicCreateOperationOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
 
         const tx = this.build(options);

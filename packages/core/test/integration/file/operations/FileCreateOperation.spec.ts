@@ -20,15 +20,15 @@ describe("FileCreateOperation", () => {
 
     it("creates a small file with operator-owned defaults", async () => {
         const contents = "hello from integration test";
-        const fileId = await fileService.createFile({ contents });
+        const { fileId } = await fileService.createFile({ contents });
 
-        expect(fileId).toMatch(/^0\.0\.\d+$/);
+        expect(fileId.toString()).toMatch(/^0\.0\.\d+$/);
 
         const info = await new FileInfoQuery()
             .setFileId(fileId)
             .execute(client);
 
-        expect(info.fileId.toString()).toBe(fileId);
+        expect(info.fileId.toString()).toBe(fileId.toString());
         expect(info.size.toNumber()).toBe(
             Buffer.from(contents, "utf8").byteLength,
         );
@@ -41,7 +41,7 @@ describe("FileCreateOperation", () => {
         // ~91 days out — just past the default 90-day auto-renew.
         const expirationTime = new Date(Date.now() + 91 * 24 * 60 * 60 * 1000);
 
-        const fileId = await fileService.createFile({
+        const { fileId } = await fileService.createFile({
             contents: "with metadata",
             fileMemo: "integration: metadata",
             expirationTime,
@@ -59,7 +59,7 @@ describe("FileCreateOperation", () => {
     });
 
     it("creates an unmodifiable file when keys is []", async () => {
-        const fileId = await fileService.createFile({
+        const { fileId } = await fileService.createFile({
             contents: "immutable",
             keys: [],
         });
@@ -72,13 +72,13 @@ describe("FileCreateOperation", () => {
         // The SDK reports null (or an empty KeyList) for such files.
         // We just assert the file is not modifiable via a standard delete.
         await expect(fileService.deleteFile({ fileId })).rejects.toThrow();
-        expect(info.fileId.toString()).toBe(fileId);
+        expect(info.fileId.toString()).toBe(fileId.toString());
     });
 
     it("creates a file with a custom key that must sign for later modifications", async () => {
         const customKey = PrivateKey.generateED25519();
 
-        const fileId = await fileService.createFile({
+        const { fileId } = await fileService.createFile({
             contents: "custom-keyed",
             keys: [customKey.publicKey],
             // Every key assigned to a new file must sign FileCreate.
@@ -111,7 +111,7 @@ describe("FileCreateOperation", () => {
         const size = 6 * 1024;
         const contents = Buffer.alloc(size, 0x61); // "aaaa..."
 
-        const fileId = await fileService.createFile({ contents });
+        const { fileId } = await fileService.createFile({ contents });
 
         const info = await new FileInfoQuery()
             .setFileId(fileId)
@@ -128,14 +128,14 @@ describe("FileCreateOperation", () => {
     });
 
     it("creates an empty file when contents is omitted (SDK parity)", async () => {
-        const fileId = await fileService.createFile();
+        const { fileId } = await fileService.createFile();
 
-        expect(fileId).toMatch(/^0\.0\.\d+$/);
+        expect(fileId.toString()).toMatch(/^0\.0\.\d+$/);
 
         const info = await new FileInfoQuery()
             .setFileId(fileId)
             .execute(client);
-        expect(info.fileId.toString()).toBe(fileId);
+        expect(info.fileId.toString()).toBe(fileId.toString());
         expect(info.size.toNumber()).toBe(0);
         expect(info.isDeleted).toBe(false);
 

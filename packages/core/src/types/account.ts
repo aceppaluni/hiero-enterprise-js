@@ -1,3 +1,4 @@
+import type { AccountId } from "@hiero-ledger/sdk";
 /**
  * The key algorithm type for the account.
  */
@@ -20,8 +21,8 @@ export enum OperatorKeyType {
  * Represents a Hiero network account.
  */
 export interface Account {
-    /** The account ID (e.g., "0.0.12345") */
-    accountId: string;
+    /** The account ID */
+    accountId: AccountId;
     /** The public key associated with the account */
     publicKey?: string;
     /** The EVM address derived from the public key */

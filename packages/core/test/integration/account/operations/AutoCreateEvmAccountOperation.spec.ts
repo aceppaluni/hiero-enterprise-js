@@ -17,8 +17,15 @@ describe("AccountService.autoCreateEvmAccount [Integration]", () => {
         // (Solo deployments persist across local runs).
         const coldAddress = `0x${randomBytes(20).toString("hex")}`;
 
-        await expect(
-            client.autoCreateEvmAccount({ evmAddress: coldAddress, amount: 5 }),
-        ).resolves.not.toThrow();
+        const result = await client.autoCreateEvmAccount({
+            evmAddress: coldAddress,
+            amount: 5,
+        });
+
+        // The child receipt must report the hollow account the transfer
+        // created — this is the live proof that setIncludeChildren works.
+        expect(result.accountId?.toString()).toMatch(/^\d+\.\d+\.\d+$/);
+        expect(result.status).toBe("SUCCESS");
+        expect(result.transactionId).toContain("@");
     });
 });

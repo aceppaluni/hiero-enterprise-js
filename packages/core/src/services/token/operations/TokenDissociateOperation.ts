@@ -5,7 +5,6 @@ import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "../../transaction/index.js";
 import { TokenDissociateValidator } from "../validation/index.js";
 
@@ -25,35 +24,30 @@ export class TokenDissociateOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenDissociateValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenDissociateValidator();
     }
 
     /** Submit a `TokenDissociateTransaction`. */
-    async execute(options: TokenDissociateOperationOptions): Promise<void> {
+    async execute(options: TokenDissociateOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenDissociate",
-                serviceName: "TokenService",
-                methodName: "dissociateToken",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenDissociate",
+            serviceName: "TokenService",
+            methodName: "dissociateToken",
+            timestamp: new Date(),
+        });
     }
 
     /** Schedule a `TokenDissociateTransaction` for deferred multi-sig execution. */
     async schedule(
         options: TokenDissociateOperationOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
 
         const tx = this.build(options);

@@ -4,6 +4,7 @@ import type { IHieroContext } from "../../../context/index.js";
 import { TransactionExecutor } from "../../transaction/index.js";
 import type { TransactionOptions } from "../../transaction/index.js";
 import { FileCreateValidator } from "../validation/index.js";
+import { HieroError } from "../../../errors/HieroError.js";
 
 /**
  * Low-level options for the `FileCreate` SDK transaction.
@@ -60,28 +61,40 @@ export class FileCreateOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: FileCreateValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new FileCreateValidator();
     }
 
     /** Submit a `FileCreateTransaction` and return the new file ID. */
-    async execute(options: FileCreateOperationOptions): Promise<string> {
+    async execute(options: FileCreateOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "FileCreate",
-                serviceName: "FileService",
-                methodName: "createFile",
-                timestamp: new Date(),
-            },
-            (receipt) => receipt.fileId!.toString(),
-        );
+        const results = await this.executor.run(tx, options, {
+            type: "FileCreate",
+            serviceName: "FileService",
+            methodName: "createFile",
+            timestamp: new Date(),
+        });
+
+        if (!results.receipt.fileId) {
+            throw new HieroError(
+                "FileCreateTransaction succeeded but no file ID was returned",
+                {
+                    code: "SDK_ERROR",
+                    context: `FileCreateOperation.execute:`,
+                    sdkStatus: results.status,
+                    transactionId: results.transactionId,
+                },
+            );
+        }
+
+        return {
+            ...results,
+            fileId: results.receipt.fileId,
+        };
     }
 
     private build(options: FileCreateOperationOptions): FileCreateTransaction {

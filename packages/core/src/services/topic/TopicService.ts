@@ -1,6 +1,6 @@
 import type { SubscriptionHandle, TopicId } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../context/index.js";
-import type { ScheduleOptions, ScheduledResult } from "../transaction/index.js";
+import type { ScheduleOptions } from "../transaction/index.js";
 import {
     TopicCreateOperation,
     TopicUpdateOperation,
@@ -12,7 +12,6 @@ import type {
     TopicUpdateOperationOptions,
     TopicDeleteOperationOptions,
     TopicMessageSubmitOperationOptions,
-    TopicMessageSubmitResult,
 } from "./operations/index.js";
 import { TopicInfoQuery, TopicMessageQuery } from "./queries/index.js";
 import type {
@@ -63,12 +62,6 @@ export type DeleteTopicOptions = TopicDeleteOperationOptions;
  * receipt corresponds to the first chunk.
  */
 export type SubmitMessageOptions = TopicMessageSubmitOperationOptions;
-
-/**
- * Receipt-derived result returned by `submitMessage` — sequence number,
- * running hash, and transaction ID of the first (or only) chunk.
- */
-export type SubmitMessageResult = TopicMessageSubmitResult;
 
 /**
  * Plain-object representation of a topic's current consensus-node state,
@@ -157,7 +150,7 @@ export class TopicService {
      * });
      * ```
      */
-    async createTopic(options: CreateTopicOptions = {}): Promise<string> {
+    async createTopic(options: CreateTopicOptions = {}) {
         return await this.createOperation.execute(options);
     }
 
@@ -174,7 +167,7 @@ export class TopicService {
     async scheduleCreateTopic(
         options: CreateTopicOptions = {},
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.createOperation.schedule(options, scheduleOptions);
     }
 
@@ -199,7 +192,7 @@ export class TopicService {
      * @param options.customFees - Replace custom fees (HIP-991), or `null`
      * @param options.expirationTime - Extend the topic's expiration (not clearable)
      */
-    async updateTopic(options: UpdateTopicOptions): Promise<void> {
+    async updateTopic(options: UpdateTopicOptions) {
         return await this.updateOperation.execute(options);
     }
 
@@ -217,7 +210,7 @@ export class TopicService {
      *
      * @param options.topicId - Topic to delete (required)
      */
-    async deleteTopic(options: DeleteTopicOptions): Promise<void> {
+    async deleteTopic(options: DeleteTopicOptions) {
         return await this.deleteOperation.execute(options);
     }
 
@@ -246,9 +239,7 @@ export class TopicService {
      * @param options.customFeeLimits - HIP-991 fee caps the submitter accepts
      * @returns Sequence number, running hash, and transaction ID from the (first chunk's) receipt
      */
-    async submitMessage(
-        options: SubmitMessageOptions,
-    ): Promise<SubmitMessageResult> {
+    async submitMessage(options: SubmitMessageOptions) {
         return await this.submitOperation.execute(options);
     }
 

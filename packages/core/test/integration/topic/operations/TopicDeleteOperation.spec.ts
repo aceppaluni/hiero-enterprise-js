@@ -16,12 +16,13 @@ describe("TopicDeleteOperation", () => {
     });
 
     async function createMutableTopic(adminKey: PrivateKey): Promise<string> {
-        return await topicService.createTopic({
+        const { topicId } = await topicService.createTopic({
             topicMemo: "integration: pre-delete",
             adminKey: adminKey.publicKey,
             autoRenewAccountId: operatorId,
             additionalSigners: [adminKey],
         });
+        return topicId.toString();
     }
 
     it("deletes a topic signed by the admin key", async () => {
@@ -41,7 +42,7 @@ describe("TopicDeleteOperation", () => {
 
     it("rejects deletion of a topic with no admin key (UNAUTHORIZED)", async () => {
         // Public, immutable topic — no admin key.
-        const topicId = await topicService.createTopic({
+        const { topicId } = await topicService.createTopic({
             topicMemo: "integration: immutable",
         });
 

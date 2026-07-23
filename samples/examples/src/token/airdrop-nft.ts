@@ -27,6 +27,7 @@
  * Run: pnpm tsx src/token/airdrop-nft.ts
  */
 
+import type { TokenId } from "@hiero-hackers/enterprise-core";
 import {
     AccountService,
     AccountType,
@@ -39,9 +40,10 @@ import { getED25519Config } from "../env.js";
 
 function tokenBalanceFor(
     balance: Balance,
-    tokenId: string,
+    tokenId: string | TokenId,
 ): string | undefined {
-    return balance.tokens.find((t) => t.tokenId === tokenId)?.balance;
+    return balance.tokens.find((t) => t.tokenId === tokenId.toString())
+        ?.balance;
 }
 
 async function createKeyedAccount(
@@ -56,7 +58,7 @@ async function createKeyedAccount(
         initialBalance,
         memo,
     });
-    return { accountId: account.accountId, key };
+    return { accountId: account.accountId.toString(), key };
 }
 
 async function multiReceiverImmediateCredit(
@@ -74,7 +76,7 @@ async function multiReceiverImmediateCredit(
     const receiver2 = await createKeyedAccount(accountService, 2, "receiver 2");
     const receiver3 = await createKeyedAccount(accountService, 2, "receiver 3");
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Multi NFT Airdrop Demo",
         tokenSymbol: "MNAD",
         treasuryAccountId: owner.accountId,
@@ -105,20 +107,20 @@ async function multiReceiverImmediateCredit(
             {
                 tokenId,
                 serial: 1,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver1.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver1.accountId.toString(),
             },
             {
                 tokenId,
                 serial: 2,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver2.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver2.accountId.toString(),
             },
             {
                 tokenId,
                 serial: 3,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver3.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver3.accountId.toString(),
             },
         ],
         additionalSigners: [owner.key],
@@ -154,7 +156,7 @@ async function pendingAirdropToUnassociatedReceiver(
         "pending nft receiver",
     );
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Pending NFT Airdrop Demo",
         tokenSymbol: "PNAD",
         treasuryAccountId: owner.accountId,
@@ -175,8 +177,8 @@ async function pendingAirdropToUnassociatedReceiver(
             {
                 tokenId,
                 serial: 1,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver.accountId.toString(),
             },
         ],
         additionalSigners: [owner.key],
@@ -221,7 +223,7 @@ async function mixedBatch(
         "unassociated receiver",
     );
 
-    const tokenId = await tokenService.createNft({
+    const { tokenId } = await tokenService.createNft({
         tokenName: "Mixed NFT Airdrop Demo",
         tokenSymbol: "MIXNAD",
         treasuryAccountId: owner.accountId,
@@ -246,14 +248,14 @@ async function mixedBatch(
             {
                 tokenId,
                 serial: 1,
-                senderAccountId: owner.accountId,
-                receiverAccountId: associated.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: associated.accountId.toString(),
             },
             {
                 tokenId,
                 serial: 2,
-                senderAccountId: owner.accountId,
-                receiverAccountId: unassociated.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: unassociated.accountId.toString(),
             },
         ],
         additionalSigners: [owner.key],

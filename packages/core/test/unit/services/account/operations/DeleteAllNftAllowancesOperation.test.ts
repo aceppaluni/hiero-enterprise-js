@@ -37,13 +37,19 @@ describe("DeleteAllNftAllowancesOperation (via AccountService)", () => {
     });
 
     it("revokes approve-for-all-serials with correct SDK arguments", async () => {
-        await service.deleteAllNftAllowances([
+        const result = await service.deleteAllNftAllowances([
             {
                 tokenId: "0.0.600",
                 ownerAccountId: "0.0.100",
                 spenderAccountId: "0.0.200",
             },
         ]);
+
+        // No SDK receipt leaks to consumers — just the floor result.
+        expect(result).toMatchObject({
+            transactionId: "0.0.123@1234567890.000000000",
+            status: "SUCCESS",
+        });
 
         const tx = vi.mocked(AccountAllowanceApproveTransaction).mock.results[0]
             .value;

@@ -87,14 +87,18 @@ describe("TokenWipeOperation (via TokenService)", () => {
         expect(tx.sign).toHaveBeenCalledWith(signer);
     });
 
-    it("returns the new total supply from the receipt", async () => {
-        const totalSupply = await service.wipeToken({
+    it("returns the transaction floor and the new total supply", async () => {
+        const result = await service.wipeToken({
             tokenId: "0.0.500",
             accountId: "0.0.700",
             amount: 10,
         });
 
-        expect(totalSupply).toBe(mocks.receipt.totalSupply);
+        expect(result).toMatchObject({
+            transactionId: "0.0.123@1234567890.000000000",
+            status: "SUCCESS",
+            totalSupply: "1000",
+        });
     });
 
     it("throws when the receipt is missing totalSupply", async () => {

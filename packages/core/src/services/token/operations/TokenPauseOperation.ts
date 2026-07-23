@@ -26,28 +26,23 @@ export class TokenPauseOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenPauseValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenPauseValidator();
     }
 
     /** Submit a `TokenPauseTransaction`. */
-    async execute(options: TokenPauseOperationOptions): Promise<void> {
+    async execute(options: TokenPauseOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenPause",
-                serviceName: "TokenService",
-                methodName: "pauseToken",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenPause",
+            serviceName: "TokenService",
+            methodName: "pauseToken",
+            timestamp: new Date(),
+        });
     }
 
     private build(options: TokenPauseOperationOptions): TokenPauseTransaction {

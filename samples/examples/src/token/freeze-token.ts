@@ -46,7 +46,7 @@ async function freezeToken(
         memo: "freeze token holder",
     });
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Freeze Demo Token",
         tokenSymbol: "FDT",
         decimals: 0,

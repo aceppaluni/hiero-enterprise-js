@@ -25,12 +25,12 @@ describe("TokenService.createFungibleToken / createNft [Integration]", () => {
             initialBalance: 10,
             memo: "token integration treasury",
         });
-        treasuryId = treasury.accountId;
+        treasuryId = treasury.accountId.toString();
     });
 
     it("creates a fungible token with the operator as treasury", async () => {
         const ctx = setupIntegrationTestEnv();
-        const tokenId = await new TokenService(ctx).createFungibleToken({
+        const { tokenId } = await new TokenService(ctx).createFungibleToken({
             tokenName: "Operator Treasury Token",
             tokenSymbol: "OTT",
             decimals: 2,
@@ -39,13 +39,13 @@ describe("TokenService.createFungibleToken / createNft [Integration]", () => {
         });
 
         expect(tokenId).toBeDefined();
-        expect(tokenId).toMatch(/^0\.0\.\d+$/);
+        expect(tokenId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 
     it("creates a fungible token with an external treasury and admin key", async () => {
         const adminKey = PrivateKey.generateED25519();
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "External Treasury Token",
             tokenSymbol: "ETT",
             decimals: 0,
@@ -58,11 +58,11 @@ describe("TokenService.createFungibleToken / createNft [Integration]", () => {
         });
 
         expect(tokenId).toBeDefined();
-        expect(tokenId).toMatch(/^0\.0\.\d+$/);
+        expect(tokenId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 
     it("creates a fungible token with finite max supply", async () => {
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Capped Token",
             tokenSymbol: "CAP",
             decimals: 4,
@@ -74,13 +74,13 @@ describe("TokenService.createFungibleToken / createNft [Integration]", () => {
         });
 
         expect(tokenId).toBeDefined();
-        expect(tokenId).toMatch(/^0\.0\.\d+$/);
+        expect(tokenId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 
     it("creates an NFT collection with a treasury and supply key", async () => {
         const supplyKey = PrivateKey.generateED25519();
 
-        const tokenId = await tokenService.createNft({
+        const { tokenId } = await tokenService.createNft({
             tokenName: "Integration NFT",
             tokenSymbol: "INFT",
             treasuryAccountId: treasuryId,
@@ -89,13 +89,13 @@ describe("TokenService.createFungibleToken / createNft [Integration]", () => {
         });
 
         expect(tokenId).toBeDefined();
-        expect(tokenId).toMatch(/^0\.0\.\d+$/);
+        expect(tokenId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 
     it("creates an NFT collection with a finite max supply", async () => {
         const supplyKey = PrivateKey.generateED25519();
 
-        const tokenId = await tokenService.createNft({
+        const { tokenId } = await tokenService.createNft({
             tokenName: "Capped NFT",
             tokenSymbol: "CNFT",
             treasuryAccountId: treasuryId,
@@ -105,7 +105,7 @@ describe("TokenService.createFungibleToken / createNft [Integration]", () => {
         });
 
         expect(tokenId).toBeDefined();
-        expect(tokenId).toMatch(/^0\.0\.\d+$/);
+        expect(tokenId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 
     it("schedules a fungible token creation and returns a scheduleId", async () => {
@@ -124,8 +124,7 @@ describe("TokenService.createFungibleToken / createNft [Integration]", () => {
             { scheduleMemo: "integration scheduled fungible" },
         );
 
-        expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
-        expect(scheduled.transactionId).toBeDefined();
+        expect(scheduled.scheduleId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 
     it("schedules an NFT collection creation and returns a scheduleId", async () => {
@@ -142,7 +141,6 @@ describe("TokenService.createFungibleToken / createNft [Integration]", () => {
             { scheduleMemo: "integration scheduled nft" },
         );
 
-        expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
-        expect(scheduled.transactionId).toBeDefined();
+        expect(scheduled.scheduleId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 });

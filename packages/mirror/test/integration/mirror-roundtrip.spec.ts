@@ -73,7 +73,7 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
 
     it("round-trips a topic: create + submit → messages", async () => {
         const topicService = new TopicService(context);
-        const topicId = await topicService.createTopic({
+        const { topicId } = await topicService.createTopic({
             topicMemo: `mirror-roundtrip ${Date.now()}`,
         });
         await topicService.submitMessage({
@@ -89,14 +89,14 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
         // smoke workflow; here we round-trip the message-list read.
         const messages = await eventually(async () => {
             const page = await repositories.topicRepository.findByTopicId(
-                topicId,
+                topicId.toString(),
                 { limit: 5 },
             );
             if (page.data.length === 0) throw new Error("no messages yet");
             return page;
         }, `messages on ${topicId}`);
         const first = messages.data[0];
-        expect(first.topicId).toBe(topicId);
+        expect(first.topicId).toBe(topicId.toString());
         expect(Buffer.from(first.message, "base64").toString("utf8")).toContain(
             "hello from the integration suite",
         );
@@ -105,7 +105,7 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
     it("round-trips a token: create → metadata, name search, holders", async () => {
         const tokenService = new TokenService(context);
         const name = `Roundtrip${Date.now()}`;
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: name,
             tokenSymbol: "RTT",
             decimals: 2,
@@ -114,7 +114,7 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
         });
 
         const token = await eventually(
-            () => repositories.tokenRepository.findById(tokenId),
+            () => repositories.tokenRepository.findById(tokenId.toString()),
             `token ${tokenId}`,
         );
         expect(token.name).toBe(name);
@@ -130,12 +130,14 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
             if (page.data.length === 0) throw new Error("not indexed yet");
             return page;
         }, `token search "${name}"`);
-        expect(search.data.map((entry) => entry.tokenId)).toContain(tokenId);
+        expect(search.data.map((entry) => entry.tokenId)).toContain(
+            tokenId.toString(),
+        );
 
         // The treasury shows up as a holder with the full supply.
         const holders = await eventually(async () => {
             const page = await repositories.tokenRepository.findHolders(
-                tokenId,
+                tokenId.toString(),
                 { limit: 5 },
             );
             if (page.data.length === 0) throw new Error("no holders yet");
@@ -161,7 +163,7 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
 
     it("paginates a high-volume topic through the rate limiter", async () => {
         const topicService = new TopicService(context);
-        const topicId = await topicService.createTopic({
+        const { topicId } = await topicService.createTopic({
             topicMemo: `volume ${Date.now()}`,
         });
         const MESSAGES = 25;
@@ -185,7 +187,7 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
             const { collectAll } =
                 await import("../../src/utils/Pagination.js");
             const drained = await collectAll(
-                await gated.topicRepository.findByTopicId(topicId, {
+                await gated.topicRepository.findByTopicId(topicId.toString(), {
                     limit: 5,
                     order: "asc",
                 }),
@@ -202,10 +204,13 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
         );
 
         // Sequence-window filter agrees with the drained view.
-        const window = await gated.topicRepository.findByTopicId(topicId, {
-            sequenceNumber: { gte: 10, lte: 14 },
-            order: "asc",
-        });
+        const window = await gated.topicRepository.findByTopicId(
+            topicId.toString(),
+            {
+                sequenceNumber: { gte: 10, lte: 14 },
+                order: "asc",
+            },
+        );
         expect(window.data.map((m) => Number(m.sequenceNumber))).toEqual([
             10, 11, 12, 13, 14,
         ]);

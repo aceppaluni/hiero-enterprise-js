@@ -1,7 +1,7 @@
 import type { FileId, Key } from "@hiero-ledger/sdk";
 import type { IHieroContext } from "../../context/index.js";
 import { HieroError, HieroErrorCodes } from "../../errors/index.js";
-import type { ScheduleOptions, ScheduledResult } from "../transaction/index.js";
+import type { ScheduleOptions } from "../transaction/index.js";
 import {
     FileCreateOperation,
     FileAppendOperation,
@@ -150,45 +150,51 @@ export class FileService {
      * });
      * ```
      */
-    async createFile(options: CreateFileOptions = {}): Promise<string> {
+    async createFile(options: CreateFileOptions = {}) {
         const [head, tail] = splitContents(options.contents);
         const keys = options.keys ?? [this.context.operatorPublicKey as Key];
 
-        const fileId = await this.createOperation.execute({
+        const result = await this.createOperation.execute({
             ...options,
             contents: head,
             keys,
         });
 
+        if (result.fileId == null) {
+            throw new HieroError(
+                "FileCreate receipt did not include a fileId.",
+                {
+                    code: HieroErrorCodes.SdkError,
+                    context: "FileService.createFile",
+                },
+            );
+        }
+
         if (tail !== null) {
             try {
                 await this.appendOperation.execute({
                     ...options,
-                    fileId,
+                    fileId: result.fileId,
                     contents: tail,
                 });
             } catch (error) {
                 // FileCreate already succeeded on-chain — the caller
                 // needs the fileId to retry the append or delete the
                 // partial file. Surface it on the thrown error.
-                //
-                // `error` is always a HieroError here because
-                // `TransactionExecutor.run` normalises every failure
-                // before throwing.
                 const cause = error as Error;
                 throw new HieroError(
-                    `File ${fileId} was created, but appending the remainder of its contents failed: ${cause.message}`,
+                    `File ${result.fileId} was created, but appending the remainder of its contents failed: ${cause.message}`,
                     {
                         code: HieroErrorCodes.SdkError,
                         context: "FileService.createFile",
                         cause,
-                        fileId,
+                        fileId: result.fileId.toString(),
                     },
                 );
             }
         }
 
-        return fileId;
+        return result;
     }
 
     /**
@@ -207,7 +213,7 @@ export class FileService {
      * @param options.chunkSize - Bytes per chunk (SDK default 4096)
      * @param options.chunkInterval - Milliseconds to wait between chunks
      */
-    async appendToFile(options: AppendToFileOptions): Promise<void> {
+    async appendToFile(options: AppendToFileOptions) {
         return await this.appendOperation.execute(options);
     }
 
@@ -231,14 +237,19 @@ export class FileService {
      * @param options.fileMemo - New file memo, or `null` to clear
      * @param options.expirationTime - Extend the file's expiration (not clearable)
      */
-    async updateFile(options: UpdateFileOptions): Promise<void> {
+    async updateFile(options: UpdateFileOptions) {
         if (options.contents === undefined) {
             return await this.updateOperation.execute(options);
         }
 
         const [head, tail] = splitContents(options.contents);
 
-        await this.updateOperation.execute({ ...options, contents: head });
+        // The update transaction is the logical write the caller asked for;
+        // any append is an internal continuation of the same contents.
+        const result = await this.updateOperation.execute({
+            ...options,
+            contents: head,
+        });
 
         if (tail !== null) {
             await this.appendOperation.execute({
@@ -247,6 +258,7 @@ export class FileService {
                 contents: tail,
             });
         }
+        return result;
     }
 
     /**
@@ -270,7 +282,7 @@ export class FileService {
     async scheduleUpdateFile(
         options: UpdateFileOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         if (options.contents !== undefined) {
             const [, tail] = splitContents(options.contents);
             if (tail !== null) {
@@ -301,7 +313,7 @@ export class FileService {
      *
      * @param options.fileId - File to delete (required)
      */
-    async deleteFile(options: DeleteFileOptions): Promise<void> {
+    async deleteFile(options: DeleteFileOptions) {
         return await this.deleteOperation.execute(options);
     }
 

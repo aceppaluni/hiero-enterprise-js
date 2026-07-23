@@ -47,28 +47,23 @@ export class TokenAirdropNftOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenAirdropNftValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenAirdropNftValidator();
     }
 
     /** Submit an NFT `TokenAirdropTransaction`. */
-    async execute(options: TokenAirdropNftOperationOptions): Promise<void> {
+    async execute(options: TokenAirdropNftOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenAirdrop",
-                serviceName: "TokenService",
-                methodName: "airdropNft",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenAirdrop",
+            serviceName: "TokenService",
+            methodName: "airdropNft",
+            timestamp: new Date(),
+        });
     }
 
     private build(

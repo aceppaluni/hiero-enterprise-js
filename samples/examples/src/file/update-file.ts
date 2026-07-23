@@ -17,7 +17,11 @@
  * Run: pnpm tsx src/file/update-file.ts
  */
 
-import { FileService, HieroContext, PrivateKey } from "@hiero-hackers/enterprise-core";
+import {
+    FileService,
+    HieroContext,
+    PrivateKey,
+} from "@hiero-hackers/enterprise-core";
 import { getED25519Config } from "../env.js";
 
 /**
@@ -40,7 +44,7 @@ async function createOperatorFile(fileService: FileService, contents: string) {
 async function replaceMemo(fileService: FileService) {
     console.log("=== Replace file memo ===\n");
 
-    const fileId = await createOperatorFile(fileService, "memo demo");
+    const { fileId } = await createOperatorFile(fileService, "memo demo");
 
     await fileService.updateFile({
         fileId,
@@ -61,7 +65,7 @@ async function replaceMemo(fileService: FileService) {
 async function clearMemo(fileService: FileService) {
     console.log("=== Clear file memo (null sentinel) ===\n");
 
-    const fileId = await createOperatorFile(fileService, "clear demo");
+    const { fileId } = await createOperatorFile(fileService, "clear demo");
 
     await fileService.updateFile({
         fileId,
@@ -83,7 +87,7 @@ async function clearMemo(fileService: FileService) {
 async function replaceContents(fileService: FileService) {
     console.log("=== Replace file contents ===\n");
 
-    const fileId = await createOperatorFile(fileService, "old contents");
+    const { fileId } = await createOperatorFile(fileService, "old contents");
 
     await fileService.updateFile({
         fileId,
@@ -106,7 +110,7 @@ async function extendExpiration(fileService: FileService) {
 
     // Create a short-lived file so the extension is meaningful and
     // stays under the network's ~92-day max auto-renew window.
-    const fileId = await fileService.createFile({
+    const { fileId } = await fileService.createFile({
         contents: "expiry demo",
         expirationTime: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     });
@@ -136,7 +140,7 @@ async function rotateFileKey(fileService: FileService) {
     const oldKey = PrivateKey.generateED25519();
     const newKey = PrivateKey.generateED25519();
 
-    const fileId = await fileService.createFile({
+    const { fileId } = await fileService.createFile({
         contents: "rotatable",
         keys: [oldKey.publicKey],
         // Custom key must co-sign FileCreate.
@@ -180,16 +184,15 @@ async function rotateFileKey(fileService: FileService) {
 async function scheduleFileUpdate(fileService: FileService) {
     console.log("=== Schedule a file update ===\n");
 
-    const fileId = await createOperatorFile(fileService, "schedule demo");
+    const { fileId } = await createOperatorFile(fileService, "schedule demo");
 
-    const { scheduleId, transactionId } = await fileService.scheduleUpdateFile({
+    const { scheduleId } = await fileService.scheduleUpdateFile({
         fileId,
         fileMemo: "scheduled memo change",
     });
 
     console.log("File ID:", fileId);
     console.log("  - scheduleId:", scheduleId);
-    console.log("  - transactionId:", transactionId);
     console.log("  - will execute once all required signatures are collected");
     console.log();
 }

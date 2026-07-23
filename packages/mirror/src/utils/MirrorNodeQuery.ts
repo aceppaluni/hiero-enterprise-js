@@ -23,11 +23,7 @@ export function segment(value: string | number): string {
 
 /** A value that can appear in a mirror node query parameter. */
 export type QueryParamValue =
-    | string
-    | number
-    | boolean
-    | RangeFilter
-    | readonly (string | number)[];
+    string | number | boolean | RangeFilter | readonly (string | number)[];
 
 /**
  * Append query params to a path, choosing `?` or `&` depending on whether

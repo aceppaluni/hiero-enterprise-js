@@ -3,11 +3,11 @@ import { AccountCreateTransaction, PublicKey, Hbar } from "@hiero-ledger/sdk";
 import { AccountType } from "../../../types/index.js";
 import type { Account } from "../../../types/index.js";
 import type { IHieroContext } from "../../../context/index.js";
+import { HieroError } from "../../../errors/HieroError.js";
 import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "../../transaction/index.js";
 import { CreateAccountValidator } from "../validation/index.js";
 
@@ -101,38 +101,37 @@ export class CreateAccountOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: CreateAccountValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new CreateAccountValidator();
     }
 
     /** Create account execute handler. */
-    async execute(options: CreateAccountOptions): Promise<Account> {
+    async execute(options: CreateAccountOptions) {
         // Validate options first — before any key parsing or SDK construction
         this.validator.validate(options);
 
         // Build the transaction with the parsed options
         const tx = this.build(options);
 
-        // Execute the transaction and map the receipt to the Account return type
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "AccountCreate",
-                serviceName: "AccountService",
-                methodName: "createAccount",
-                timestamp: new Date(),
-            },
-            (receipt) => this.toAccount(receipt, options),
-        );
+        // Execute the transaction and merge the derived account fields
+        const results = await this.executor.run(tx, options, {
+            type: "AccountCreate",
+            serviceName: "AccountService",
+            methodName: "createAccount",
+            timestamp: new Date(),
+        });
+        return {
+            ...results,
+            ...this.toAccount(results.receipt, options),
+        };
     }
 
     /** Schedule account creation */
     async schedule(
         options: CreateAccountOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
         const tx = this.build(options);
         return await this.executor.scheduleRun(
@@ -232,8 +231,18 @@ export class CreateAccountOperation {
         receipt: TransactionReceipt,
         options: CreateAccountOptions,
     ): Account {
+        if (!receipt.accountId) {
+            throw new HieroError(
+                "Account creation failed — no accountId returned in receipt.",
+                {
+                    code: "SDK_ERROR",
+                    context: "CreateAccountOperation.execute",
+                    sdkStatus: receipt.status.toString(),
+                },
+            );
+        }
         const result: Account = {
-            accountId: receipt.accountId!.toString(),
+            accountId: receipt.accountId,
         };
 
         if (options.key != null) {

@@ -47,7 +47,7 @@ async function unfreezeToken(
         memo: "unfreeze token holder",
     });
 
-    const tokenId = await tokenService.createFungibleToken({
+    const { tokenId } = await tokenService.createFungibleToken({
         tokenName: "Unfreeze Demo Token",
         tokenSymbol: "UDT",
         decimals: 0,

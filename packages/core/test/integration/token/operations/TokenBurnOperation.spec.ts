@@ -27,7 +27,7 @@ describe("TokenService burn operations [Integration]", () => {
         const initialSupply = 1_000;
         const burnAmount = 250;
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Burn Fungible Integration",
             tokenSymbol: "BFI",
             decimals: 0,
@@ -43,7 +43,9 @@ describe("TokenService burn operations [Integration]", () => {
             additionalSigners: [owner.key],
         });
 
-        expect(newTotalSupply.toNumber()).toBe(initialSupply - burnAmount);
+        expect(newTotalSupply.totalSupply).toBe(
+            String(initialSupply - burnAmount),
+        );
 
         await waitForMirrorNodeRecord();
 
@@ -52,7 +54,7 @@ describe("TokenService burn operations [Integration]", () => {
     });
 
     it("burns specific NFT serials", async () => {
-        const tokenId = await tokenService.createNft({
+        const { tokenId } = await tokenService.createNft({
             tokenName: "Burn NFT Integration",
             tokenSymbol: "BNI",
             treasuryAccountId: owner.accountId,
@@ -77,7 +79,7 @@ describe("TokenService burn operations [Integration]", () => {
         });
 
         // 3 minted - 2 burned = 1 remaining
-        expect(newTotalSupply.toNumber()).toBe(1);
+        expect(newTotalSupply.totalSupply).toBe("1");
 
         await waitForMirrorNodeRecord();
 
@@ -86,7 +88,7 @@ describe("TokenService burn operations [Integration]", () => {
     });
 
     it("schedules a token burn and returns a scheduleId", async () => {
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Scheduled Burn",
             tokenSymbol: "SBN",
             decimals: 0,
@@ -105,7 +107,6 @@ describe("TokenService burn operations [Integration]", () => {
             { scheduleMemo: "integration scheduled burn" },
         );
 
-        expect(scheduled.scheduleId).toMatch(/^0\.0\.\d+$/);
-        expect(scheduled.transactionId).toBeDefined();
+        expect(scheduled.scheduleId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 });

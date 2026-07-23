@@ -59,7 +59,7 @@ describe("TokenNftInfoQuery (via TokenService)", () => {
         expect(mocks.mockQuery.setNftId).toHaveBeenCalledWith("0.0.1234/7");
         expect(mocks.mockQuery.execute).toHaveBeenCalledWith(context.client);
 
-        expect(info).toEqual({
+        expect(info).toMatchObject({
             nftId: "0.0.1234/7",
             tokenId: "0.0.1234",
             serial: "7",

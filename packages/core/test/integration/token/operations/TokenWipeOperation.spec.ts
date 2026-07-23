@@ -29,7 +29,7 @@ describe("TokenService wipe operations [Integration]", () => {
         const transferAmount = 400;
         const wipeAmount = 250;
 
-        const tokenId = await tokenService.createFungibleToken({
+        const { tokenId } = await tokenService.createFungibleToken({
             tokenName: "Wipe Fungible Integration",
             tokenSymbol: "WFI",
             decimals: 0,
@@ -61,7 +61,9 @@ describe("TokenService wipe operations [Integration]", () => {
             additionalSigners: [owner.key],
         });
 
-        expect(newTotalSupply.toNumber()).toBe(initialSupply - wipeAmount);
+        expect(newTotalSupply.totalSupply).toBe(
+            String(initialSupply - wipeAmount),
+        );
 
         await waitForMirrorNodeRecord();
 
@@ -72,7 +74,7 @@ describe("TokenService wipe operations [Integration]", () => {
     it("wipes specific NFT serials from a holder account", async () => {
         const holder = await createTestAccount(accountService, 2);
 
-        const tokenId = await tokenService.createNft({
+        const { tokenId } = await tokenService.createNft({
             tokenName: "Wipe NFT Integration",
             tokenSymbol: "WNI",
             treasuryAccountId: owner.accountId,
@@ -121,7 +123,7 @@ describe("TokenService wipe operations [Integration]", () => {
         });
 
         // 3 minted - 2 wiped = 1 remaining (still owned by treasury)
-        expect(newTotalSupply.toNumber()).toBe(1);
+        expect(newTotalSupply.totalSupply).toBe("1");
 
         await waitForMirrorNodeRecord();
 

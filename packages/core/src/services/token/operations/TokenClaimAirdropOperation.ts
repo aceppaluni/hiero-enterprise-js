@@ -41,28 +41,23 @@ export class TokenClaimAirdropOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: TokenClaimAirdropValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new TokenClaimAirdropValidator();
     }
 
     /** Submit a `TokenClaimAirdropTransaction`. */
-    async execute(options: TokenClaimAirdropOperationOptions): Promise<void> {
+    async execute(options: TokenClaimAirdropOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        return await this.executor.run(
-            tx,
-            options,
-            {
-                type: "TokenClaimAirdrop",
-                serviceName: "TokenService",
-                methodName: "claimAirdrop",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "TokenClaimAirdrop",
+            serviceName: "TokenService",
+            methodName: "claimAirdrop",
+            timestamp: new Date(),
+        });
     }
 
     private build(

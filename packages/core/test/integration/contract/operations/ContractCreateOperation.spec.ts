@@ -27,39 +27,40 @@ describe("ContractCreateOperation", () => {
         // contract deploy expects the file contents to be the hex-encoded
         // bytecode (the network decodes it server-side). Uploading raw decoded
         // bytes triggers ERROR_DECODING_BYTESTRING at ContractCreate time.
-        bytecodeFileId = await fileService.createFile({
+        const { fileId } = await fileService.createFile({
             contents: Buffer.from(MINIMAL_BYTECODE_HEX, "utf8"),
         });
+        bytecodeFileId = fileId.toString();
     });
 
     it("deploys a contract from a pre-uploaded bytecode FileId", async () => {
-        const contractId = await contractService.createContract({
+        const { contractId } = await contractService.createContract({
             bytecodeFileId,
             gas: 150_000,
         });
 
         expect(contractId).toBeDefined();
-        expect(contractId).toMatch(/^0\.0\.\d+$/);
+        expect(contractId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 
     it("deploys a contract from raw bytecode embedded in-transaction (HIP-435)", async () => {
-        const contractId = await contractService.createContract({
+        const { contractId } = await contractService.createContract({
             bytecode: Buffer.from(MINIMAL_BYTECODE_HEX, "hex"),
             gas: 150_000,
         });
 
         expect(contractId).toBeDefined();
-        expect(contractId).toMatch(/^0\.0\.\d+$/);
+        expect(contractId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 
     it("deploys a contract with a memo recorded on the entity", async () => {
-        const contractId = await contractService.createContract({
+        const { contractId } = await contractService.createContract({
             bytecodeFileId,
             gas: 150_000,
             contractMemo: "integration test contract",
         });
 
         expect(contractId).toBeDefined();
-        expect(contractId).toMatch(/^0\.0\.\d+$/);
+        expect(contractId.toString()).toMatch(/^0\.0\.\d+$/);
     });
 });

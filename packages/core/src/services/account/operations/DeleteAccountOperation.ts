@@ -5,7 +5,6 @@ import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "../../transaction/index.js";
 
 /**
@@ -47,7 +46,7 @@ export class DeleteAccountOperation {
     }
 
     /** Delete account execute handler. */
-    async execute(options: DeleteAccountOptions): Promise<void> {
+    async execute(options: DeleteAccountOptions) {
         // Prepend accountKey so it signs the tx before the operator auto-sign
         const opts: DeleteAccountOptions = {
             ...options,
@@ -56,17 +55,12 @@ export class DeleteAccountOperation {
                 ...(options.additionalSigners ?? []),
             ],
         };
-        return await this.executor.run(
-            this.build(options),
-            opts,
-            {
-                type: "AccountDelete",
-                serviceName: "AccountService",
-                methodName: "deleteAccount",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(this.build(options), opts, {
+            type: "AccountDelete",
+            serviceName: "AccountService",
+            methodName: "deleteAccount",
+            timestamp: new Date(),
+        });
     }
 
     /**
@@ -78,7 +72,7 @@ export class DeleteAccountOperation {
     async schedule(
         options: ScheduleDeleteAccountOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.executor.scheduleRun(
             this.build(options),
             options,

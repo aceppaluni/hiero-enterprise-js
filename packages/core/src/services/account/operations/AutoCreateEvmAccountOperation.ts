@@ -4,7 +4,6 @@ import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "../../transaction/index.js";
 
 /**
@@ -28,26 +27,49 @@ export class AutoCreateEvmAccountOperation {
         this.executor = new TransactionExecutor(context);
     }
 
-    /** Auto-create EVM account execute handler. */
-    async execute(options: AutoCreateEvmAccountOptions): Promise<void> {
-        return await this.executor.run(
-            this.build(options),
-            options,
-            {
-                type: "AccountAutoCreate",
-                serviceName: "AccountService",
-                methodName: "autoCreateEvmAccount",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+    /**
+     * Auto-create EVM account execute handler.
+     *
+     * @returns The executor's shared fields plus `accountId` from the
+     *   transfer's *child* receipt when the address was cold. A warm
+     *   address leaves `accountId` `null` — the transfer landed, nothing
+     *   was created.
+     */
+    async execute(options: AutoCreateEvmAccountOptions) {
+        const results = await this.executor.run(this.build(options), options, {
+            type: "AccountAutoCreate",
+            serviceName: "AccountService",
+            methodName: "autoCreateEvmAccount",
+            timestamp: new Date(),
+        });
+
+        // The new hollow account id lives on the transfer's child receipt — not
+        // populated on the base receipt the executor already fetched.
+        try {
+            const withChildren = await results.response
+                .getReceiptQuery(this.context.client)
+                .setIncludeChildren(true)
+                .execute(this.context.client);
+
+            const child = withChildren.children.find(
+                (c) => c.accountId != null,
+            );
+
+            return {
+                ...results,
+                accountId: child?.accountId ?? null,
+            };
+        } catch {
+            // The transfer reached consensus; avoid throwing after funds moved.
+            return { ...results, accountId: null };
+        }
     }
 
     /** Schedule the hollow-account transfer. */
     async schedule(
         options: AutoCreateEvmAccountOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         return await this.executor.scheduleRun(
             this.build(options),
             options,

@@ -56,7 +56,7 @@ async function createNft(
     // The supply key itself does not need to sign creation — only future
     // mint transactions.
 
-    const collectionId = await tokenService.createNft({
+    const { tokenId: collectionId } = await tokenService.createNft({
         tokenName: "Acme Art",
         tokenSymbol: "ART",
         treasuryAccountId: treasury.accountId,
@@ -110,7 +110,6 @@ async function scheduleCreateNft(
     );
 
     console.log("Schedule ID:", scheduled.scheduleId);
-    console.log("Transaction ID:", scheduled.transactionId);
     console.log();
 }
 

@@ -5,7 +5,6 @@ import { TransactionExecutor } from "../../transaction/index.js";
 import type {
     TransactionOptions,
     ScheduleOptions,
-    ScheduledResult,
 } from "../../transaction/index.js";
 import { ContractDeleteValidator } from "../validation/index.js";
 
@@ -51,7 +50,7 @@ export class ContractDeleteOperation {
     private readonly executor: TransactionExecutor;
     private readonly validator: ContractDeleteValidator;
 
-    constructor(context: IHieroContext) {
+    constructor(private readonly context: IHieroContext) {
         this.executor = new TransactionExecutor(context);
         this.validator = new ContractDeleteValidator();
     }
@@ -59,29 +58,24 @@ export class ContractDeleteOperation {
     /**
      * Submit a `ContractDeleteTransaction`.
      */
-    async execute(options: ContractDeleteOperationOptions): Promise<void> {
+    async execute(options: ContractDeleteOperationOptions) {
         this.validator.validate(options);
 
         const tx = this.build(options);
 
-        await this.executor.run(
-            tx,
-            options,
-            {
-                type: "ContractDelete",
-                serviceName: "ContractService",
-                methodName: "deleteContract",
-                timestamp: new Date(),
-            },
-            () => undefined,
-        );
+        return await this.executor.run(tx, options, {
+            type: "ContractDelete",
+            serviceName: "ContractService",
+            methodName: "deleteContract",
+            timestamp: new Date(),
+        });
     }
 
     /** Schedule a `ContractDeleteTransaction` for deferred multi-sig execution. */
     async schedule(
         options: ContractDeleteOperationOptions,
         scheduleOptions?: ScheduleOptions,
-    ): Promise<ScheduledResult> {
+    ) {
         this.validator.validate(options);
 
         const tx = this.build(options);
