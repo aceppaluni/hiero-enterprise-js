@@ -59,8 +59,8 @@ async function deleteHbarAllowance(accountService: AccountService) {
     await accountService.approveHbarAllowance({
         hbarAllowances: [
             {
-                ownerAccountId: owner.accountId,
-                spenderAccountId: spender.accountId,
+                ownerAccountId: owner.accountId.toString(),
+                spenderAccountId: spender.accountId.toString(),
                 amount: 5,
             },
         ],
@@ -75,8 +75,8 @@ async function deleteHbarAllowance(accountService: AccountService) {
     await accountService.deleteHbarAllowance(
         [
             {
-                ownerAccountId: owner.accountId,
-                spenderAccountId: spender.accountId,
+                ownerAccountId: owner.accountId.toString(),
+                spenderAccountId: spender.accountId.toString(),
             },
         ],
         { additionalSigners: [ownerKey] },
@@ -138,9 +138,9 @@ async function deleteTokenAllowance(
     await accountService.approveTokenAllowance({
         tokenAllowances: [
             {
-                tokenId,
-                ownerAccountId: owner.accountId,
-                spenderAccountId: spender.accountId,
+                tokenId: tokenId.toString(),
+                ownerAccountId: owner.accountId.toString(),
+                spenderAccountId: spender.accountId.toString(),
                 amount: 500,
             },
         ],
@@ -153,9 +153,9 @@ async function deleteTokenAllowance(
     await accountService.deleteTokenAllowance(
         [
             {
-                tokenId,
-                ownerAccountId: owner.accountId,
-                spenderAccountId: spender.accountId,
+                tokenId: tokenId.toString(),
+                ownerAccountId: owner.accountId.toString(),
+                spenderAccountId: spender.accountId.toString(),
             },
         ],
         { additionalSigners: [ownerKey] },
@@ -165,7 +165,7 @@ async function deleteTokenAllowance(
         "Revoked: spender",
         spender.accountId,
         "can no longer transfer token",
-        tokenId,
+        tokenId.toString(),
     );
     console.log();
 }
@@ -215,7 +215,7 @@ async function deleteNftAllowanceBySerials(
     console.log("Created NFT collection:", tokenId);
 
     await tokenService.mintToken({
-        tokenId,
+        tokenId: tokenId.toString(),
         metadata: [
             Buffer.from("metadata-1"),
             Buffer.from("metadata-2"),
@@ -230,9 +230,9 @@ async function deleteNftAllowanceBySerials(
     await accountService.approveNftAllowance({
         nftAllowances: [
             {
-                tokenId,
-                ownerAccountId: owner.accountId,
-                spenderAccountId: spender.accountId,
+                tokenId: tokenId.toString(),
+                ownerAccountId: owner.accountId.toString(),
+                spenderAccountId: spender.accountId.toString(),
                 serialNumbers: [1, 2],
             },
         ],
@@ -250,8 +250,8 @@ async function deleteNftAllowanceBySerials(
     await accountService.deleteNftAllowance(
         [
             {
-                tokenId,
-                ownerAccountId: owner.accountId,
+                tokenId: tokenId.toString(),
+                ownerAccountId: owner.accountId.toString(),
                 serialNumbers: [1, 2],
             },
         ],
@@ -260,7 +260,7 @@ async function deleteNftAllowanceBySerials(
 
     console.log(
         "Revoked: no spender can transfer serials [1, 2] from collection",
-        tokenId,
+        tokenId.toString(),
     );
     console.log();
 }
@@ -310,7 +310,7 @@ async function deleteAllNftAllowances(
     console.log("Created NFT collection:", tokenId);
 
     await tokenService.mintToken({
-        tokenId,
+        tokenId: tokenId.toString(),
         metadata: [Buffer.from("metadata-1"), Buffer.from("metadata-2")],
         additionalSigners: [ownerKey],
     });
@@ -321,9 +321,9 @@ async function deleteAllNftAllowances(
     await accountService.approveNftAllowance({
         nftAllowances: [
             {
-                tokenId,
-                ownerAccountId: owner.accountId,
-                spenderAccountId: spender.accountId,
+                tokenId: tokenId.toString(),
+                ownerAccountId: owner.accountId.toString(),
+                spenderAccountId: spender.accountId.toString(),
                 allSerials: true,
             },
         ],
@@ -339,9 +339,9 @@ async function deleteAllNftAllowances(
     await accountService.deleteAllNftAllowances(
         [
             {
-                tokenId,
-                ownerAccountId: owner.accountId,
-                spenderAccountId: spender.accountId,
+                tokenId: tokenId.toString(),
+                ownerAccountId: owner.accountId.toString(),
+                spenderAccountId: spender.accountId.toString(),
             },
         ],
         { additionalSigners: [ownerKey] },
@@ -351,7 +351,7 @@ async function deleteAllNftAllowances(
         "Revoked: spender",
         spender.accountId,
         "no longer has blanket approval for collection",
-        tokenId,
+        tokenId.toString(),
     );
     console.log();
 }

@@ -45,17 +45,18 @@ import {
     NftId,
     PendingAirdropId,
     PrivateKey,
-    TokenId,
     TokenService,
+    type TokenId,
     type Balance,
 } from "@hiero-hackers/enterprise-core";
 import { getED25519Config } from "../env.js";
 
 function tokenBalanceFor(
     balance: Balance,
-    tokenId: string,
+    tokenId: string | TokenId,
 ): string | undefined {
-    return balance.tokens.find((t) => t.tokenId === tokenId)?.balance;
+    return balance.tokens.find((t) => t.tokenId === tokenId.toString())
+        ?.balance;
 }
 
 async function createKeyedAccount(
@@ -70,7 +71,7 @@ async function createKeyedAccount(
         initialBalance,
         memo,
     });
-    return { accountId: account.accountId, key };
+    return { accountId: account.accountId.toString(), key };
 }
 
 async function cancelPendingFungibleAirdrop(
@@ -101,8 +102,8 @@ async function cancelPendingFungibleAirdrop(
         airdrops: [
             {
                 tokenId,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver.accountId.toString(),
                 amount: 25,
             },
         ],
@@ -172,8 +173,8 @@ async function cancelPendingNftAirdrop(
             {
                 tokenId,
                 serial: 1,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver.accountId.toString(),
             },
         ],
         additionalSigners: [owner.key],
@@ -192,7 +193,7 @@ async function cancelPendingNftAirdrop(
             new PendingAirdropId({
                 senderId: owner.accountId,
                 receiverId: receiver.accountId,
-                nftId: new NftId(TokenId.fromString(tokenId), 1),
+                nftId: new NftId(tokenId, 1),
             }),
         ],
         additionalSigners: [owner.key],
@@ -253,8 +254,8 @@ async function cancelMixedBatch(
         airdrops: [
             {
                 tokenId: fungibleTokenId,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver.accountId.toString(),
                 amount: 12,
             },
         ],
@@ -265,8 +266,8 @@ async function cancelMixedBatch(
             {
                 tokenId: nftTokenId,
                 serial: 1,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver.accountId.toString(),
             },
         ],
         additionalSigners: [owner.key],
@@ -291,7 +292,7 @@ async function cancelMixedBatch(
             new PendingAirdropId({
                 senderId: owner.accountId,
                 receiverId: receiver.accountId,
-                nftId: new NftId(TokenId.fromString(nftTokenId), 1),
+                nftId: new NftId(nftTokenId, 1),
             }),
         ],
         additionalSigners: [owner.key],

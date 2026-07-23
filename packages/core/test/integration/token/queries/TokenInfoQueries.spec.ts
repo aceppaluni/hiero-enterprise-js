@@ -9,7 +9,7 @@ import {
     AccountService,
     TokenService,
 } from "../../../../src/services/index.js";
-import { NftId, TokenId, TokenType, TokenSupplyType } from "@hiero-ledger/sdk";
+import { NftId, TokenType, TokenSupplyType } from "@hiero-ledger/sdk";
 
 describe("TokenService info queries [Integration]", () => {
     let accountService: AccountService;
@@ -74,9 +74,7 @@ describe("TokenService info queries [Integration]", () => {
 
             await waitForMirrorNodeRecord();
 
-            const info = await tokenService.getTokenInfo(
-                TokenId.fromString(tokenId),
-            );
+            const info = await tokenService.getTokenInfo(tokenId);
 
             expect(info.tokenId).toBe(tokenId);
             expect(info.tokenType).toBe(TokenType.NonFungibleUnique);
@@ -108,7 +106,7 @@ describe("TokenService info queries [Integration]", () => {
 
             await waitForMirrorNodeRecord();
 
-            const nftId = new NftId(TokenId.fromString(tokenId), 1);
+            const nftId = new NftId(tokenId, 1);
             const info = await tokenService.getNftInfo(nftId);
 
             expect(info.nftId).toBe(`${tokenId}/1`);

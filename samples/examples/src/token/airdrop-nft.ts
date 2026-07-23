@@ -27,6 +27,7 @@
  * Run: pnpm tsx src/token/airdrop-nft.ts
  */
 
+import type { TokenId } from "@hiero-hackers/enterprise-core";
 import {
     AccountService,
     AccountType,
@@ -39,9 +40,10 @@ import { getED25519Config } from "../env.js";
 
 function tokenBalanceFor(
     balance: Balance,
-    tokenId: string,
+    tokenId: string | TokenId,
 ): string | undefined {
-    return balance.tokens.find((t) => t.tokenId === tokenId)?.balance;
+    return balance.tokens.find((t) => t.tokenId === tokenId.toString())
+        ?.balance;
 }
 
 async function createKeyedAccount(
@@ -56,7 +58,7 @@ async function createKeyedAccount(
         initialBalance,
         memo,
     });
-    return { accountId: account.accountId, key };
+    return { accountId: account.accountId.toString(), key };
 }
 
 async function multiReceiverImmediateCredit(
@@ -105,20 +107,20 @@ async function multiReceiverImmediateCredit(
             {
                 tokenId,
                 serial: 1,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver1.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver1.accountId.toString(),
             },
             {
                 tokenId,
                 serial: 2,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver2.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver2.accountId.toString(),
             },
             {
                 tokenId,
                 serial: 3,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver3.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver3.accountId.toString(),
             },
         ],
         additionalSigners: [owner.key],
@@ -175,8 +177,8 @@ async function pendingAirdropToUnassociatedReceiver(
             {
                 tokenId,
                 serial: 1,
-                senderAccountId: owner.accountId,
-                receiverAccountId: receiver.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: receiver.accountId.toString(),
             },
         ],
         additionalSigners: [owner.key],
@@ -246,14 +248,14 @@ async function mixedBatch(
             {
                 tokenId,
                 serial: 1,
-                senderAccountId: owner.accountId,
-                receiverAccountId: associated.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: associated.accountId.toString(),
             },
             {
                 tokenId,
                 serial: 2,
-                senderAccountId: owner.accountId,
-                receiverAccountId: unassociated.accountId,
+                senderAccountId: owner.accountId.toString(),
+                receiverAccountId: unassociated.accountId.toString(),
             },
         ],
         additionalSigners: [owner.key],

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { NftId, TokenId } from "@hiero-ledger/sdk";
+import type { TokenId } from "@hiero-ledger/sdk";
+import { NftId } from "@hiero-ledger/sdk";
 import { setupIntegrationTestEnv } from "../../../utils/env.js";
 import {
     waitForMirrorNodeRecord,
@@ -17,9 +18,10 @@ import {
 
 function tokenBalanceFor(
     balance: { tokens: { tokenId: string; balance: string }[] },
-    tokenId: string,
+    tokenId: string | TokenId,
 ): string | undefined {
-    return balance.tokens.find((t) => t.tokenId === tokenId)?.balance;
+    return balance.tokens.find((t) => t.tokenId === tokenId.toString())
+        ?.balance;
 }
 
 describe("TokenService reject operations [Integration]", () => {
@@ -90,7 +92,7 @@ describe("TokenService reject operations [Integration]", () => {
         // and the treasury supply has been restored in full.
         const holderTokens = await queryAccountTokens(holder.accountId);
         expect(
-            holderTokens.find((t) => t.token_id === tokenId),
+            holderTokens.find((t) => t.token_id === tokenId.toString()),
         ).toBeUndefined();
 
         const treasuryBalance = await accountService.getAccountBalance(
@@ -168,10 +170,7 @@ describe("TokenService reject operations [Integration]", () => {
 
         await tokenService.rejectTokensFlow({
             ownerId: holder.accountId,
-            nftIds: [
-                new NftId(TokenId.fromString(tokenIdA), 1),
-                new NftId(TokenId.fromString(tokenIdB), 1),
-            ],
+            nftIds: [new NftId(tokenIdA, 1), new NftId(tokenIdB, 1)],
             ownerKey: holder.key,
         });
 
@@ -185,10 +184,10 @@ describe("TokenService reject operations [Integration]", () => {
         // holds its only serial again.
         const holderTokens = await queryAccountTokens(holder.accountId);
         expect(
-            holderTokens.find((t) => t.token_id === tokenIdA),
+            holderTokens.find((t) => t.token_id === tokenIdA.toString()),
         ).toBeUndefined();
         expect(
-            holderTokens.find((t) => t.token_id === tokenIdB),
+            holderTokens.find((t) => t.token_id === tokenIdB.toString()),
         ).toBeUndefined();
 
         const treasuryBalance = await accountService.getAccountBalance(
@@ -256,7 +255,7 @@ describe("TokenService reject operations [Integration]", () => {
         await tokenService.rejectTokensFlow({
             ownerId: holder.accountId,
             fungibleTokenIds: [fungibleTokenId],
-            nftIds: [new NftId(TokenId.fromString(nftTokenId), 1)],
+            nftIds: [new NftId(nftTokenId, 1)],
             ownerKey: holder.key,
         });
 
@@ -269,10 +268,10 @@ describe("TokenService reject operations [Integration]", () => {
         // Both relationships are gone after the dissociation step of the flow.
         const holderTokens = await queryAccountTokens(holder.accountId);
         expect(
-            holderTokens.find((t) => t.token_id === fungibleTokenId),
+            holderTokens.find((t) => t.token_id === fungibleTokenId.toString()),
         ).toBeUndefined();
         expect(
-            holderTokens.find((t) => t.token_id === nftTokenId),
+            holderTokens.find((t) => t.token_id === nftTokenId.toString()),
         ).toBeUndefined();
 
         // Treasury supply has been restored for both.

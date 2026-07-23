@@ -39,7 +39,7 @@ describe("ContractDeleteOperation", () => {
             adminKey: adminKey.publicKey,
             additionalSigners: [adminKey],
         });
-        return contractId;
+        return contractId.toString();
     }
 
     it("deletes a contract and transfers the remaining balance to an account", async () => {

@@ -50,8 +50,8 @@ describe("AutoCreateEvmAccountOperation (via AccountService)", () => {
             expect(result).toMatchObject({
                 transactionId: "0.0.123@1234567890.000000000",
                 status: "SUCCESS",
-                accountId: "0.0.4321",
             });
+            expect(result.accountId?.toString()).toBe("0.0.4321");
         });
 
         it("resolves without accountId for a warm address — never throws after funds moved", async () => {

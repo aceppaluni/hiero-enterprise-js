@@ -93,7 +93,7 @@ describe("ContractExecuteOperation", () => {
             gas: 200_000,
             contractMemo: "execute-operation integration target",
         });
-        contractId = newId;
+        contractId = newId.toString();
     });
 
     it("invokes a contract function via setFunction with ABI-typed parameters", async () => {

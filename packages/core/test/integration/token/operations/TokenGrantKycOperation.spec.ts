@@ -52,7 +52,9 @@ describe("TokenService grantKyc operations [Integration]", () => {
         await waitForMirrorNodeRecord();
 
         const tokens = await queryAccountTokens(holder.accountId);
-        const relationship = tokens.find((t) => t.token_id === tokenId);
+        const relationship = tokens.find(
+            (t) => t.token_id === tokenId.toString(),
+        );
 
         expect(relationship).toBeDefined();
         expect(relationship?.kyc_status).toBe("GRANTED");

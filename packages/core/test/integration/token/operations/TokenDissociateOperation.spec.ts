@@ -48,7 +48,9 @@ describe("TokenService dissociate operations [Integration]", () => {
         await waitForMirrorNodeRecord();
 
         const before = await queryAccountTokens(receiver.accountId);
-        expect(before.find((t) => t.token_id === tokenId)).toBeDefined();
+        expect(
+            before.find((t) => t.token_id === tokenId.toString()),
+        ).toBeDefined();
 
         await tokenService.dissociateToken({
             accountId: receiver.accountId,
@@ -59,7 +61,9 @@ describe("TokenService dissociate operations [Integration]", () => {
         await waitForMirrorNodeRecord();
 
         const after = await queryAccountTokens(receiver.accountId);
-        expect(after.find((t) => t.token_id === tokenId)).toBeUndefined();
+        expect(
+            after.find((t) => t.token_id === tokenId.toString()),
+        ).toBeUndefined();
     });
 
     it("schedules a token dissociation", async () => {

@@ -114,7 +114,7 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
         });
 
         const token = await eventually(
-            () => repositories.tokenRepository.findById(tokenId),
+            () => repositories.tokenRepository.findById(tokenId.toString()),
             `token ${tokenId}`,
         );
         expect(token.name).toBe(name);
@@ -135,7 +135,7 @@ describe.skipIf(!hasEnvironment)("mirror round-trips [Integration]", () => {
         // The treasury shows up as a holder with the full supply.
         const holders = await eventually(async () => {
             const page = await repositories.tokenRepository.findHolders(
-                tokenId,
+                tokenId.toString(),
                 { limit: 5 },
             );
             if (page.data.length === 0) throw new Error("no holders yet");

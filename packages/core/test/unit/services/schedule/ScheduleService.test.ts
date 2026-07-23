@@ -147,7 +147,7 @@ describe("ScheduleService", () => {
                 additionalSigners: [PrivateKey.generateED25519()],
             });
 
-            expect(result.scheduledTransactionId).toBe(
+            expect(result.scheduledTransactionId?.toString()).toBe(
                 "0.0.500@1234567890.000000001?scheduled",
             );
         });

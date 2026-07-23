@@ -91,7 +91,7 @@ export class TokenCreateOperation {
 
         return {
             ...results,
-            tokenId: results.receipt.tokenId.toString(),
+            tokenId: results.receipt.tokenId,
         };
     }
 

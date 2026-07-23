@@ -48,7 +48,9 @@ describe("TokenService associate operations [Integration]", () => {
         await waitForMirrorNodeRecord();
 
         const tokens = await queryAccountTokens(receiver.accountId);
-        const relationship = tokens.find((t) => t.token_id === tokenId);
+        const relationship = tokens.find(
+            (t) => t.token_id === tokenId.toString(),
+        );
 
         expect(relationship).toBeDefined();
         expect(relationship?.token_id).toBe(tokenId);

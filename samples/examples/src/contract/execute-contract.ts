@@ -73,7 +73,7 @@ async function deploySimpleStorage(
     });
     console.log("Deployed SimpleStorage contract:", contractId);
     console.log();
-    return contractId;
+    return contractId.toString();
 }
 
 /**

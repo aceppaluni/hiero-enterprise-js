@@ -57,7 +57,7 @@ export class AutoCreateEvmAccountOperation {
 
             return {
                 ...results,
-                accountId: child?.accountId?.toString() ?? null,
+                accountId: child?.accountId ?? null,
             };
         } catch {
             // The transfer reached consensus; avoid throwing after funds moved.

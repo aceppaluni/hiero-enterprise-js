@@ -47,9 +47,8 @@ export class ScheduleSignOperation {
         });
         return {
             ...results,
-            scheduledTransactionId: results.receipt.scheduledTransactionId
-                ? results.receipt.scheduledTransactionId.toString()
-                : null,
+            scheduledTransactionId:
+                results.receipt.scheduledTransactionId ?? null,
         };
     }
 }

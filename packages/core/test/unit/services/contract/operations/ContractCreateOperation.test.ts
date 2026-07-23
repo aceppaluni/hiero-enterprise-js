@@ -57,7 +57,7 @@ describe("ContractCreateOperation (via ContractService)", () => {
                 gas: 100_000,
             });
 
-            expect(contractId).toBe("0.0.666");
+            expect(contractId.toString()).toBe("0.0.666");
 
             const tx = vi.mocked(ContractCreateTransaction).mock.results[0]
                 .value;
@@ -87,7 +87,7 @@ describe("ContractCreateOperation (via ContractService)", () => {
                 gas: 200_000,
             });
 
-            expect(contractId).toBe("0.0.666");
+            expect(contractId.toString()).toBe("0.0.666");
 
             const tx = vi.mocked(ContractCreateTransaction).mock.results[0]
                 .value;

@@ -61,7 +61,7 @@ describe("AccountService approve-allowance operations [Integration]", () => {
         const approveResult = await client.approveTokenAllowance({
             tokenAllowances: [
                 {
-                    tokenId,
+                    tokenId: tokenId.toString(),
                     ownerAccountId: owner.accountId,
                     spenderAccountId: spender.accountId,
                     amount: 500,
@@ -75,7 +75,9 @@ describe("AccountService approve-allowance operations [Integration]", () => {
 
         const allowances = await queryTokenAllowances(owner.accountId);
         const match = allowances.find(
-            (a) => a.spender === spender.accountId && a.token_id === tokenId,
+            (a) =>
+                a.spender === spender.accountId &&
+                a.token_id === tokenId.toString(),
         );
         expect(match).toBeDefined();
         expect(match!.amount).toBe(500);
@@ -101,7 +103,7 @@ describe("AccountService approve-allowance operations [Integration]", () => {
         const approveResult = await client.approveNftAllowance({
             nftAllowances: [
                 {
-                    tokenId,
+                    tokenId: tokenId.toString(),
                     ownerAccountId: owner.accountId,
                     spenderAccountId: spender.accountId,
                     serialNumbers: [1, 2],

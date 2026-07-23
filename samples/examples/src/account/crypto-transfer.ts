@@ -149,7 +149,7 @@ async function transferToken(
     );
 
     const balance = await accountService.getAccountBalance(receiver.accountId);
-    const held = balance.tokens.find((t) => t.tokenId === tokenId);
+    const held = balance.tokens.find((t) => t.tokenId === tokenId.toString());
     console.log("Receiver token balance:", held?.balance);
     console.log();
 }

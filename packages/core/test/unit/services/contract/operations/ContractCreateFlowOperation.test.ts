@@ -77,7 +77,7 @@ describe("ContractCreateFlowOperation (via ContractService)", () => {
                 gas: 150_000,
             });
 
-            expect(contractId).toBe("0.0.666");
+            expect(contractId.toString()).toBe("0.0.666");
             expect(vi.mocked(ContractCreateFlow)).toHaveBeenCalledTimes(1);
             expect(mocks.flow.setBytecode).toHaveBeenCalledWith(bytecode);
             expect(mocks.flow.setGas).toHaveBeenCalledWith(150_000);

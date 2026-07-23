@@ -79,7 +79,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
         const approveResult = await client.approveTokenAllowance({
             tokenAllowances: [
                 {
-                    tokenId,
+                    tokenId: tokenId.toString(),
                     ownerAccountId: owner.accountId,
                     spenderAccountId: spender.accountId,
                     amount: 500,
@@ -94,7 +94,8 @@ describe("AccountService delete-allowance operations [Integration]", () => {
         expect(
             granted.find(
                 (a) =>
-                    a.spender === spender.accountId && a.token_id === tokenId,
+                    a.spender === spender.accountId &&
+                    a.token_id === tokenId.toString(),
             ),
         ).toBeDefined();
 
@@ -102,7 +103,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
         const deleteResult = await client.deleteTokenAllowance(
             [
                 {
-                    tokenId,
+                    tokenId: tokenId.toString(),
                     ownerAccountId: owner.accountId,
                     spenderAccountId: spender.accountId,
                 },
@@ -114,7 +115,9 @@ describe("AccountService delete-allowance operations [Integration]", () => {
 
         const after = await queryTokenAllowances(owner.accountId);
         const match = after.find(
-            (a) => a.spender === spender.accountId && a.token_id === tokenId,
+            (a) =>
+                a.spender === spender.accountId &&
+                a.token_id === tokenId.toString(),
         );
         expect(match === undefined || match.amount === 0).toBe(true);
     });
@@ -140,7 +143,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
         const approveResult = await client.approveNftAllowance({
             nftAllowances: [
                 {
-                    tokenId,
+                    tokenId: tokenId.toString(),
                     ownerAccountId: owner.accountId,
                     spenderAccountId: spender.accountId,
                     serialNumbers: [1, 2],
@@ -161,7 +164,7 @@ describe("AccountService delete-allowance operations [Integration]", () => {
         const deleteResult = await client.deleteNftAllowance(
             [
                 {
-                    tokenId,
+                    tokenId: tokenId.toString(),
                     ownerAccountId: owner.accountId,
                     serialNumbers: [1, 2],
                 },

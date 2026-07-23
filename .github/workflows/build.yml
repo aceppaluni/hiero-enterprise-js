@@ -38,20 +38,44 @@ jobs:
               uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
               with:
                   egress-policy: audit
-
-            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - name: Checkout code
+              uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
               with:
                   persist-credentials: false
 
-            - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+            - name: Setup pnpm
+              uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
               # version comes from package.json "packageManager"
 
-            - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+            - name: Setup Node
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
                   node-version: ${{ matrix.node-version }}
                   cache: pnpm
 
-            - run: pnpm install --frozen-lockfile
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: ESLint
+              run: pnpm run lint
+
+            - name: Build packages
+              run: pnpm run build
+
+            # Response-field completeness: every schema reachable from a
+            # mirror node spec response must be carried by the wire types.
+            - name: Mirror spec field diff
+              working-directory: packages/mirror
+              run: node spec/diff-response-fields.mjs
+
+            # Sanity check that the package's published types are complete
+            - name: Check published types
+              run: |
+                  for pkg in core mirror express fastify nest; do
+                    echo "::group::attw $pkg"
+                    (cd "packages/$pkg" && pnpm exec attw --pack)
+                    echo "::endgroup::"
+                  done
 
             - name: Setup Hiero Solo Network
               uses: hiero-ledger/hiero-solo-action@531a2b283ca4912df537d64bf89da0f6be4c2574 # v0.22.0
@@ -97,31 +121,6 @@ jobs:
                     echo "::error::Mirror Node gRPC on localhost:5600 never became reachable" >&2
                     exit 1
                   fi
-
-            - name: ESLint
-              run: pnpm run lint
-
-            # Response-field completeness: every schema reachable from a
-            # mirror node spec response must be carried by the wire types.
-            - name: Mirror spec field diff
-              working-directory: packages/mirror
-              run: node spec/diff-response-fields.mjs
-
-            - name: Build packages
-              run: pnpm run build
-
-            # Published-surface type check: pack each package and verify
-            # its `exports` serve matching JavaScript + declarations under
-            # every consumer resolution mode (node10, node16-CJS,
-            # node16-ESM, bundler). Guards against ESM/CJS declaration
-            # mismatches that tsc on our own source cannot see.
-            - name: Check published types (attw)
-              run: |
-                  for pkg in core mirror express fastify nest; do
-                    echo "::group::attw $pkg"
-                    (cd "packages/$pkg" && pnpm exec attw --pack)
-                    echo "::endgroup::"
-                  done
 
             - name: Run integration tests
               env:

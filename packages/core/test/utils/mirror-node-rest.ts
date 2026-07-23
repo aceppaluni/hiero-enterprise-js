@@ -11,6 +11,13 @@
  * happens after the vitest setup file has populated `process.env`.
  */
 
+import type {
+    AccountId,
+    ContractId,
+    TokenId,
+    TopicId,
+} from "@hiero-ledger/sdk";
+
 function getMirrorUrl(): string {
     const url = process.env.HIERO_MIRROR_NODE_URL;
     if (!url) {
@@ -115,6 +122,12 @@ export interface MirrorContractInfo {
     } | null;
 }
 
+/**
+ * Every helper below embeds the ID in a template literal, so passing an
+ * SDK object (`AccountId`, `TokenId`, ...) triggers its `.toString()`
+ * automatically — no manual coercion required at the call site.
+ */
+
 async function getJson<T>(url: string): Promise<T> {
     const res = await fetch(url);
     if (!res.ok) {
@@ -129,7 +142,7 @@ async function getJson<T>(url: string): Promise<T> {
  * Fetch HBAR (crypto) allowances granted by `ownerAccountId`.
  */
 export async function queryHbarAllowances(
-    ownerAccountId: string,
+    ownerAccountId: string | AccountId,
 ): Promise<MirrorAllowance[]> {
     const data = await getJson<{ allowances?: MirrorAllowance[] }>(
         `${getMirrorUrl()}/api/v1/accounts/${ownerAccountId}/allowances/crypto`,
@@ -141,7 +154,7 @@ export async function queryHbarAllowances(
  * Fetch fungible token allowances granted by `ownerAccountId`.
  */
 export async function queryTokenAllowances(
-    ownerAccountId: string,
+    ownerAccountId: string | AccountId,
 ): Promise<MirrorAllowance[]> {
     const data = await getJson<{ allowances?: MirrorAllowance[] }>(
         `${getMirrorUrl()}/api/v1/accounts/${ownerAccountId}/allowances/tokens`,
@@ -154,7 +167,7 @@ export async function queryTokenAllowances(
  * the NFT itself rather than the owner-account allowances view.
  */
 export async function queryNftRecord(
-    tokenId: string,
+    tokenId: string | TokenId,
     serial: number,
 ): Promise<MirrorNftRecord> {
     return getJson<MirrorNftRecord>(
@@ -166,7 +179,7 @@ export async function queryNftRecord(
  * Fetch token relationships for an account.
  */
 export async function queryAccountTokens(
-    accountId: string,
+    accountId: string | AccountId,
 ): Promise<MirrorAccountToken[]> {
     const data = await getJson<{ tokens?: MirrorAccountToken[] }>(
         `${getMirrorUrl()}/api/v1/accounts/${accountId}/tokens`,
@@ -180,7 +193,7 @@ export async function queryAccountTokens(
  * are all observable via the Mirror Node after the consensus node propagates.
  */
 export async function queryTokenInfo(
-    tokenId: string,
+    tokenId: string | TokenId,
 ): Promise<MirrorTokenInfo> {
     return getJson<MirrorTokenInfo>(
         `${getMirrorUrl()}/api/v1/tokens/${tokenId}`,
@@ -194,7 +207,7 @@ export async function queryTokenInfo(
  * all observable via the Mirror Node after the consensus node propagates.
  */
 export async function queryContractInfo(
-    contractId: string,
+    contractId: string | ContractId,
 ): Promise<MirrorContractInfo> {
     return getJson<MirrorContractInfo>(
         `${getMirrorUrl()}/api/v1/contracts/${contractId}`,
@@ -225,7 +238,7 @@ export interface MirrorTopicInfo {
  * consensus node propagates.
  */
 export async function queryTopicInfo(
-    topicId: string,
+    topicId: string | TopicId,
 ): Promise<MirrorTopicInfo> {
     return getJson<MirrorTopicInfo>(
         `${getMirrorUrl()}/api/v1/topics/${topicId}`,

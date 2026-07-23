@@ -29,7 +29,7 @@ export async function createTestAccount(
         keyType: AccountType.ED25519,
         initialBalance,
     });
-    return { accountId: account.accountId, key };
+    return { accountId: account.accountId.toString(), key };
 }
 
 /**

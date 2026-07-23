@@ -37,7 +37,7 @@ describe("ContractUpdateOperation", () => {
             contractMemo: "initial memo",
             additionalSigners: [adminKey],
         });
-        return contractId;
+        return contractId.toString();
     }
 
     it("updates the contract memo", async () => {

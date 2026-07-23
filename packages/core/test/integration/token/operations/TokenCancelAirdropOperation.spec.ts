@@ -9,13 +9,15 @@ import {
     AccountService,
     TokenService,
 } from "../../../../src/services/index.js";
-import { NftId, PendingAirdropId, TokenId } from "@hiero-ledger/sdk";
+import { NftId, PendingAirdropId } from "@hiero-ledger/sdk";
+import type { TokenId } from "@hiero-ledger/sdk";
 
 function tokenBalanceFor(
     balance: { tokens: { tokenId: string; balance: string }[] },
-    tokenId: string,
+    tokenId: string | TokenId,
 ): string | undefined {
-    return balance.tokens.find((t) => t.tokenId === tokenId)?.balance;
+    return balance.tokens.find((t) => t.tokenId === tokenId.toString())
+        ?.balance;
 }
 
 describe("TokenService cancel airdrop operations [Integration]", () => {
@@ -71,7 +73,7 @@ describe("TokenService cancel airdrop operations [Integration]", () => {
                 new PendingAirdropId({
                     senderId: owner.accountId,
                     receiverId: receiver.accountId,
-                    tokenId: TokenId.fromString(tokenId),
+                    tokenId: tokenId,
                 }),
             ],
             additionalSigners: [owner.key],
@@ -134,7 +136,7 @@ describe("TokenService cancel airdrop operations [Integration]", () => {
                 new PendingAirdropId({
                     senderId: owner.accountId,
                     receiverId: receiver.accountId,
-                    nftId: new NftId(TokenId.fromString(tokenId), 1),
+                    nftId: new NftId(tokenId, 1),
                 }),
             ],
             additionalSigners: [owner.key],
@@ -214,12 +216,12 @@ describe("TokenService cancel airdrop operations [Integration]", () => {
                 new PendingAirdropId({
                     senderId: owner.accountId,
                     receiverId: receiver.accountId,
-                    tokenId: TokenId.fromString(fungibleTokenId),
+                    tokenId: fungibleTokenId,
                 }),
                 new PendingAirdropId({
                     senderId: owner.accountId,
                     receiverId: receiver.accountId,
-                    nftId: new NftId(TokenId.fromString(nftTokenId), 1),
+                    nftId: new NftId(nftTokenId, 1),
                 }),
             ],
             additionalSigners: [owner.key],

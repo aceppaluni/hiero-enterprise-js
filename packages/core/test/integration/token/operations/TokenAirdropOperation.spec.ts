@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
+import type { TokenId } from "@hiero-ledger/sdk";
 import { setupIntegrationTestEnv } from "../../../utils/env.js";
 import { waitForMirrorNodeRecord } from "../../../utils/mirror-node.js";
 import {
@@ -12,9 +13,10 @@ import {
 
 function tokenBalanceFor(
     balance: { tokens: { tokenId: string; balance: string }[] },
-    tokenId: string,
+    tokenId: string | TokenId,
 ): string | undefined {
-    return balance.tokens.find((t) => t.tokenId === tokenId)?.balance;
+    return balance.tokens.find((t) => t.tokenId === tokenId.toString())
+        ?.balance;
 }
 
 describe("TokenService airdrop operations [Integration]", () => {

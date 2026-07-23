@@ -61,8 +61,8 @@ async function approveHbarAllowance(accountService: AccountService) {
     await accountService.approveHbarAllowance({
         hbarAllowances: [
             {
-                ownerAccountId: owner.accountId,
-                spenderAccountId: spender.accountId,
+                ownerAccountId: owner.accountId.toString(),
+                spenderAccountId: spender.accountId.toString(),
                 amount: 5,
             },
         ],
@@ -125,7 +125,7 @@ async function approveNftAllowanceBySerials(
     console.log("Created NFT collection:", tokenId);
 
     await tokenService.mintToken({
-        tokenId,
+        tokenId: tokenId.toString(),
         metadata: [
             Buffer.from("metadata-1"),
             Buffer.from("metadata-2"),
@@ -141,9 +141,9 @@ async function approveNftAllowanceBySerials(
     await accountService.approveNftAllowance({
         nftAllowances: [
             {
-                tokenId,
-                ownerAccountId: owner.accountId,
-                spenderAccountId: spender.accountId,
+                tokenId: tokenId.toString(),
+                ownerAccountId: owner.accountId.toString(),
+                spenderAccountId: spender.accountId.toString(),
                 serialNumbers: [1, 2],
             },
         ],
@@ -154,7 +154,7 @@ async function approveNftAllowanceBySerials(
         "Approved: spender",
         spender.accountId,
         "can transfer serials [1, 2] from collection",
-        tokenId,
+        tokenId.toString(),
     );
     console.log();
 }
@@ -228,7 +228,7 @@ async function approveNftWithDelegatingSpender(
     console.log("Created NFT collection:", tokenId);
 
     await tokenService.mintToken({
-        tokenId,
+        tokenId: tokenId.toString(),
         metadata: [
             Buffer.from("nft-a"),
             Buffer.from("nft-b"),
@@ -246,9 +246,9 @@ async function approveNftWithDelegatingSpender(
     await accountService.approveNftAllowance({
         nftAllowances: [
             {
-                tokenId,
-                ownerAccountId: owner.accountId,
-                spenderAccountId: primarySpender.accountId,
+                tokenId: tokenId.toString(),
+                ownerAccountId: owner.accountId.toString(),
+                spenderAccountId: primarySpender.accountId.toString(),
                 allSerials: true,
             },
         ],
@@ -269,11 +269,11 @@ async function approveNftWithDelegatingSpender(
     await accountService.approveNftAllowance({
         nftAllowances: [
             {
-                tokenId,
-                ownerAccountId: owner.accountId,
-                spenderAccountId: delegatedSpender.accountId,
+                tokenId: tokenId.toString(),
+                ownerAccountId: owner.accountId.toString(),
+                spenderAccountId: delegatedSpender.accountId.toString(),
                 serialNumbers: [1, 2],
-                delegatingSpender: primarySpender.accountId,
+                delegatingSpender: primarySpender.accountId.toString(),
             },
         ],
         additionalSigners: [primarySpenderKey],

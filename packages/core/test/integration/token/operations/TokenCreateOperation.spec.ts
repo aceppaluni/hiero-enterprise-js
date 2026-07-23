@@ -25,7 +25,7 @@ describe("TokenService.createFungibleToken / createNft [Integration]", () => {
             initialBalance: 10,
             memo: "token integration treasury",
         });
-        treasuryId = treasury.accountId;
+        treasuryId = treasury.accountId.toString();
     });
 
     it("creates a fungible token with the operator as treasury", async () => {

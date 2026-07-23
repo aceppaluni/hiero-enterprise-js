@@ -103,7 +103,7 @@ describe("TransferOperation [Integration]", () => {
 
             const balance = await client.getAccountBalance(receiver.accountId);
             const tokenBalance = balance.tokens.find(
-                (t) => t.tokenId === tokenId,
+                (t) => t.tokenId === tokenId.toString(),
             );
             expect(tokenBalance).toBeDefined();
             expect(tokenBalance!.balance).toBe("250");
@@ -138,7 +138,7 @@ describe("TransferOperation [Integration]", () => {
 
             const balance = await client.getAccountBalance(receiver.accountId);
             const tokenBalance = balance.tokens.find(
-                (t) => t.tokenId === tokenId,
+                (t) => t.tokenId === tokenId.toString(),
             );
             expect(tokenBalance!.balance).toBe("100");
         });
@@ -172,7 +172,7 @@ describe("TransferOperation [Integration]", () => {
 
             const balance = await client.getAccountBalance(spender.accountId);
             const tokenBalance = balance.tokens.find(
-                (t) => t.tokenId === tokenId,
+                (t) => t.tokenId === tokenId.toString(),
             );
             expect(tokenBalance!.balance).toBe("100");
         });

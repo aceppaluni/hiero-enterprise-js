@@ -70,7 +70,7 @@ describe("TokenCreateOperation (via TokenService)", () => {
                 treasuryAccountId: "0.0.555",
             });
 
-            expect(tokenId).toBe("0.0.500");
+            expect(tokenId.toString()).toBe("0.0.500");
 
             const tx = vi.mocked(TokenCreateTransaction).mock.results[0].value;
             expect(tx.setTokenName).toHaveBeenCalledWith("Acme");
@@ -229,7 +229,7 @@ describe("TokenCreateOperation (via TokenService)", () => {
                 supplyKey,
             });
 
-            expect(tokenId).toBe("0.0.500");
+            expect(tokenId.toString()).toBe("0.0.500");
 
             const tx = vi.mocked(TokenCreateTransaction).mock.results[0].value;
             expect(tx.setTokenType).toHaveBeenCalledWith(

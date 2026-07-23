@@ -109,7 +109,7 @@ export class ContractCreateOperation {
 
         return {
             ...results,
-            contractId: results.receipt.contractId.toString(),
+            contractId: results.receipt.contractId,
         };
     }
 

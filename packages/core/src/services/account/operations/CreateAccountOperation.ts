@@ -242,7 +242,7 @@ export class CreateAccountOperation {
             );
         }
         const result: Account = {
-            accountId: receipt.accountId.toString(),
+            accountId: receipt.accountId,
         };
 
         if (options.key != null) {

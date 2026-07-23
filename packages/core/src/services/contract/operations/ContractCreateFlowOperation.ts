@@ -134,7 +134,7 @@ export class ContractCreateFlowOperation {
                     },
                 );
             }
-            const contractId = receipt.contractId.toString();
+            const contractId = receipt.contractId;
 
             await this.context.emitAfterTransaction({
                 ...event,

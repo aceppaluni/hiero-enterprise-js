@@ -33,7 +33,7 @@ describe("Contract queries", () => {
             gas: 200_000,
             contractMemo: "contract-queries integration target",
         });
-        contractId = newId;
+        contractId = newId.toString();
     });
 
     describe("callContract", () => {
