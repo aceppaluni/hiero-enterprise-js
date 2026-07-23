@@ -127,7 +127,11 @@ export class TransactionExecutor {
             );
         }
 
+        // Shared fields plus scheduleId — same shape rule as run(), so a
+        // scheduled write also hands back the ScheduleCreate transaction id
+        // the caller needs to correlate with an explorer or the mirror node.
         return {
+            ...result,
             scheduleId: result.receipt.scheduleId,
         };
     }
