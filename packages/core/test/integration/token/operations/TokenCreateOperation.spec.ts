@@ -30,7 +30,7 @@ describe("TokenService.createFungibleToken / createNft [Integration]", () => {
 
     it("creates a fungible token with the operator as treasury", async () => {
         const ctx = setupIntegrationTestEnv();
-        const tokenId = await new TokenService(ctx).createFungibleToken({
+        const { tokenId } = await new TokenService(ctx).createFungibleToken({
             tokenName: "Operator Treasury Token",
             tokenSymbol: "OTT",
             decimals: 2,

@@ -27,7 +27,7 @@ describe("TopicCreateOperation", () => {
             .setTopicId(topicId)
             .execute(client);
 
-        expect(info.topicId).toBe(topicId.toString());
+        expect(info.topicId.toString()).toBe(topicId.toString());
         expect(info.topicMemo).toBe("integration: public topic");
         // No admin key was supplied — topic is immutable.
         expect(info.adminKey).toBeNull();
@@ -53,7 +53,7 @@ describe("TopicCreateOperation", () => {
             .setTopicId(topicId)
             .execute(client);
 
-        expect(info.topicId).toBe(topicId.toString());
+        expect(info.topicId.toString()).toBe(topicId.toString());
         expect(info.topicMemo).toBe("integration: private topic");
         expect(info.adminKey).not.toBeNull();
         expect(info.submitKey).not.toBeNull();
