@@ -151,6 +151,11 @@ import {
     assertFeeEstimateResponse,
 } from "../utils/MirrorNodeValidators.js";
 import { RequestGate } from "./RequestGate.js";
+import { notifyObserver } from "./MirrorClientObserver.js";
+import type {
+    MirrorClientObserver,
+    RequestTelemetry,
+} from "./MirrorClientObserver.js";
 import { appendQuery, segment } from "../utils/MirrorNodeQuery.js";
 
 /** Default per-request timeout, in milliseconds. */
@@ -262,6 +267,13 @@ export interface MirrorNodeClientOptions {
      */
     retryOn404?: boolean;
     /**
+     * Read-only request-lifecycle telemetry (#145) — start/retry/end
+     * events for UI loading indicators and status banners. Callbacks are
+     * error-isolated and cannot affect requests. See
+     * {@link MirrorClientObserver}.
+     */
+    observer?: MirrorClientObserver;
+    /**
      * Maximum number of requests allowed in flight at once. Additional
      * requests queue and start as slots free up. This is *pro-active*
      * back-pressure: it bounds parallelism before the mirror node ever
@@ -322,6 +334,7 @@ export class MirrorNodeClient {
     private readonly timeoutMs: number;
     private readonly maxRetries: number;
     private readonly retryOn404: boolean;
+    private readonly observer?: MirrorClientObserver;
 
     /** Pro-active concurrency + rate limiter shared by every request. */
     private readonly gate: RequestGate;
@@ -338,6 +351,7 @@ export class MirrorNodeClient {
         this.baseUrl = url;
         this.timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
         this.maxRetries = options?.maxRetries ?? DEFAULT_MAX_RETRIES;
+        this.observer = options?.observer;
         this.retryOn404 = options?.retryOn404 ?? false;
         // A shared gate (from withRetryOn404) already carries the concurrency
         // + rate settings, so the per-option knobs are only read when we
@@ -374,6 +388,9 @@ export class MirrorNodeClient {
             maxRetries: this.maxRetries,
             retryOn404: true,
             gate: this.gate,
+            // The view is the same logical client to its consumer — its
+            // requests must report to the same observer, not vanish.
+            observer: this.observer,
         });
         return this.retryOn404View;
     }
@@ -383,8 +400,56 @@ export class MirrorNodeClient {
      * its retry loop. One logical request holds exactly one slot; retries do
      * not re-acquire, so a burst of retries can never deadlock the gate.
      */
-    private request<T>(path: string, body?: unknown): Promise<T> {
-        return this.gate.run(() => this.fetchWithRetry<T>(path, body));
+    private async request<T>(path: string, body?: unknown): Promise<T> {
+        const { observer } = this;
+        if (!observer) {
+            return this.gate.run(() => this.fetchWithRetry<T>(path, body));
+        }
+
+        // Observer telemetry (#145): start before the gate so queue time
+        // reads as "busy"; exactly one end event on every settle path.
+        const startedAt = Date.now();
+        const telemetry: RequestTelemetry = { attempts: 0, status: undefined };
+        // `failed` is an explicit flag, not inferred from the error value:
+        // `throw undefined` is legal JS, and a sentinel-based check would
+        // report that rejection as a success-shaped event.
+        const end = (failed: boolean, error?: unknown): void => {
+            // Prefer the status the error carries (HTTP-level failures);
+            // fall back to the last status telemetry saw — a body that
+            // arrived but failed to parse still has a wire status worth
+            // reporting.
+            const status =
+                error instanceof MirrorError && error.status !== undefined
+                    ? error.status
+                    : telemetry.status;
+            notifyObserver(observer.onRequestEnd, {
+                path,
+                durationMs: Date.now() - startedAt,
+                attempts: telemetry.attempts,
+                ...(status !== undefined && { status }),
+                // `errorCode` present ⇔ the transport promise rejected —
+                // non-MirrorError throws still mark the failure via the
+                // generic code, so no failure can masquerade as success.
+                ...(failed && {
+                    errorCode:
+                        error instanceof MirrorError
+                            ? error.code
+                            : MirrorErrorCodes.MirrorNodeError,
+                }),
+            });
+        };
+
+        notifyObserver(observer.onRequestStart, { path });
+        try {
+            const result = await this.gate.run(() =>
+                this.fetchWithRetry<T>(path, body, 0, telemetry),
+            );
+            end(false);
+            return result;
+        } catch (error) {
+            end(true, error);
+            throw error;
+        }
     }
 
     /**
@@ -429,7 +494,9 @@ export class MirrorNodeClient {
         path: string,
         body?: unknown,
         attempt = 0,
+        telemetry?: RequestTelemetry,
     ): Promise<T> {
+        if (telemetry) telemetry.attempts += 1;
         const url = `${this.baseUrl}${path}`;
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), this.timeoutMs);
@@ -463,8 +530,19 @@ export class MirrorNodeClient {
             // are surfaced immediately — they almost always indicate a misconfigured
             // base URL rather than a transient blip.
             if (isAbort && attempt < this.maxRetries) {
-                await sleep(this.backoffMs(attempt));
-                return this.fetchWithRetry<T>(path, body, attempt + 1);
+                const delayMs = this.backoffMs(attempt);
+                notifyObserver(this.observer?.onRetry, {
+                    path,
+                    attempt: attempt + 1,
+                    delayMs,
+                });
+                await sleep(delayMs);
+                return this.fetchWithRetry<T>(
+                    path,
+                    body,
+                    attempt + 1,
+                    telemetry,
+                );
             }
 
             throw new MirrorError(
@@ -495,8 +573,15 @@ export class MirrorNodeClient {
             const retryAfter = parseRetryAfter(
                 response.headers.get("retry-after"),
             );
-            await sleep(retryAfter ?? this.backoffMs(attempt));
-            return this.fetchWithRetry<T>(path, body, attempt + 1);
+            const delayMs = retryAfter ?? this.backoffMs(attempt);
+            notifyObserver(this.observer?.onRetry, {
+                path,
+                attempt: attempt + 1,
+                delayMs,
+                status: response.status,
+            });
+            await sleep(delayMs);
+            return this.fetchWithRetry<T>(path, body, attempt + 1, telemetry);
         }
 
         // The timer stays armed across the body read: a stalled/slow
@@ -524,6 +609,7 @@ export class MirrorNodeClient {
                     },
                 );
             }
+            if (telemetry) telemetry.status = response.status;
             return (await response.json()) as T;
         } catch (err) {
             if (

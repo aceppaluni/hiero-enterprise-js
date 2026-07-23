@@ -208,7 +208,10 @@ Adding an endpoint touches one spot in each layer, in this order:
    for any filters (reuse `RangeFilter` / `EntityIdFilter` / `TimestampFilter`).
 5. **Client method** in the matching `// ───` section of
    [`src/client/MirrorNodeClient.ts`](packages/mirror/src/client/MirrorNodeClient.ts) —
-   wrap every path parameter in `segment(...)`.
+   wrap every path parameter in `segment(...)`, and go through
+   `this.request(...)`, never `fetch` directly: rate limiting, retries,
+   observer telemetry (#145), and response parsing all assume that single
+   transport choke point (a guard test enforces it).
 6. **Repository method** in the matching `src/repositories/*.ts` (a thin
    delegator). A brand-new repository also goes in
    [`repositories/factory.ts`](packages/mirror/src/repositories/factory.ts) —
