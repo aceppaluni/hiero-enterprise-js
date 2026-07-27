@@ -377,6 +377,19 @@ describe("TransactionExecutor", () => {
             expect(result.scheduleId.toString()).toBe("0.0.777");
         });
 
+        it("returns the shared fields alongside scheduleId — the ScheduleCreate transaction id is the caller's correlator", async () => {
+            const result = await executor.scheduleRun(
+                bundle.tx as never,
+                {},
+                SAMPLE_EVENT,
+            );
+
+            expect(result.transactionId).toBe("0.0.123@1234567890.000000000");
+            expect(result.status).toBe("SUCCESS");
+            expect(result.receipt).toBeDefined();
+            expect(result.response).toBeDefined();
+        });
+
         it("applies the schedule payer when provided as a string", async () => {
             await executor.scheduleRun(bundle.tx as never, {}, SAMPLE_EVENT, {
                 payerAccountId: "0.0.501",
