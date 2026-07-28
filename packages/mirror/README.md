@@ -313,6 +313,39 @@ such entity". Either way, a persistent 404 exhausts the retries and still
 surfaces as `NOT_FOUND` — so `orNull` keeps treating genuine absence as
 `null` (see [Errors](#errors)).
 
+## Request telemetry (observer)
+
+The client owns queueing and retries internally, so a caller sees only a
+promise that eventually settles. An optional **observer** restores
+visibility for UIs — a loading indicator counts balanced start/end pairs
+(queue time included), a status banner distinguishes "busy, retrying" from
+a terminal failure.
+
+**This is read-only telemetry, not middleware** — observers receive plain
+data and cannot mutate, intercept, or cancel requests. Guarantees: one
+`onRequestEnd` per `onRequestStart` on every transport outcome (success,
+HTTP error, timeout, unreadable body); retries surface via `onRetry`
+without producing extra pairs; callbacks are error-isolated — an observer
+bug never affects the request. The bracket covers the *transport*: schema
+validation runs after it, so a payload that arrives but fails validation
+ends as a transport success — `errorCode` present means the wire request
+itself failed. The `withRetryOn404()` view reports through the same
+observer.
+
+```ts
+const client = new MirrorNodeClient(url, {
+  observer: {
+    onRequestStart: () => spinner.increment(),
+    onRetry: ({ status, delayMs }) =>
+      banner.busy(`mirror node ${status ?? 'timeout'}, retrying in ${delayMs}ms`),
+    onRequestEnd: (e) => {
+      spinner.decrement();
+      if (e.errorCode && e.status !== 404) banner.error(e.errorCode);
+    },
+  },
+});
+```
+
 ## Unit & timestamp helpers
 
 ```ts
